@@ -1,3 +1,20 @@
+$background-color: red;
+
+@import "steam.scss";
+
 html {
-	background: grey;
+	background: $background-color;
+	color: red;
+}
+
+#id {
+	color:red;
+
+	.class {
+	color:purple;
+
+		&:hover {
+			color:green;
+		}
+	}
 }

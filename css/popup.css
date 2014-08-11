@@ -1,2 +1,13 @@
+test {
+  font-size: 14px; }
+
 html {
-  background: grey; }
+  background: red;
+  color: red; }
+
+#id {
+  color: red; }
+  #id .class {
+    color: purple; }
+    #id .class:hover {
+      color: green; }
