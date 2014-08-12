@@ -6,7 +6,8 @@ var getAllApps = function() {
   $.ajax({
     url: "http://api.steampowered.com/ISteamApps/GetAppList/v2",
     type: "GET",
-    accepts: "application/json"
+    accepts: "application/json",
+    retryLimit: 3
   })
     .done(function(response) {
       $.each(response.applist.apps, function(index, value) {
@@ -15,6 +16,22 @@ var getAllApps = function() {
       });
       //console.log(response.applist.apps);
       console.log(appIds);
+    })
+    .error(function(xhr, textStatus, errorThrown) {
+      if (textStatus == 'timeout') {
+        this.tryCount++;
+        if (this.tryCount <= this.retryLimit) {
+          //try again
+          $.ajax(this);
+          return;
+        }
+        return;
+      }
+      if (xhr.status == 500) {
+        //handle error
+      } else {
+        //handle error
+      }
     });
 };
 
@@ -40,19 +57,54 @@ var getAppDetails = function() {
     $.ajax({
       url: "http://store.steampowered.com/api/appdetails/?appids=" + appIds_chunk.toString() + "&cc=DE&l=english&filters=price_overview",
       type: "GET",
-      accepts: "application/json"
+      accepts: "application/json",
+      retryLimit: 3
     })
       .done(function(response) {
         callback(response);
+      })
+      .error(function(xhr, textStatus, errorThrown) {
+        if (textStatus == 'timeout') {
+          this.tryCount++;
+          if (this.tryCount <= this.retryLimit) {
+            //try again
+            console.info("Retry_"+tryCount);
+            $.ajax(this);
+            return;
+          }
+          return;
+        }
+        if (xhr.status == 500) {
+          //handle error
+        } else {
+          //handle error
+        }
       });
   }
   $.ajax({
     url: "http://store.steampowered.com/api/appdetails/?appids=" + appIds.toString() + "&cc=DE&l=english&filters=price_overview",
     type: "GET",
-    accepts: "application/json"
+    accepts: "application/json",
+    retryLimit: 3
   })
     .done(function(response) {
       callback(response);
+    })
+    .error(function(xhr, textStatus, errorThrown) {
+      if (textStatus == 'timeout') {
+        this.tryCount++;
+        if (this.tryCount <= this.retryLimit) {
+          //try again
+          $.ajax(this);
+          return;
+        }
+        return;
+      }
+      if (xhr.status == 500) {
+        //handle error
+      } else {
+        //handle error
+      }
     });
 };
 
