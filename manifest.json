@@ -13,6 +13,6 @@
     },
     "author": "Lennart Jarms",
     "content_security_policy": "script-src 'self'; object-src 'self'",
-    "permissions": ["http://store.steampowered.com/*", "http://api.steampowered.com/*"],
+    "permissions": ["storage", "http://store.steampowered.com/*", "http://api.steampowered.com/*"],
     "web_accessible_resources": [""]
 }
