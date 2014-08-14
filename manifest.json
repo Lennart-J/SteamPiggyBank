@@ -11,6 +11,10 @@
         "default_title": "Steam Sale Catcher",
         "default_popup": "popup.html"
     },
+    "background": {
+        "scripts": ["scripts/jquery-2.1.1.min.js", "scripts/background.js"],
+        "persistent": false
+    },
     "author": "Lennart Jarms",
     "content_security_policy": "script-src 'self'; object-src 'self'",
     "permissions": ["storage", "http://store.steampowered.com/*", "http://api.steampowered.com/*"],
