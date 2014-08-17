@@ -1,20 +1,155 @@
-$background-color: red;
-
 @import "steam.scss";
 
-html {
-	background: $background-color;
-	color: red;
+* {
+	margin:0;
+	padding:0;
 }
 
-#id {
-	color:red;
+html {
+	background: $background-content;
+	color: $textcolor-content;
+	font-family: $font-family;
+	font-size: 13px;
+	min-width: 400px;
+	min-height: 500px;
+}
 
-	.class {
-	color:purple;
+#header {
+	 background-color: $background-column;
+    background-image: -webkit-linear-gradient(135deg, transparent,
+                      transparent 25%, hsla(0,0%,0%,.05) 25%,
+                      hsla(0,0%,0%,.05) 50%, transparent 50%,
+                      transparent 75%, hsla(0,0%,0%,.05) 75%,
+                      hsla(0,0%,0%,.05));
+    background-image: -moz-linear-gradient(135deg, transparent,
+                      transparent 25%, hsla(0,0%,0%,.1) 25%,
+                      hsla(0,0%,0%,.1) 50%, transparent 50%,
+                      transparent 75%, hsla(0,0%,0%,.1) 75%,
+                      hsla(0,0%,0%,.1));
+    background-image: -ms-linear-gradient(135deg, transparent,
+                      transparent 25%, hsla(0,0%,0%,.1) 25%,
+                      hsla(0,0%,0%,.1) 50%, transparent 50%,
+                      transparent 75%, hsla(0,0%,0%,.1) 75%,
+                      hsla(0,0%,0%,.1));
+    background-image: -o-linear-gradient(135deg, transparent,
+                      transparent 25%, hsla(0,0%,0%,.1) 25%,
+                      hsla(0,0%,0%,.1) 50%, transparent 50%,
+                      transparent 75%, hsla(0,0%,0%,.1) 75%,
+                      hsla(0,0%,0%,.1));
+    background-image: linear-gradient(135deg, transparent,
+                      transparent 25%, hsla(0,0%,0%,.1) 25%,
+                      hsla(0,0%,0%,.1) 50%, transparent 50%,
+                      transparent 75%, hsla(0,0%,0%,.1) 75%,
+                      hsla(0,0%,0%,.1));
+    background-size: 15px 15px;
+	text-align:center;
+	position:relative;
+	border-bottom: 1px solid black;
+	padding:10px;
+	h2 {
+		font-weight: lighter;
+	}
+}
 
-		&:hover {
-			color:green;
+.overlay {
+	position:absolute;
+	right:0;
+	top:0;
+	height:100%;
+	width:100%;
+	background: -webkit-linear-gradient(-90deg, rgba(255,255,255,0.1) 0, rgba(220,220,220,0.1) 35%, rgba(40,40,40,0.1) 80%, rgba(0,0,0,0.2) 100%);
+  background: -moz-linear-gradient(180deg, rgba(255,255,255,0.1) 0, rgba(220,220,220,0.1) 35%, rgba(40,40,40,0.1) 80%, rgba(0,0,0,0.2) 100%);
+  background: linear-gradient(180deg, rgba(255,255,255,0.1) 0, rgba(220,220,220,0.1) 35%, rgba(40,40,40,0.1) 80%, rgba(0,0,0,0.2) 100%);
+}
+
+#result-header {
+	height: 25px;
+	color:$textcolor-columns;
+	background-color:$background-column;
+	margin-bottom: 1px;
+	div {
+		float:right;
+	}
+	.col {
+		border-left: 1px solid #000000;
+		text-align: center;
+		padding: 4px 0px 0px 8px;
+	}
+	.result-price {
+		padding-right: 16px;
+		padding-left:0;
+		text-align:right;
+	}
+	.result-name {
+		border:none;
+		padding:4px 16px;
+		float:none;
+		text-align: left;
+	}
+}
+	
+.result-price {
+	width: 50px;
+	text-align: right;
+	del {
+		color:$textcolor-oldprice;
+	}
+}
+.result-discount {
+	margin-right:8px;
+}
+.result-row {
+	display:block;
+	border: 1px solid;
+	height: 58px;
+	text-decoration:none;
+	position: relative;
+	margin-bottom: 1px;
+	color: $textcolor-content;
+	.result-price, .result-discount, .result-metascore {
+		float: right;
+		padding: 4px 0px 0px 8px;
+		margin-left: 1px;
+		margin-top: 18px;
+	}
+	.col {
+		text-decoration: none;
+	}
+	&.even {
+		background-color: $background-row-even;
+		border-color: $background-row-even;
+	}
+	&.odd {
+		background-color: $background-row-odd;
+		border-color: $background-row-odd;
+	}
+	.result-price {
+		margin-top:9px;
+		padding-right:16px;
+	}
+	.result-name {
+		margin: 14px 14px 0 153px;
+		h4 {
+			overflow: hidden;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			&:hover {
+				color:red;
+			}
 		}
+	}
+	.result-capsule {
+		position:absolute;
+		top:8px;
+		left:16px;
+		img {
+			height: 45px;
+			width: 120px;
+		}
+	}
+
+	&:hover {
+		border: 1px solid #8bb9e0;
+		text-decoration: none;
 	}
 }

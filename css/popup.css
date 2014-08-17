@@ -1,13 +1,109 @@
-test {
-  font-size: 14px; }
+* {
+  margin: 0;
+  padding: 0; }
 
 html {
-  background: red;
-  color: red; }
+  background: black;
+  color: #b0aeac;
+  font-family: tahoma, helvetica, arial, trebuchet ms, sans-serif;
+  font-size: 13px;
+  min-width: 400px;
+  min-height: 500px; }
 
-#id {
-  color: red; }
-  #id .class {
-    color: purple; }
-    #id .class:hover {
-      color: green; }
+#header {
+  background-color: #262626;
+  background-image: -webkit-linear-gradient(135deg, transparent, transparent 25%, rgba(0, 0, 0, 0.05) 25%, rgba(0, 0, 0, 0.05) 50%, transparent 50%, transparent 75%, rgba(0, 0, 0, 0.05) 75%, rgba(0, 0, 0, 0.05));
+  background-image: -moz-linear-gradient(135deg, transparent, transparent 25%, rgba(0, 0, 0, 0.1) 25%, rgba(0, 0, 0, 0.1) 50%, transparent 50%, transparent 75%, rgba(0, 0, 0, 0.1) 75%, rgba(0, 0, 0, 0.1));
+  background-image: -ms-linear-gradient(135deg, transparent, transparent 25%, rgba(0, 0, 0, 0.1) 25%, rgba(0, 0, 0, 0.1) 50%, transparent 50%, transparent 75%, rgba(0, 0, 0, 0.1) 75%, rgba(0, 0, 0, 0.1));
+  background-image: -o-linear-gradient(135deg, transparent, transparent 25%, rgba(0, 0, 0, 0.1) 25%, rgba(0, 0, 0, 0.1) 50%, transparent 50%, transparent 75%, rgba(0, 0, 0, 0.1) 75%, rgba(0, 0, 0, 0.1));
+  background-image: linear-gradient(135deg, transparent, transparent 25%, rgba(0, 0, 0, 0.1) 25%, rgba(0, 0, 0, 0.1) 50%, transparent 50%, transparent 75%, rgba(0, 0, 0, 0.1) 75%, rgba(0, 0, 0, 0.1));
+  background-size: 15px 15px;
+  text-align: center;
+  position: relative;
+  border-bottom: 1px solid black;
+  padding: 10px; }
+  #header h2 {
+    font-weight: lighter; }
+
+.overlay {
+  position: absolute;
+  right: 0;
+  top: 0;
+  height: 100%;
+  width: 100%;
+  background: -webkit-linear-gradient(-90deg, rgba(255, 255, 255, 0.1) 0, rgba(220, 220, 220, 0.1) 35%, rgba(40, 40, 40, 0.1) 80%, rgba(0, 0, 0, 0.2) 100%);
+  background: -moz-linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0, rgba(220, 220, 220, 0.1) 35%, rgba(40, 40, 40, 0.1) 80%, rgba(0, 0, 0, 0.2) 100%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0, rgba(220, 220, 220, 0.1) 35%, rgba(40, 40, 40, 0.1) 80%, rgba(0, 0, 0, 0.2) 100%); }
+
+#result-header {
+  height: 25px;
+  color: #b0aeac;
+  background-color: #262626;
+  margin-bottom: 1px; }
+  #result-header div {
+    float: right; }
+  #result-header .col {
+    border-left: 1px solid #000000;
+    text-align: center;
+    padding: 4px 0px 0px 8px; }
+  #result-header .result-price {
+    padding-right: 16px;
+    padding-left: 0;
+    text-align: right; }
+  #result-header .result-name {
+    border: none;
+    padding: 4px 16px;
+    float: none;
+    text-align: left; }
+
+.result-price {
+  width: 50px;
+  text-align: right; }
+  .result-price del {
+    color: #888888; }
+
+.result-discount {
+  margin-right: 8px; }
+
+.result-row {
+  display: block;
+  border: 1px solid;
+  height: 58px;
+  text-decoration: none;
+  position: relative;
+  margin-bottom: 1px;
+  color: #b0aeac; }
+  .result-row .result-price, .result-row .result-discount, .result-row .result-metascore {
+    float: right;
+    padding: 4px 0px 0px 8px;
+    margin-left: 1px;
+    margin-top: 18px; }
+  .result-row .col {
+    text-decoration: none; }
+  .result-row.even {
+    background-color: #1f1f1f;
+    border-color: #1f1f1f; }
+  .result-row.odd {
+    background-color: #1a1a1a;
+    border-color: #1a1a1a; }
+  .result-row .result-price {
+    margin-top: 9px;
+    padding-right: 16px; }
+  .result-row .result-name {
+    margin: 14px 14px 0 153px; }
+    .result-row .result-name h4 {
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis; }
+      .result-row .result-name h4:hover {
+        color: red; }
+  .result-row .result-capsule {
+    position: absolute;
+    top: 8px;
+    left: 16px; }
+    .result-row .result-capsule img {
+      height: 45px;
+      width: 120px; }
+  .result-row:hover {
+    border: 1px solid #8bb9e0;
+    text-decoration: none; }

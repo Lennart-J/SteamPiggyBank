@@ -13,7 +13,7 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
 
 //DOM Manipulation
 $(document).ready(function() {
-  $('#button')
+ /* $('#button')
   //.on('click', getAllApps)
   .attr('disabled', true);
   $('#button2')
@@ -21,5 +21,5 @@ $(document).ready(function() {
   .attr('disabled', true);
   $('#button3')
     .on('click', getDiscountedApps);
-  //.attr('disabled', true);
+  //.attr('disabled', true);*/
 });
