@@ -13,7 +13,11 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
 
 //DOM Manipulation
 $(document).ready(function() {
- /* $('#button')
+  $('a').on('click', function(e) {
+    e.preventDefault();
+    window.open($(this).attr('href'), 'SteamSalesCatcher');
+  });
+  /* $('#button')
   //.on('click', getAllApps)
   .attr('disabled', true);
   $('#button2')
