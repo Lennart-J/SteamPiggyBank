@@ -7,12 +7,16 @@ var getDiscountedApps = function() {
   chrome.storage.local.get(['discounted_apps_detailed'], function(items) {
     if (items.discounted_apps_detailed) {
       appIds_discount_detailed = items.discounted_apps_detailed;
-      console.log(items.discounted_apps_detailed);
-      /*sortElements(items.discounted_apps_detailed);
-      console.log(items.discounted_apps_detailed);*/
-      createElements(items.discounted_apps_detailed);
+      console.log(appIds_discount_detailed.length);
+      appIds_discount_detailed = removeDuplicates(appIds_discount_detailed);
+      console.log(appIds_discount_detailed.length);
+
+      sortElements(appIds_discount_detailed);
+      console.log(appIds_discount_detailed);
+
+      createElements(appIds_discount_detailed);
     } else {
-      //TODO
+      // TODO
       // try again after 10s
       console.warn('discounted_apps_detailed not in storage');
       setTimeout(getDiscountedApps, 10000);
@@ -23,8 +27,32 @@ var getDiscountedApps = function() {
 function sortElements(sourceArray) {
   console.log("sortElements");
   sourceArray.sort(function(a, b) {
-    return ((a.recommendations.total < b.recommendations.total) ? -1 : ((a.recommendations.total > b.recommendations.total) ? 1 : 0));
+    if (a.recommendations && b.recommendations) {
+      return ((a.recommendations.total < b.recommendations.total) ? 1 : ((a.recommendations.total > b.recommendations.total) ? -1 : 0));
+    } else if (a.recommendations) {
+      return -1;
+    } else if (b.recommendations) {
+      return 1;
+    } else {
+      return 0;
+    }
   });
+}
+
+function removeDuplicates(sourceArray) {
+  var uniques = [];
+
+  $.each(sourceArray, function(sourceIndex, sourceElement) {
+    $.each(uniques, function(uniquesIndex, uniquesElement) {
+      if (sourceElement.appid === uniquesElement.appid) {
+        console.log("Found duplicate app ", uniquesElement, sourceElement);
+        uniques.splice(uniquesIndex, 1);
+      }
+    });
+    uniques.push(sourceElement);
+  });
+
+  return uniques;
 }
 
 function createElements(sourceArray) {

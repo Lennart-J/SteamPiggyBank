@@ -46,7 +46,7 @@ var getAppDetails = function(appIds, urlParams) {
               }
             } else {
               appIds_discount_detailed.push({
-                appid: key,
+                appid: value.data.steam_appid,
                 type: value.data.type,
                 name: value.data.name,
                 metacritic : value.data.metacritic,
@@ -175,8 +175,8 @@ var processDiscountedAppDetails = function() {
       console.log(diff);
       var dayDiff = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-      /*console.warn("DEBUG - OVERWRITING dayDiff");
-      dayDiff = 5;*/
+      console.warn("DEBUG - OVERWRITING dayDiff");
+      dayDiff = 5;
       if (dayDiff > 0) {
         getAllApps(processAppDetails);
       } else {
