@@ -95,8 +95,6 @@ html {
       overflow: hidden;
       white-space: nowrap;
       text-overflow: ellipsis; }
-      .result-row .result-name h4:hover {
-        color: red; }
   .result-row .result-capsule {
     position: absolute;
     top: 8px;

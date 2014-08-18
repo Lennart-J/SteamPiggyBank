@@ -71,7 +71,6 @@ var getAppDetails = function(appIds, urlParams) {
         setTimeout(function() {
           getAppDetails(appIds);
         }, 5000);*/
-
       }
     }
   });
@@ -176,8 +175,8 @@ var processDiscountedAppDetails = function() {
       console.log(diff);
       var dayDiff = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-      console.warn("DEBUG - OVERWRITING dayDiff");
-      dayDiff = 5;
+      /*console.warn("DEBUG - OVERWRITING dayDiff");
+      dayDiff = 5;*/
       if (dayDiff > 0) {
         getAllApps(processAppDetails);
       } else {
