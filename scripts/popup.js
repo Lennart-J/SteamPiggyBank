@@ -15,6 +15,18 @@ var getDiscountedApps = function() {
       console.log(appIds_discount_detailed);
 
       createElements(appIds_discount_detailed);
+
+      //dynamically display title if the name is cut off with an ellipsis
+      $('.col.result-name h4').on('mouseenter', function() {
+        var $this = $(this),
+          title = $this.attr('title');
+
+        if (!title) {
+          if (this.offsetWidth < this.scrollWidth) $this.attr('title', $this.text());
+        } else {
+          if (this.offsetWidth >= this.scrollWidth && title == $this.text()) $this.removeAttr('title');
+        }
+      });
     } else {
       // TODO
       // try again after 10s
@@ -95,7 +107,7 @@ function createElements(sourceArray) {
       .append(
         $('<div>').addClass('col result-name')
         .append(
-          $('<h4>').html(value.name)
+          $('<h4>').html(value.name) //.attr('title', value.name)
         )
       )
     );
@@ -116,4 +128,6 @@ $(document).ready(function() {
   });
 
   getDiscountedApps();
+
+
 });

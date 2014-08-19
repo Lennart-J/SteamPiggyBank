@@ -8,7 +8,9 @@ html {
   font-family: tahoma, helvetica, arial, trebuchet ms, sans-serif;
   font-size: 13px;
   min-width: 400px;
-  min-height: 500px; }
+  max-width: 400px;
+  min-height: 500px;
+  max-height: 500px; }
 
 #header {
   background-color: #262626;
