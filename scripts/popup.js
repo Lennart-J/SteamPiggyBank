@@ -110,6 +110,10 @@ function createElements(sourceArray) {
           $('<h4>').html(value.name) //.attr('title', value.name)
         )
       )
+      .on('click', function(e) {
+        e.preventDefault();
+        window.open($(this).attr('href'), 'SteamSalesCatcher');
+      })
     );
     //}
   });
