@@ -7,8 +7,11 @@ var getDiscountedApps = function() {
   chrome.storage.local.get(['discounted_apps_detailed'], function(items) {
     if (items.discounted_apps_detailed) {
       appIds_discount_detailed = items.discounted_apps_detailed;
+
       console.log(appIds_discount_detailed.length);
+
       appIds_discount_detailed = removeDuplicates(appIds_discount_detailed);
+
       console.log(appIds_discount_detailed.length);
 
       sortElements(appIds_discount_detailed);
@@ -59,6 +62,7 @@ function removeDuplicates(sourceArray) {
       if (sourceElement.appid === uniquesElement.appid) {
         console.log("Found duplicate app ", uniquesElement, sourceElement);
         uniques.splice(uniquesIndex, 1);
+        return false;
       }
     });
     uniques.push(sourceElement);
@@ -81,6 +85,7 @@ function createElements(sourceArray) {
     console.log("each " + index + " ", value);
     isEven = index % 2 === 0 ? true : false;
     aClass = isEven === true ? 'even' : 'odd';
+
     //if (index <= 10) {
     $resultContent.append(
       $('<a>').addClass('result-row ' + aClass).attr('href', steamStoreAppUrl + value.appid)
@@ -126,12 +131,5 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
 
 //DOM Manipulation
 $(document).ready(function() {
-  $('a').on('click', function(e) {
-    e.preventDefault();
-    window.open($(this).attr('href'), 'SteamSalesCatcher');
-  });
-
   getDiscountedApps();
-
-
 });

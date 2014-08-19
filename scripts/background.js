@@ -99,6 +99,12 @@ var processAppDetails = function() {
     console.log((benchmark_end - benchmark_begin) / 1000);
     //TODO ready to continue :)
     var todayUTC = new Date(new Date().toUTCString().substr(0, 25));
+    if(todayUTC.getHours() < 17) {
+      //1 day back
+      todayUTC.setDate(todayUTC.getDate() - 1);
+    } else {
+      todayUTC.setHours(17,1,0,0);
+    }
     //graceperiod so storage sets 
     setTimeout(function() {
       chrome.storage.local.set({
@@ -168,18 +174,17 @@ var processDiscountedAppDetails = function() {
     if (items.lastAppListPoll) {
       //Steam update time set to 17:01 UTC
       var storedDate = new Date(items.lastAppListPoll),
-        steamUpdateTime = new Date(new Date().toUTCString().substr(0, 25)),
-        diff = steamUpdateTime - storedDate;
+        today = new Date(new Date().toUTCString().substr(0, 25)),
+        diff = today - storedDate;
 
-      steamUpdateTime.setHours(17, 1, 0, 0);
       console.log("storedDate: ", storedDate);
-      console.log("steamUpdateTime: ", steamUpdateTime);
-      console.log(diff, "sUT gt sD: ", steamUpdateTime > storedDate, "sUT lt sD: ", steamUpdateTime < storedDate);
+      console.log("today: ", today);
+      console.log(diff, "sUT gt sD: ", today > storedDate, "sUT lt sD: ", today < storedDate);
       var dayDiff = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-      /*console.warn("DEBUG - OVERWRITING dayDiff");
+     /* console.warn("DEBUG - OVERWRITING dayDiff");
       dayDiff = 5;*/
-      if (storedDate > steamUpdateTime) {
+      if (dayDiff > 0) {
         getAllApps(processAppDetails);
       } else {
         console.info("Less than one day has passed since last update.");
