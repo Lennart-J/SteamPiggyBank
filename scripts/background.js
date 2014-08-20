@@ -157,13 +157,13 @@ function displayProgressInBadge() {
   chrome.browserAction.getBadgeText({}, function(result) {
     var newBadgeText = '';
 
-    if ((result === '.' || result === '..' || result === '...') && XHRsinProgress) {
-      if (result === '.') {
-        newBadgeText = '..';
-      } else if (result === '..') {
+    if ((result === '.  ' || result === '.. ' || result === '...') && XHRsinProgress) {
+      if (result === '.  ') {
+        newBadgeText = '.. ';
+      } else if (result === '.. ') {
         newBadgeText = '...';
       } else if (result === '...') {
-        newBadgeText = '.';
+        newBadgeText = '.  ';
       }
     } else {
       return false;
@@ -180,7 +180,7 @@ function displayProgressInBadge_Start() {
     color: "#3366CC"
   });
   chrome.browserAction.setBadgeText({
-    text: '.'
+    text: '.  '
   });
 
   displayProgressInBadge();
@@ -188,7 +188,7 @@ function displayProgressInBadge_Start() {
 
 function displayProgressInBadge_End() {
   chrome.browserAction.setBadgeText({
-    text: 'OK'
+    text: 'Ok'
   });
   setTimeout(function() {
     chrome.browserAction.setBadgeText({
