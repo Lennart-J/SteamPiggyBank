@@ -196,7 +196,6 @@ function displayProgressInBadge_End() {
     });
   }, 2000);
 }
-
 //Immediate initialization function called on browser start, i.e. when bg script is initialized
 (function() {
   console.info('init');
@@ -213,8 +212,8 @@ function displayProgressInBadge_End() {
       console.log(diff, "today gt storedDate: ", today > storedDate, "today lt storedDate: ", today < storedDate);
       var dayDiff = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-      console.warn("DEBUG - OVERWRITING dayDiff");
-      dayDiff = 5;
+      /*console.warn("DEBUG - OVERWRITING dayDiff");
+      dayDiff = 5;*/
       if (dayDiff > 0) {
         XHRsinProgress = true;
         displayProgressInBadge_Start();

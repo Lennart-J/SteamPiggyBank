@@ -132,6 +132,8 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
   //$.inArray('',changes)
 });
 
+chrome.runtime.sendMessage("hello");
+
 //DOM Manipulation
 $(document).ready(function() {
 
