@@ -130,12 +130,6 @@ function createElements(sourceArray) {
 chrome.storage.onChanged.addListener(function(changes, namespace) {
   console.info('Storage changed ', changes);
   //$.inArray('',changes)
-  chrome.browserAction.setBadgeBackgroundColor({
-    color: "#33CC00"
-  });
-  chrome.browserAction.setBadgeText({
-    text: "New"
-  });
 });
 
 //DOM Manipulation
