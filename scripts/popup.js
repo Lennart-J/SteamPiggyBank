@@ -86,39 +86,45 @@ function createElements(sourceArray) {
     isEven = index % 2 === 0 ? true : false;
     aClass = isEven === true ? 'even' : 'odd';
 
-    $resultContent.append(
-      $('<a>').addClass('result-row ' + aClass).attr('href', steamStoreAppUrl + value.appid)
-      .append(
-        $('<div>').addClass('col result-price')
+    try {
+      $resultContent.append(
+        $('<a>').addClass('result-row ' + aClass).attr('href', steamStoreAppUrl + value.appid)
         .append(
-          $('<p>').append(
-            $('<del>').html((value.price_overview.initial / 100).toFixed(2) + currency)
+          $('<div>').addClass('col result-price')
+          .append(
+            $('<p>').append(
+              $('<del>').html((value.price_overview.initial / 100).toFixed(2) + currency)
+            )
+          )
+          .append(
+            $('<p>').html((value.price_overview.final / 100).toFixed(2) + currency)
           )
         )
         .append(
-          $('<p>').html((value.price_overview.final / 100).toFixed(2) + currency)
+          $('<div>').addClass('col result-discount').html(value.price_overview.discount_percent + "%")
         )
-      )
-      .append(
-        $('<div>').addClass('col result-discount').html(value.price_overview.discount_percent + "%")
-      )
-      .append(
-        $('<div>').addClass('col result-capsule')
         .append(
-          $('<img>').attr('src', steamSmallCapsuleBaseUrl + value.appid + steamSmallCapsuleAffix)
+          $('<div>').addClass('col result-capsule')
+          .append(
+            $('<img>').attr('src', steamSmallCapsuleBaseUrl + value.appid + steamSmallCapsuleAffix)
+          )
         )
-      )
-      .append(
-        $('<div>').addClass('col result-name')
         .append(
-          $('<h4>').html(value.name) //.attr('title', value.name)
+          $('<div>').addClass('col result-name')
+          .append(
+            $('<h4>').html(value.name) //.attr('title', value.name)
+          )
         )
-      )
-      .on('click', function(e) {
-        e.preventDefault();
-        window.open($(this).attr('href'), 'SteamSalesCatcher');
-      })
-    );
+        .on('click', function(e) {
+          e.preventDefault();
+          window.open($(this).attr('href'), 'SteamSalesCatcher');
+        })
+      );
+
+    } catch (ex) {
+      console.error("Error in createElements: ", ex);
+      console.error("At " + index + "with " + value);
+    }
 
     //Icon badge count
     /*chrome.browserAction.setBadgeText({

@@ -1,13 +1,9 @@
 {
     "manifest_version": 2,
     "name": "Steam Sale Catcher",
-    "version": "0.1",
+    "version": "0.21",
     "description": "Get a quick overview of Steam's current sales",
     "browser_action": {
-        /*"default_icon": {
-          "19": "", 
-          "38": "" 
-        },*/
         "default_title": "Steam Sale Catcher",
         "default_popup": "popup.html"
     },

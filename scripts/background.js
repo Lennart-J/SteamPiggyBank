@@ -81,7 +81,7 @@ var processAppDetails = function() {
 
   for (var i = 0; i <= chunkCount; i++) {
     appIds_chunk = makeChunk(appIds);
-    XHRs.push(getAppDetails(appIds_chunk, "&cc=EE&l=english&filters=price_overview"));
+    XHRs.push(getAppDetails(appIds_chunk, "&cc=DE&l=english&filters=price_overview"));
   }
   //not needed because i <= chunkCount
   //XHRs.push(getAppDetails(appIds, "&cc=EE&l=english&filters=price_overview"));
@@ -128,7 +128,7 @@ var processDiscountedAppDetails = function() {
 
   for (var i = 0; i <= chunkCount; i++) {
     appIds_chunk = makeChunk(appIds_discount);
-    XHRs.push(getAppDetails(appIds_chunk, "&cc=EE&l=english"));
+    XHRs.push(getAppDetails(appIds_chunk, "&cc=DE&l=english"));
   }
   //XHRs.push(getAppDetails(appIds_discount, "&cc=DE&l=english"));
   var defer = $.when.apply($, XHRs);
@@ -223,6 +223,8 @@ function displayProgressInBadge_End() {
         console.info("Less than one day has passed since last update.");
       }
     } else {
+      XHRsinProgress = true;
+      displayProgressInBadge_Start();
       //no date in storage found
       console.info("No lastAppListPoll parameter found in storage.");
       getAllApps(processAppDetails);
