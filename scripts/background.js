@@ -2,15 +2,7 @@ var appIds = [],
   appIds_discount = [],
   appIds_discount_detailed = [],
   XHRs = [],
-  CHUNK_SIZE = 200,
-  appIds_discount_appids = [],
-  appIds_discount_type = [],
-  appIds_discount_name = [],
-  appIds_discount_controller = [],
-  appIds_discount_platforms = [],
-  appIds_discount_categories = [],
-  appIds_discount_genres = [],
-  appIds_discount_price = [];
+  CHUNK_SIZE = 200;
 
 var getAllApps = function(callback) {
   console.info("Performing requests.");
@@ -102,9 +94,8 @@ var processAppDetails = function() {
     if(todayUTC.getHours() < 17) {
       //1 day back
       todayUTC.setDate(todayUTC.getDate() - 1);
-    } else {
-      todayUTC.setHours(17,1,0,0);
-    }
+    } 
+    todayUTC.setHours(17,1,0,0);
     //graceperiod so storage sets 
     setTimeout(function() {
       chrome.storage.local.set({
@@ -141,19 +132,10 @@ var processDiscountedAppDetails = function() {
   //XHRs.push(getAppDetails(appIds_discount, "&cc=DE&l=english"));
   var defer = $.when.apply($, XHRs);
   defer.done(function() {
-    //TODO ready to continue :)
     //graceperiod so storage sets 
     setTimeout(function() {
       chrome.storage.local.set({
         'discounted_apps_detailed': appIds_discount_detailed
-        //Remember last poll to steam api
-        //'discounted_type': appIds_discount,
-        //'discount_name': appIds_discount_name,
-        // 'discount_controller': appIds_discount_controller,
-        //'discount_platforms': appIds_discount_platforms,
-        //'discount_categories': appIds_discount_categories,
-        //'discount_genres': appIds_discount_genres,
-        //'discount_price': appIds_discount_price
       }, function() {
         console.info('commited in storage');
         chrome.storage.local.getBytesInUse(['discounted_apps_detailed'], function(res) {
@@ -179,10 +161,10 @@ var processDiscountedAppDetails = function() {
 
       console.log("storedDate: ", storedDate);
       console.log("today: ", today);
-      console.log(diff, "sUT gt sD: ", today > storedDate, "sUT lt sD: ", today < storedDate);
+      console.log(diff, "today gt storedDate: ", today > storedDate, "today lt storedDate: ", today < storedDate);
       var dayDiff = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-     /* console.warn("DEBUG - OVERWRITING dayDiff");
+      /*console.warn("DEBUG - OVERWRITING dayDiff");
       dayDiff = 5;*/
       if (dayDiff > 0) {
         getAllApps(processAppDetails);
