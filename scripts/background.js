@@ -42,13 +42,13 @@ var getAppDetails = function(appIds, urlParams) {
                 appid: value.data.steam_appid,
                 type: value.data.type,
                 name: value.data.name,
-                metacritic: value.data.metacritic,
-                recommendations: value.data.recommendations, //optional
-                controller_support: value.data.controller_support,
-                platforms: value.data.platforms,
+                price_overview: value.data.price_overview,
                 categories: value.data.categories,
                 genres: value.data.genres,
-                price_overview: value.data.price_overview
+                platforms: value.data.platforms,
+                metacritic: value.data.metacritic,
+                recommendations: value.data.recommendations, //optional
+                controller_support: value.data.controller_support
               });
             }
           }
