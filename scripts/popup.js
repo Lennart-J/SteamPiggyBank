@@ -86,7 +86,6 @@ function createElements(sourceArray) {
     isEven = index % 2 === 0 ? true : false;
     aClass = isEven === true ? 'even' : 'odd';
 
-    //if (index <= 10) {
     $resultContent.append(
       $('<a>').addClass('result-row ' + aClass).attr('href', steamStoreAppUrl + value.appid)
       .append(
@@ -120,16 +119,27 @@ function createElements(sourceArray) {
         window.open($(this).attr('href'), 'SteamSalesCatcher');
       })
     );
-    //}
+
+    //Icon badge count
+    /*chrome.browserAction.setBadgeText({
+      text: index.toString()
+    });*/
   });
 }
 
 chrome.storage.onChanged.addListener(function(changes, namespace) {
   console.info('Storage changed ', changes);
   //$.inArray('',changes)
+  chrome.browserAction.setBadgeBackgroundColor({
+    color: "#33CC00"
+  });
+  chrome.browserAction.setBadgeText({
+    text: "New"
+  });
 });
 
 //DOM Manipulation
 $(document).ready(function() {
+
   getDiscountedApps();
 });

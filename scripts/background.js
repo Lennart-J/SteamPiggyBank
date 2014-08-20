@@ -2,7 +2,8 @@ var appIds = [],
   appIds_discount = [],
   appIds_discount_detailed = [],
   XHRs = [],
-  CHUNK_SIZE = 200;
+  CHUNK_SIZE = 200,
+  XHRsinProgress = false;
 
 var getAllApps = function(callback) {
   console.info("Performing requests.");
@@ -91,11 +92,11 @@ var processAppDetails = function() {
     console.log((benchmark_end - benchmark_begin) / 1000);
     //TODO ready to continue :)
     var todayUTC = new Date(new Date().toUTCString().substr(0, 25));
-    if(todayUTC.getHours() < 17) {
+    if (todayUTC.getHours() < 17) {
       //1 day back
       todayUTC.setDate(todayUTC.getDate() - 1);
-    } 
-    todayUTC.setHours(17,1,0,0);
+    }
+    todayUTC.setHours(17, 1, 0, 0);
     //graceperiod so storage sets 
     setTimeout(function() {
       chrome.storage.local.set({
@@ -143,10 +144,58 @@ var processDiscountedAppDetails = function() {
         });
         //empty Ajax array
         XHRs = [];
+        //stop badge animation
+        XHRsinProgress = false;
+        displayProgressInBadge_End();
       });
     }, 1000);
   });
 };
+
+function displayProgressInBadge() {
+
+  chrome.browserAction.getBadgeText({}, function(result) {
+    var newBadgeText = '';
+
+    if ((result === '.' || result === '..' || result === '...') && XHRsinProgress) {
+      if (result === '.') {
+        newBadgeText = '..';
+      } else if (result === '..') {
+        newBadgeText = '...';
+      } else if (result === '...') {
+        newBadgeText = '.';
+      }
+    } else {
+      return false;
+    }
+    chrome.browserAction.setBadgeText({
+      text: newBadgeText
+    });
+    setTimeout(displayProgressInBadge, 500);
+  });
+}
+
+function displayProgressInBadge_Start() {
+  chrome.browserAction.setBadgeBackgroundColor({
+    color: "#3366CC"
+  });
+  chrome.browserAction.setBadgeText({
+    text: '.'
+  });
+
+  displayProgressInBadge();
+}
+
+function displayProgressInBadge_End() {
+  chrome.browserAction.setBadgeText({
+    text: 'OK'
+  });
+  setTimeout(function() {
+    chrome.browserAction.setBadgeText({
+      text: ''
+    });
+  }, 2000);
+}
 
 //Immediate initialization function called on browser start, i.e. when bg script is initialized
 (function() {
@@ -159,14 +208,17 @@ var processDiscountedAppDetails = function() {
         today = new Date(new Date().toUTCString().substr(0, 25)),
         diff = today - storedDate;
 
-      console.log("storedDate: ", storedDate);
-      console.log("today: ", today);
+      console.log("storedDate(UTC): ", storedDate);
+      console.log("today(UTC): ", today);
       console.log(diff, "today gt storedDate: ", today > storedDate, "today lt storedDate: ", today < storedDate);
       var dayDiff = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-      /*console.warn("DEBUG - OVERWRITING dayDiff");
-      dayDiff = 5;*/
+      console.warn("DEBUG - OVERWRITING dayDiff");
+      dayDiff = 5;
       if (dayDiff > 0) {
+        XHRsinProgress = true;
+        displayProgressInBadge_Start();
+
         getAllApps(processAppDetails);
       } else {
         console.info("Less than one day has passed since last update.");
