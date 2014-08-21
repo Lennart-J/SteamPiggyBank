@@ -10,7 +10,12 @@ var appIds = [],
 chrome.runtime.onUpdateAvailable.addListener(function(details) {
   console.log("updating to version " + details.version);
   //UNLOADS POPUP
-  chrome.runtime.reload();
+  chrome.storage.local.set({
+    extnUpdated: true
+  }, function() {
+    chrome.runtime.reload();
+  });
+
 });
 //Force update check when background script is loaded
 // -at the moment on browser start
@@ -149,7 +154,8 @@ var processDiscountedAppDetails = function() {
     //graceperiod so storage sets 
     setTimeout(function() {
       chrome.storage.local.set({
-        'discounted_apps_detailed': appIds_discount_detailed
+        'discounted_apps_detailed': appIds_discount_detailed,
+        'extnUpdated' : false
       }, function() {
         console.info('commited in storage');
         chrome.storage.local.getBytesInUse(['discounted_apps_detailed'], function(res) {
@@ -213,8 +219,8 @@ function displayProgressInBadge_End() {
 (function() {
   console.info('init');
 
-  chrome.storage.local.get(['lastAppListPoll'], function(items) {
-    if (items.lastAppListPoll) {
+  chrome.storage.local.get(['lastAppListPoll', 'extnUpdated'], function(items) {
+    if (items.lastAppListPoll || items.extnUpdated) {
       //Steam update time set to 17:01 UTC
       var storedDate = new Date(items.lastAppListPoll),
         today = new Date(new Date().toUTCString().substr(0, 25)),
@@ -227,7 +233,7 @@ function displayProgressInBadge_End() {
 
       /*console.warn("DEBUG - OVERWRITING dayDiff");
       dayDiff = 5;*/
-      if (dayDiff > 0) {
+      if (dayDiff > 0 || items.extnUpdated) {
         XHRsinProgress = true;
         displayProgressInBadge_Start();
 
