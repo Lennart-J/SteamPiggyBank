@@ -5,6 +5,18 @@ var appIds = [],
   CHUNK_SIZE = 200,
   XHRsinProgress = false;
 
+//usually triggered when Chrome makes an update check
+// -triggered by requestUpdateCheck AND Chromes automatic update mechanism
+chrome.runtime.onUpdateAvailable.addListener(function(details) {
+  console.log("updating to version " + details.version);
+  chrome.runtime.reload();
+});
+//Force update check when background script is loaded
+// -at the moment on browser start
+chrome.runtime.requestUpdateCheck(function(status) {
+  console.info("requestUpdateCheck result: ", status);
+});
+
 var getAllApps = function(callback) {
   console.info("Performing requests.");
 
@@ -39,7 +51,7 @@ var getAppDetails = function(appIds, urlParams) {
               }
             } else {
               appIds_discount_detailed.push({
-                appid: value.data.steam_appid,
+                appid: value.data.steam_appid.toString(),
                 type: value.data.type,
                 name: value.data.name,
                 price_overview: value.data.price_overview,
@@ -230,5 +242,4 @@ function displayProgressInBadge_End() {
       getAllApps(processAppDetails);
     }
   });
-
 })();
