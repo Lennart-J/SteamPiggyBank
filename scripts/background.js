@@ -9,6 +9,7 @@ var appIds = [],
 // -triggered by requestUpdateCheck AND Chromes automatic update mechanism
 chrome.runtime.onUpdateAvailable.addListener(function(details) {
   console.log("updating to version " + details.version);
+  //UNLOADS POPUP
   chrome.runtime.reload();
 });
 //Force update check when background script is loaded
