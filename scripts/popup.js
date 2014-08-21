@@ -31,8 +31,8 @@ var getDiscountedApps = function() {
         }
       });
     } else {
-      // TODO
-      // try again after 10s
+      // TODO is there a better way?
+      // try again after 10s, recursive
       console.warn('discounted_apps_detailed not in storage');
       setTimeout(getDiscountedApps, 10000);
     }

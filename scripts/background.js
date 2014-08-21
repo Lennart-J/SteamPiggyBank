@@ -10,12 +10,21 @@ var appIds = [],
 chrome.runtime.onUpdateAvailable.addListener(function(details) {
   console.log("updating to version " + details.version);
   //UNLOADS POPUP
-  chrome.storage.local.set({
-    extnUpdated: true
-  }, function() {
-    chrome.runtime.reload();
-  });
+  chrome.browserAction.disable();
+  chrome.runtime.reload();
+});
 
+chrome.runtime.onInstall.addListener(function(details) {
+  if (details.reason === "update") {
+    chrome.browserAction.enable();
+    if (!XHRsinProgress) {
+      XHRsinProgress = true;
+      displayProgressInBadge_Start();
+      //performing requests
+      console.info("Extension updated.");
+      getAllApps(processAppDetails);
+    }
+  }
 });
 //Force update check when background script is loaded
 // -at the moment on browser start
@@ -108,7 +117,7 @@ var processAppDetails = function() {
   defer.done(function() {
     benchmark_end = Date.now();
     console.log((benchmark_end - benchmark_begin) / 1000);
-    //TODO ready to continue :)
+    //ready to continue :)
     var todayUTC = new Date(new Date().toUTCString().substr(0, 25));
     if (todayUTC.getHours() < 17) {
       //1 day back
@@ -155,7 +164,7 @@ var processDiscountedAppDetails = function() {
     setTimeout(function() {
       chrome.storage.local.set({
         'discounted_apps_detailed': appIds_discount_detailed,
-        'extnUpdated' : false
+        'extnUpdated': false
       }, function() {
         console.info('commited in storage');
         chrome.storage.local.getBytesInUse(['discounted_apps_detailed'], function(res) {
@@ -219,8 +228,8 @@ function displayProgressInBadge_End() {
 (function() {
   console.info('init');
 
-  chrome.storage.local.get(['lastAppListPoll', 'extnUpdated'], function(items) {
-    if (items.lastAppListPoll || items.extnUpdated) {
+  chrome.storage.local.get(['lastAppListPoll'], function(items) {
+    if (items.lastAppListPoll) {
       //Steam update time set to 17:01 UTC
       var storedDate = new Date(items.lastAppListPoll),
         today = new Date(new Date().toUTCString().substr(0, 25)),
@@ -233,7 +242,7 @@ function displayProgressInBadge_End() {
 
       /*console.warn("DEBUG - OVERWRITING dayDiff");
       dayDiff = 5;*/
-      if (dayDiff > 0 || items.extnUpdated) {
+      if (dayDiff > 0) {
         XHRsinProgress = true;
         displayProgressInBadge_Start();
 
