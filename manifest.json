@@ -1,15 +1,15 @@
 {
     "manifest_version": 2,
     "name": "Steam Sale Catcher",
-    "version": "0.29",
+    "version": "0.34",
     "description": "Get a quick overview of Steam's current sales",
-    "browser_action": {
-        "default_title": "Steam Sale Catcher",
-        "default_popup": "popup.html"
-    },
     "background": {
         "scripts": ["scripts/jquery-2.1.1.min.js", "scripts/background.js"],
         "persistent": false
+    },
+    "browser_action": {
+        "default_title": "Steam Sale Catcher",
+        "default_popup": "popup.html"
     },
     "author": "Lennart Jarms",
     "content_security_policy": "script-src 'self'; object-src 'self'",

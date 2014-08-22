@@ -5,18 +5,8 @@ var appIds = [],
   CHUNK_SIZE = 200,
   XHRsinProgress = false;
 
-//usually triggered when Chrome makes an update check
-// -triggered by requestUpdateCheck AND Chromes automatic update mechanism
-chrome.runtime.onUpdateAvailable.addListener(function(details) {
-  console.log("updating to version " + details.version);
-  //UNLOADS POPUP
-  chrome.browserAction.disable();
-  chrome.runtime.reload();
-});
-
-chrome.runtime.onInstall.addListener(function(details) {
+chrome.runtime.onInstalled.addListener(function(details) {
   if (details.reason === "update") {
-    chrome.browserAction.enable();
     if (!XHRsinProgress) {
       XHRsinProgress = true;
       displayProgressInBadge_Start();
@@ -28,9 +18,12 @@ chrome.runtime.onInstall.addListener(function(details) {
 });
 //Force update check when background script is loaded
 // -at the moment on browser start
-chrome.runtime.requestUpdateCheck(function(status) {
-  console.info("requestUpdateCheck result: ", status);
+chrome.runtime.onStartup.addListener(function() {
+  chrome.runtime.requestUpdateCheck(function(status) {
+    console.info("requestUpdateCheck result: ", status);
+  });
 });
+
 
 var getAllApps = function(callback) {
   console.info("Performing requests.");
@@ -228,34 +221,37 @@ function displayProgressInBadge_End() {
 (function() {
   console.info('init');
 
-  chrome.storage.local.get(['lastAppListPoll'], function(items) {
-    if (items.lastAppListPoll) {
-      //Steam update time set to 17:01 UTC
-      var storedDate = new Date(items.lastAppListPoll),
-        today = new Date(new Date().toUTCString().substr(0, 25)),
-        diff = today - storedDate;
+  console.log("XHRsinProgress: " + XHRsinProgress);
+  if (!XHRsinProgress) {
+    chrome.storage.local.get(['lastAppListPoll'], function(items) {
+      if (items.lastAppListPoll) {
+        //Steam update time set to 17:01 UTC
+        var storedDate = new Date(items.lastAppListPoll),
+          today = new Date(new Date().toUTCString().substr(0, 25)),
+          diff = today - storedDate;
 
-      console.log("storedDate(UTC): ", storedDate);
-      console.log("today(UTC): ", today);
-      console.log(diff, "today gt storedDate: ", today > storedDate, "today lt storedDate: ", today < storedDate);
-      var dayDiff = Math.floor(diff / (1000 * 60 * 60 * 24));
+        console.log("storedDate(UTC): ", storedDate);
+        console.log("today(UTC): ", today);
+        console.log(diff, "today gt storedDate: ", today > storedDate, "today lt storedDate: ", today < storedDate);
+        var dayDiff = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-      /*console.warn("DEBUG - OVERWRITING dayDiff");
-      dayDiff = 5;*/
-      if (dayDiff > 0) {
+        /*console.warn("DEBUG - OVERWRITING dayDiff");
+        dayDiff = 5;*/
+        if (dayDiff > 0) {
+          XHRsinProgress = true;
+          displayProgressInBadge_Start();
+
+          getAllApps(processAppDetails);
+        } else {
+          console.info("Less than one day has passed since last update.");
+        }
+      } else {
         XHRsinProgress = true;
         displayProgressInBadge_Start();
-
+        //no date in storage found
+        console.info("No lastAppListPoll parameter found in storage.");
         getAllApps(processAppDetails);
-      } else {
-        console.info("Less than one day has passed since last update.");
       }
-    } else {
-      XHRsinProgress = true;
-      displayProgressInBadge_Start();
-      //no date in storage found
-      console.info("No lastAppListPoll parameter found in storage.");
-      getAllApps(processAppDetails);
-    }
-  });
+    });
+  }
 })();
