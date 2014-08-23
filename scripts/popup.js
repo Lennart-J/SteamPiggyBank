@@ -10,7 +10,7 @@ var getDiscountedApps = function() {
 
       console.log(appIds_discount_detailed.length);
 
-      appIds_discount_detailed = removeDuplicates(appIds_discount_detailed);
+      //appIds_discount_detailed = removeDuplicates(appIds_discount_detailed);
 
       console.log(appIds_discount_detailed.length);
 
@@ -54,7 +54,7 @@ function sortElements(sourceArray) {
   });
 }
 
-function removeDuplicates(sourceArray) {
+/*function removeDuplicates(sourceArray) {
   var uniques = [];
 
   $.each(sourceArray, function(sourceIndex, sourceElement) {
@@ -69,7 +69,7 @@ function removeDuplicates(sourceArray) {
   });
 
   return uniques;
-}
+}*/
 
 function createElements(sourceArray) {
   var steamStoreAppUrl = "http://store.steampowered.com/app/",
