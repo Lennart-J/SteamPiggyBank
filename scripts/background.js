@@ -1,8 +1,7 @@
-var appIds = [],
-  appIds_discount = [],
-  appIds_discount_detailed = [],
-  packageIds = [],
-  packageIds_discount = [],
+var appIds = [],                    
+  appIds_discount = [],             
+  appIds_discount_detailed = [],    
+  packageIds_discount = [],         
   packageIds_discount_detailed = [];
 var XHRs = [],
   CHUNK_SIZE = 200,
@@ -32,10 +31,9 @@ var getAllApps = function(callback) {
   console.info("Performing app requests.");
 
   $.ajax({
-    url: "http://api.steampowered.com/ISteamApps/GetAppList/v2",
-    type: "GET",
-    accepts: "application/json",
-    retryLimit: 3
+    url        : "http://api.steampowered.com/ISteamApps/GetAppList/v2",
+    type       : "GET",
+    accepts    : "application/json"
   })
     .done(function(response) {
       $.each(response.applist.apps, function(index, value) {
@@ -49,9 +47,9 @@ var getAllApps = function(callback) {
 
 var getAppDetails = function(appIds, urlParams) {
   return $.ajax({
-    url: "http://store.steampowered.com/api/appdetails/?appids=" + appIds.toString() + urlParams,
-    type: "GET",
-    accepts: "application/json",
+    url     : "http://store.steampowered.com/api/appdetails/?appids=" + appIds.toString() + urlParams,
+    type    : "GET",
+    accepts : "application/json",
     statusCode: {
       200: function(data, textStatus, jqXHR) {
         $.each(data, function(key, value) {
@@ -75,16 +73,16 @@ var getAppDetails = function(appIds, urlParams) {
                 value.data.price_overview.discount_percent = ((value.data.price_overview.final / value.data.price_overview.initial).toFixed(2) -1) * 100;
               }
               appIds_discount_detailed.push({
-                appid: value.data.steam_appid.toString(),
-                type: value.data.type,
-                name: value.data.name,
-                price_overview: value.data.price_overview,
-                categories: value.data.categories,
-                genres: value.data.genres,
-                platforms: value.data.platforms,
-                metacritic: value.data.metacritic,
-                recommendations: value.data.recommendations, //optional
-                controller_support: value.data.controller_support
+                appid              : value.data.steam_appid.toString(),
+                type               : value.data.type,
+                name               : value.data.name,
+                price_overview     : value.data.price_overview,
+                categories         : value.data.categories,
+                genres             : value.data.genres,
+                platforms          : value.data.platforms,
+                metacritic         : value.data.metacritic,
+                recommendations    : value.data.recommendations, //optional
+                controller_support : value.data.controller_support
               });
             }
           }
@@ -116,15 +114,14 @@ var getPackageDetails = function(packageIds) {
           if (value.success === true && !$.isArray(value.data) && value.data.apps && value.data.apps.length > 1) {
 
             packageIds_discount_detailed.push({
-              packageid: key.toString(),
-              name: value.data.name,
-              price: value.data.price,
-              apps: value.data.apps,
+              packageid : key.toString(),
+              name      : value.data.name,
+              price     : value.data.price,
+              apps      : value.data.apps,
             });
           }
         });
         console.log(packageIds_discount_detailed, packageIds_discount_detailed.length);
-
       }
     }
   });
@@ -164,9 +161,9 @@ var processAppDetails = function() {
       packageIds_discount = removeDuplicates(packageIds_discount);
       chrome.storage.local.set({
         //Remember last poll to steam api
-        'lastAppListPoll': todayUTC.toString(),
-        'discounted_apps': appIds_discount,
-        'discounted_packages': packageIds_discount
+        'lastAppListPoll'     : todayUTC.toString(),
+        'discounted_apps'     : appIds_discount,
+        'discounted_packages' : packageIds_discount
       }, function() {
         console.info('commited in storage');
         //empty Ajax array
@@ -244,8 +241,8 @@ var processDiscountedAppDetails = function() {
       console.log("appIds_discount_detailed Length: " + appIds_discount_detailed.length);
       console.log("packageIds_discount_detailed Length: " + packageIds_discount_detailed.length);
       chrome.storage.local.set({
-        'discounted_apps_detailed': appIds_discount_detailed,
-        'discounted_packages_detailed': packageIds_discount_detailed
+        'discounted_apps_detailed'     : appIds_discount_detailed,
+        'discounted_packages_detailed' : packageIds_discount_detailed
       }, function() {
         console.info('commited in storage');
         chrome.storage.local.getBytesInUse(['discounted_apps_detailed', 'discounted_packages_detailed'], function(res) {

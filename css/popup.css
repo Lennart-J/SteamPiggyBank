@@ -64,8 +64,12 @@ html {
   .result-price del {
     color: #888888; }
 
-.result-discount {
+.result-discount, .result-metascore {
   margin-right: 8px; }
+
+.result-metascore {
+  font-weight: bold;
+  color: #8bc53f; }
 
 .result-row {
   display: block;
@@ -78,8 +82,10 @@ html {
   .result-row .result-price, .result-row .result-discount, .result-row .result-metascore {
     float: right;
     padding: 4px 0px 0px 8px;
-    margin-left: 1px;
+    margin-left: 10px;
     margin-top: 18px; }
+  .result-row .result-price {
+    margin-left: 1px; }
   .result-row .col {
     text-decoration: none; }
   .result-row.even {

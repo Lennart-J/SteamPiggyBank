@@ -97,8 +97,13 @@ html {
 		color:$textcolor-oldprice;
 	}
 }
-.result-discount {
+.result-discount, .result-metascore {
 	margin-right:8px;
+}
+
+.result-metascore {
+	font-weight: bold;
+	color: $textcolor-metascore;
 }
 .result-row {
 	display:block;
@@ -111,8 +116,11 @@ html {
 	.result-price, .result-discount, .result-metascore {
 		float: right;
 		padding: 4px 0px 0px 8px;
-		margin-left: 1px;
+		margin-left: 10px;
 		margin-top: 18px;
+	}
+	.result-price {
+		margin-left: 1px;
 	}
 	.col {
 		text-decoration: none;

@@ -8,12 +8,6 @@ var getDiscountedApps = function() {
     if (items.discounted_apps_detailed) {
       appIds_discount_detailed = items.discounted_apps_detailed;
 
-      console.log(appIds_discount_detailed.length);
-
-      //appIds_discount_detailed = removeDuplicates(appIds_discount_detailed);
-
-      console.log(appIds_discount_detailed.length);
-
       sortElements(appIds_discount_detailed);
       console.log(appIds_discount_detailed);
 
@@ -54,23 +48,6 @@ function sortElements(sourceArray) {
   });
 }
 
-/*function removeDuplicates(sourceArray) {
-  var uniques = [];
-
-  $.each(sourceArray, function(sourceIndex, sourceElement) {
-    $.each(uniques, function(uniquesIndex, uniquesElement) {
-      if (sourceElement.appid === uniquesElement.appid) {
-        console.log("Found duplicate app ", uniquesElement, sourceElement);
-        uniques.splice(uniquesIndex, 1);
-        return false;
-      }
-    });
-    uniques.push(sourceElement);
-  });
-
-  return uniques;
-}*/
-
 function createElements(sourceArray) {
   var steamStoreAppUrl = "http://store.steampowered.com/app/",
     steamSmallCapsuleBaseUrl = "http://cdn.akamai.steamstatic.com/steam/apps/",
@@ -81,14 +58,22 @@ function createElements(sourceArray) {
   console.log('createElements');
 
   $.each(sourceArray, function(index, value) {
-    var isEven, aClass;
+    var isEven = false, 
+      aClass = '',
+      metascore = '-';
+
     console.log("each " + index + " ", value);
     isEven = index % 2 === 0 ? true : false;
     aClass = isEven === true ? 'even' : 'odd';
 
+    if (value.metacritic) {
+      metascore = value.metacritic.score;
+    }
+
     try {
       $resultContent.append(
         $('<a>').addClass('result-row ' + aClass).attr('href', steamStoreAppUrl + value.appid)
+        //price
         .append(
           $('<div>').addClass('col result-price')
           .append(
@@ -100,21 +85,34 @@ function createElements(sourceArray) {
             $('<p>').html((value.price_overview.final / 100).toFixed(2) + currency)
           )
         )
+        //discount
         .append(
           $('<div>').addClass('col result-discount').html(value.price_overview.discount_percent + "%")
         )
+        //picture
         .append(
           $('<div>').addClass('col result-capsule')
           .append(
             $('<img>').attr('src', steamSmallCapsuleBaseUrl + value.appid + steamSmallCapsuleAffix)
           )
         )
+        //metascore
+        .append(
+          $('<a>').addClass('col result-metascore').html(metascore)
+          .on('click', function(e) {
+            e.preventDefault();
+            if(metascore !== '-') {
+              window.open(value.metacritic.url, 'SteamSalesCatcher');
+            } 
+          })
+        )
+        /* //name
         .append(
           $('<div>').addClass('col result-name')
           .append(
             $('<h4>').html(value.name) //.attr('title', value.name)
           )
-        )
+        )*/
         .on('click', function(e) {
           e.preventDefault();
           window.open($(this).attr('href'), 'SteamSalesCatcher');
