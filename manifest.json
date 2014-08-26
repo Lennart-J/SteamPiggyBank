@@ -11,7 +11,7 @@
         "default_title": "Steam Sale Catcher",
         "default_popup": "popup.html"
     },
-    "author": "Lennart Jarms",
+    "author": "Lennart Jarms, Janina Huether",
     "content_security_policy": "script-src 'self'; object-src 'self'",
     "permissions": ["storage", "http://store.steampowered.com/*", "http://api.steampowered.com/*"],
     "web_accessible_resources": [""]
