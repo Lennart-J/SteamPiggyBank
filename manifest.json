@@ -2,12 +2,12 @@
   "manifest_version": 2,
   "name": "Steam Piggy Bank",
   "short_name": "SPB",
-  "version": "0.37",
+  "version": "0.38",
   "description": "Get a quick overview of Steam's current sales",
   "icons": {
-      "128": "img/Icon128x128coinlessAndBig.png",
-      "16": "img/Icon16x16coinless.png",
-      "48": "img/Icon48x48coinless.png"
+      "128": "img/Icon128x128.png",
+      "16": "img/Icon16x16.png",
+      "48": "img/Icon48x48.png"
    },
   "background": {
     "scripts": ["scripts/jquery-2.1.1.min.js", "scripts/background.js"],
@@ -15,8 +15,8 @@
   },
   "browser_action": {
     "default_icon": {
-      "19": "img/Icon19x19coinless.png",
-      "38": "img/Icon38x38coinless.png"
+      "19": "img/Icon19x19.png",
+      "38": "img/Icon38x38.png"
     },
     "default_title": "Steam Piggy Bank",
     "default_popup": "popup.html"
