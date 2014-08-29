@@ -1,6 +1,6 @@
 <html>
 	<head>
-		<title>Steam Sale Check</title>
+		<title>Steam Piggy Bank</title>
 		<script type="text/javascript" src="scripts/jquery-2.1.1.min.js"></script>
 		<script type="text/javascript" src='scripts/popup.js'></script>
 		<link rel="stylesheet" type="text/css" href="css/popup.css" />
@@ -8,7 +8,7 @@
 
 	<body>
 	<div id="header">
-		<h2>Steam Sales Catcher</h2>
+		<h2>Steam Piggy Bank</h2>
 	<div class="overlay"></div>
 
 	</div>
@@ -16,10 +16,26 @@
 	<div id="content">
 		
 		<div id="result-header">
-			<div class="col result-price">Price</div>
-			<div class="col result-discount">Discount</div>
-			<div class="col result-metascore">Metascore</div>
-			<div class="col result-name">Title</div>
+			<div class="col result-price">
+				<p>Price</p>
+				<span class='arrow'></span>
+			</div>
+			<div class="col result-discount">
+				<p>Discount</p>
+				<span class='arrow'></span>
+			</div>
+			<div class="col result-metascore" title ="Metascore">
+				<p>Meta</p>
+				<span class='arrow'></span>
+			</div>
+			<div class="col result-genre">
+				<p>Genre</p>
+				<span class='arrow'></span>
+			</div>
+			<div class="col result-name">
+				<p>Title</p>
+				<span class='arrow'></span>
+			</div>
 		</div>
 		<div id="result-content">
 			<!-- <a class="result-row even" href="http://store.steampowered.com/app/230230">

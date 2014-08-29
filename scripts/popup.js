@@ -8,7 +8,10 @@ var getDiscountedApps = function() {
     if (items.discounted_apps_detailed) {
       appIds_discount_detailed = items.discounted_apps_detailed;
 
-      sortElements(appIds_discount_detailed);
+      sortElements(appIds_discount_detailed, {
+        parentObj: 'recommendations',
+        filter: 'total'
+      });
       console.log(appIds_discount_detailed);
 
       createElements(appIds_discount_detailed);
@@ -24,6 +27,12 @@ var getDiscountedApps = function() {
           if (this.offsetWidth >= this.scrollWidth && title == $this.text()) $this.removeAttr('title');
         }
       });
+
+      $('.col.result-genre p').each(function(key, value) {
+        var $this = $(this);
+
+        if (this.offsetWidth < this.scrollWidth) $this.attr('title', $this.text());
+      });
     } else {
       // TODO is there a better way?
       // try again after 10s, recursive
@@ -33,17 +42,27 @@ var getDiscountedApps = function() {
   });
 };
 
-function sortElements(sourceArray) {
-  console.log("sortElements");
+function sortElements(sourceArray, args) {
+  var parentObj = args.parentObj,
+    filter = args.filter;
+
+  console.log("sortElements by: ", args);
   sourceArray.sort(function(a, b) {
-    if (a.recommendations && b.recommendations) {
-      return ((a.recommendations.total < b.recommendations.total) ? 1 : ((a.recommendations.total > b.recommendations.total) ? -1 : 0));
-    } else if (a.recommendations) {
-      return -1;
-    } else if (b.recommendations) {
-      return 1;
-    } else {
-      return 0;
+
+    if (typeof filter !== 'undefined') {
+      if (a[parentObj] && b[parentObj]) {
+        return ((a[parentObj][filter] < b[parentObj][filter]) ? 1 : ((a[parentObj][filter] > b[parentObj][filter]) ? -1 : 0));
+      } else if (a[parentObj]) return -1;
+      else if (b[parentObj]) return 1;
+      else return 0;
+    }
+    //if no filter specified, parentObj itself is comparison parameter
+    else {
+      if (a[parentObj] && b[parentObj]) {
+        return ((a[parentObj] < b[parentObj]) ? 1 : ((a[parentObj] > b[parentObj]) ? -1 : 0));
+      } else if (a[parentObj]) return -1;
+      else if (b[parentObj]) return 1;
+      else return 0;
     }
   });
 }
@@ -58,9 +77,11 @@ function createElements(sourceArray) {
   console.log('createElements');
 
   $.each(sourceArray, function(index, value) {
-    var isEven = false, 
+    var isEven = false,
       aClass = '',
-      metascore = '-';
+      metascoreClass = '',
+      metascore = '-',
+      genres = [];
 
     console.log("each " + index + " ", value);
     isEven = index % 2 === 0 ? true : false;
@@ -68,6 +89,17 @@ function createElements(sourceArray) {
 
     if (value.metacritic) {
       metascore = value.metacritic.score;
+    } else {
+      metascoreClass = 'unavailable';
+    }
+
+    //get genres
+    if (value.genres) {
+      $.each(value.genres, function(k, v) {
+        genres.push(v.description);
+      });
+      genres = genres.join(', ');
+
     }
 
     try {
@@ -89,22 +121,25 @@ function createElements(sourceArray) {
         .append(
           $('<div>').addClass('col result-discount').html(value.price_overview.discount_percent + "%")
         )
+        //metascore
+        .append(
+          $('<a>').addClass('col result-metascore ' + metascoreClass).html(metascore).attr('href', '#')
+        )
+        //genres
+        .append(
+          $('<div>').addClass('col result-genre')
+          .append(
+            $('<p>').html(genres.toString())
+          )
+        )
         //picture
         .append(
           $('<div>').addClass('col result-capsule')
           .append(
-            $('<img>').attr('src', steamSmallCapsuleBaseUrl + value.appid + steamSmallCapsuleAffix)
+            $('<img>')
+            .attr('src', steamSmallCapsuleBaseUrl + value.appid + steamSmallCapsuleAffix)
+            .attr('title', value.name)
           )
-        )
-        //metascore
-        .append(
-          $('<a>').addClass('col result-metascore').html(metascore)
-          .on('click', function(e) {
-            e.preventDefault();
-            if(metascore !== '-') {
-              window.open(value.metacritic.url, 'SteamSalesCatcher');
-            } 
-          })
         )
         /* //name
         .append(
@@ -114,8 +149,18 @@ function createElements(sourceArray) {
           )
         )*/
         .on('click', function(e) {
+          var $meta = $(this).find('a.col.result-metascore'),
+            offset = $meta.offset(),
+            offsetRight = offset.left + $meta.outerWidth();
+
           e.preventDefault();
-          window.open($(this).attr('href'), 'SteamSalesCatcher');
+
+          if (e.pageX > offset.left && e.pageX < offsetRight && metascore !== '-') {
+            window.open(value.metacritic.url, '_blank');
+          } else {
+            window.open($(this).attr('href'), '_blank');
+          }
+
         })
       );
 
@@ -131,6 +176,12 @@ function createElements(sourceArray) {
   });
 }
 
+function deleteElements() {
+  console.log("deleteElements");
+
+  $('#result-content a.result-row').remove();
+}
+
 chrome.storage.onChanged.addListener(function(changes, namespace) {
   console.info('Storage changed ', changes);
   //$.inArray('',changes)
@@ -138,8 +189,88 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
 
 chrome.runtime.sendMessage("hello");
 
+//TODO show loading state
+function attachSortClickHandler() {
+  var $priceCol = $('#result-header .col.result-price p'),
+    $discountCol = $('#result-header .col.result-discount p'),
+    $metaCol = $('#result-header .col.result-metascore p'),
+    $genreCol = $('#result-header .col.result-genre p'),
+    $nameCol = $('#result-header .col.result-name p');
+
+  console.log("attachSortClickHandler");
+
+  $priceCol.on('click', function() {
+    var sortCriteria = {
+      parentObj: 'price_overview',
+      filter: 'final'
+    };
+    colClickHandler($(this), sortCriteria);
+  });
+
+  $discountCol.on('click', function() {
+    var sortCriteria = {
+      parentObj: 'price_overview',
+      filter: 'discount_percent'
+    };
+    colClickHandler($(this), sortCriteria);
+  });
+
+  $metaCol.on('click', function() {
+    var sortCriteria = {
+      parentObj: 'metacritic',
+      filter: 'score'
+    };
+    colClickHandler($(this), sortCriteria);
+  });
+
+  $genreCol.on('click', function() {
+    var sortCriteria = {
+      parentObj: 'genres'
+    };
+    colClickHandler($(this), sortCriteria);
+  });
+
+  $nameCol.on('click', function() {
+    var sortCriteria = {
+      parentObj: 'name'
+    };
+    colClickHandler($(this), sortCriteria);
+  });
+}
+
+function colClickHandler(columnReference, sortCriteria) {
+  var $arrow = columnReference.next('.arrow'),
+    arrowClass = '';
+
+  console.info('price col header clicked');
+
+  if (!($arrow.hasClass('up') || $arrow.hasClass('down'))) {
+    sortElements(appIds_discount_detailed, sortCriteria);
+    //WARNING workaround for sorting by name
+    if (sortCriteria.parentObj === 'name') {
+      appIds_discount_detailed.reverse();
+    }
+    arrowClass = 'down';
+    //already clicked before
+  } else {
+    appIds_discount_detailed.reverse();
+    if ($arrow.hasClass('down')) {
+      arrowClass = 'up';
+    } else {
+      arrowClass = 'down';
+    }
+  }
+  $('span.arrow').removeClass('up').removeClass('down');
+  $arrow.addClass(arrowClass);
+
+  deleteElements();
+
+
+  createElements(appIds_discount_detailed);
+}
 //DOM Manipulation
 $(document).ready(function() {
 
   getDiscountedApps();
+  attachSortClickHandler();
 });

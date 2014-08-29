@@ -7,17 +7,14 @@ html {
   color: #b0aeac;
   font-family: tahoma, helvetica, arial, trebuchet ms, sans-serif;
   font-size: 13px;
-  min-width: 400px;
-  max-width: 400px;
+  min-width: 420px;
+  max-width: 420px;
   min-height: 500px;
   max-height: 500px; }
 
 #header {
   background-color: #262626;
   background-image: -webkit-linear-gradient(135deg, transparent, transparent 25%, rgba(0, 0, 0, 0.05) 25%, rgba(0, 0, 0, 0.05) 50%, transparent 50%, transparent 75%, rgba(0, 0, 0, 0.05) 75%, rgba(0, 0, 0, 0.05));
-  background-image: -moz-linear-gradient(135deg, transparent, transparent 25%, rgba(0, 0, 0, 0.1) 25%, rgba(0, 0, 0, 0.1) 50%, transparent 50%, transparent 75%, rgba(0, 0, 0, 0.1) 75%, rgba(0, 0, 0, 0.1));
-  background-image: -ms-linear-gradient(135deg, transparent, transparent 25%, rgba(0, 0, 0, 0.1) 25%, rgba(0, 0, 0, 0.1) 50%, transparent 50%, transparent 75%, rgba(0, 0, 0, 0.1) 75%, rgba(0, 0, 0, 0.1));
-  background-image: -o-linear-gradient(135deg, transparent, transparent 25%, rgba(0, 0, 0, 0.1) 25%, rgba(0, 0, 0, 0.1) 50%, transparent 50%, transparent 75%, rgba(0, 0, 0, 0.1) 75%, rgba(0, 0, 0, 0.1));
   background-image: linear-gradient(135deg, transparent, transparent 25%, rgba(0, 0, 0, 0.1) 25%, rgba(0, 0, 0, 0.1) 50%, transparent 50%, transparent 75%, rgba(0, 0, 0, 0.1) 75%, rgba(0, 0, 0, 0.1));
   background-size: 15px 15px;
   text-align: center;
@@ -37,6 +34,20 @@ html {
   background: -moz-linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0, rgba(220, 220, 220, 0.1) 35%, rgba(40, 40, 40, 0.1) 80%, rgba(0, 0, 0, 0.2) 100%);
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0, rgba(220, 220, 220, 0.1) 35%, rgba(40, 40, 40, 0.1) 80%, rgba(0, 0, 0, 0.2) 100%); }
 
+.arrow {
+  width: 0;
+  height: 0;
+  border-left: 5px solid transparent;
+  border-right: 5px solid transparent;
+  display: inline-block;
+  visibility: hidden; }
+  .arrow.up {
+    border-bottom: 7px solid #b0aeac;
+    visibility: visible; }
+  .arrow.down {
+    border-top: 7px solid #b0aeac;
+    visibility: visible; }
+
 #result-header {
   height: 25px;
   color: #b0aeac;
@@ -44,19 +55,25 @@ html {
   margin-bottom: 1px; }
   #result-header div {
     float: right; }
+    #result-header div p {
+      display: inline-block;
+      cursor: pointer;
+      max-width: 60px; }
   #result-header .col {
     border-left: 1px solid #000000;
     text-align: center;
-    padding: 4px 0px 0px 8px; }
+    padding: 4px 0px 0px 10px; }
   #result-header .result-price {
     padding-right: 16px;
     padding-left: 0;
     text-align: right; }
   #result-header .result-name {
     border: none;
-    padding: 4px 16px;
+    padding-left: 16px;
     float: none;
     text-align: left; }
+  #result-header .result-genre {
+    margin-right: 18px; }
 
 .result-price {
   width: 50px;
@@ -65,11 +82,10 @@ html {
     color: #888888; }
 
 .result-discount, .result-metascore {
-  margin-right: 8px; }
+  margin-right: 5px; }
 
-.result-metascore {
-  font-weight: bold;
-  color: #8bc53f; }
+.result-genre {
+  margin-right: 10px; }
 
 .result-row {
   display: block;
@@ -79,13 +95,6 @@ html {
   position: relative;
   margin-bottom: 1px;
   color: #b0aeac; }
-  .result-row .result-price, .result-row .result-discount, .result-row .result-metascore {
-    float: right;
-    padding: 4px 0px 0px 8px;
-    margin-left: 10px;
-    margin-top: 18px; }
-  .result-row .result-price {
-    margin-left: 1px; }
   .result-row .col {
     text-decoration: none; }
   .result-row.even {
@@ -94,9 +103,32 @@ html {
   .result-row.odd {
     background-color: #1a1a1a;
     border-color: #1a1a1a; }
+  .result-row .result-price, .result-row .result-discount, .result-row .result-metascore, .result-row .result-genre {
+    float: right;
+    padding: 4px 0px 0px 8px;
+    margin-left: 10px;
+    margin-top: 18px; }
+  .result-row .result-genre {
+    min-width: 60px;
+    max-width: 60px; }
+    .result-row .result-genre p {
+      text-align: left;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis; }
+  .result-row .result-discount {
+    margin-right: 12px; }
   .result-row .result-price {
+    margin-left: 1px;
     margin-top: 9px;
     padding-right: 16px; }
+  .result-row .result-metascore {
+    min-width: 16px;
+    font-weight: bold;
+    color: #8bc53f;
+    margin-right: 30px; }
+    .result-row .result-metascore.unavailable {
+      color: #464646; }
   .result-row .result-name {
     margin: 14px 14px 0 153px; }
     .result-row .result-name h4 {
