@@ -8,7 +8,8 @@
     packageIds_discount_detailed = [];
   var XHRs = [],
     CHUNK_SIZE = 200,
-    XHRsinProgress = false;
+    XHRsinProgress = false,
+    retrievedCountryCode = false;
 
   chrome.runtime.onInstalled.addListener(function(details) {
     if (details.reason === "update") {
@@ -95,10 +96,48 @@
           } else {
             console.log(appIds_discount_detailed, appIds_discount_detailed.length);
           }
+          if (!retrievedCountryCode) {
+            retrievedCountryCode = true;
+            parseSteamLocaleCookie();
+          }
         }
       }
     });
   };
+
+  function parseSteamLocaleCookie() {
+    console.info("getSteamLocaleCookie");
+    chrome.cookies.getAll({
+      "domain": "store.steampowered.com"
+    }, function(cookies) {
+      var cc = "";
+      $.each(cookies, function(key, element) {
+        if (element.name && element.name.indexOf("steamCC") === 0) {
+          console.info("getSteamLocaleCookie: " + element.value);
+          cc = element.value;
+          retrievedCountryCode = true;
+        }
+        //WARNING disable for debugging
+        else if (element.name === "fakeCC") {
+          console.info("getSteamLocaleCookie (fake): " + element.value);
+          console.log("Got fake CC...");
+          cc = element.value;
+          retrievedCountryCode = true;
+          return false;
+        } else {
+          retrievedCountryCode = false;
+        }
+      });
+
+      if (retrievedCountryCode) {
+        chrome.storage.local.set({
+          "countryCode": cc
+        }, function() {
+          retrievedCountryCode = true;
+        });
+      }
+    });
+  }
 
   var getPackageDetails = function(packageIds) {
     return $.ajax({
@@ -303,7 +342,10 @@
 
     console.log("XHRsinProgress: " + XHRsinProgress);
     if (!XHRsinProgress) {
-      chrome.storage.local.get(["lastAppListPoll"], function(items) {
+      chrome.storage.local.get(["countryCode", "lastAppListPoll"], function(items) {
+        /*if (items.countryCode) {
+          retrievedCountryCode = true;
+        }*/
         if (items.lastAppListPoll) {
           //Steam update time set to 17:01 UTC
           var storedDate = new Date(items.lastAppListPoll),

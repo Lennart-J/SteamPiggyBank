@@ -1,9 +1,16 @@
 (function() {
   "use strict";
 
-  var appIds_discount = [],
-    appIds_discount_detailed = [];
+  var appIds_discount_detailed = [],
+    steamLocale = "";
 
+  var getSteamLocale = function() {
+    chrome.storage.local.get(["countryCode"], function(items) {
+      if (items.countryCode) {
+        return items.countryCode;
+      }
+    });
+  };
 
   var getDiscountedApps = function() {
     console.log("getDiscountedApps");
@@ -113,11 +120,11 @@
             $("<div>").addClass("col result-price")
             .append(
               $("<p>").append(
-                $("<del>").html((value.price_overview.initial / 100).toFixed(2) + currency)
+                $("<del>").html(formatPrice(value.price_overview.initial, value.price_overview.currency))
               )
             )
             .append(
-              $("<p>").html((value.price_overview.final / 100).toFixed(2) + currency)
+              $("<p>").html(formatPrice(value.price_overview.final, value.price_overview.currency))
             )
           )
           //discount
@@ -179,12 +186,50 @@
     });
   }
 
-  function getCurrency() {
-    chrome.cookies.get({
-      "name" : 
-    }, function(details) {
+  function formatPrice(val, currency) {
+    var locale = parseLocaleFromCurrency(currency);
 
-    });
+    if (locale === "") {
+      return Number((val / 100).toFixed(2)).toLocaleString({
+        style: "currency",
+        currency: currency
+      });
+    } else {
+      return Number((val / 100).toFixed(2)).toLocaleString(locale, {
+        style: "currency",
+        currency: currency
+      });
+    }
+
+  }
+
+  function parseLocaleFromCurrency(currency) {
+    var loc = "";
+
+    //TODO add all currencies
+    switch (currency) {
+      case "GBP":
+        loc = "en-GB";
+        break;
+      case "USD":
+        loc = "en-US";
+        break;
+      case "RUB":
+        loc = "ru-MOW";
+        break;
+      case "BRL":
+        loc = "br-DF";
+        break;
+      case "EUR":
+        loc = "de-DE";
+        break;
+      case "YEN":
+        loc = "ja-JP";
+        break;
+      default:
+        return navigator.language;
+    }
+    return loc;
   }
 
   function deleteElements() {
@@ -281,6 +326,8 @@
   }
   //DOM Manipulation
   $(document).ready(function() {
+
+    steamLocale = getSteamLocale();
 
     getDiscountedApps();
     attachSortClickHandler();
