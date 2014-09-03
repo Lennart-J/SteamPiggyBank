@@ -23,6 +23,6 @@
   },
   "author": "Lennart Jarms, Janina Huether",
   "content_security_policy": "script-src 'self'; object-src 'self'",
-  "permissions": ["storage", "http://store.steampowered.com/*", "http://api.steampowered.com/*"],
+  "permissions": ["storage", "cookies", "http://store.steampowered.com/*", "http://api.steampowered.com/*"],
   "web_accessible_resources": ["images/*.png"]
 }
