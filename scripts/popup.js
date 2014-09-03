@@ -178,63 +178,50 @@
         console.error("Error in createElements: ", ex);
         console.error("At " + index + "with " + value);
       }
-
-      //Icon badge count
-      /*chrome.browserAction.setBadgeText({
-      text: index.toString()
-    });*/
     });
   }
 
-  function formatPrice(val, currency) {
-    var locale = parseLocaleFromCurrency(currency);
+  var currencyLocaleMap = {
+    "GBP": "en-GB",
+    "USD": "en-US",
+    "EUR": "de-DE",
+    "RUB": "ru-AD",
+    "BRL": "br-DF",
+    "JPY": "ja-JP",
+    "IDR": "en",
+    "MYR": "en",
+    "PHP": "ph",
+    "SGD": "en",
+    "THB": "th",
+    "AUD": "en-AU",
+    "NZD": "en-NZ",
+    "CAD": "en-CA",
+    "NOK": "no",
+    "KRW": "en",
+    "TRY": "en",
+    "MXN": "en"
+  };
 
-    if (locale === "") {
-      return Number((val / 100).toFixed(2)).toLocaleString({
-        style: "currency",
-        currency: currency
-      });
-    } else {
+  function formatPrice(val, currency) {
+    var locale = currencyLocaleMap[currency];
+
+    if (locale !== "") {
       return Number((val / 100).toFixed(2)).toLocaleString(locale, {
         style: "currency",
         currency: currency
       });
+    } else {
+      return Number((val / 100).toFixed(2)).toLocaleString({
+        style: "currency",
+        currency: currency
+      });
     }
 
   }
 
-  function parseLocaleFromCurrency(currency) {
-    var loc = "";
-
-    //TODO add all currencies
-    switch (currency) {
-      case "GBP":
-        loc = "en-GB";
-        break;
-      case "USD":
-        loc = "en-US";
-        break;
-      case "RUB":
-        loc = "ru-MOW";
-        break;
-      case "BRL":
-        loc = "br-DF";
-        break;
-      case "EUR":
-        loc = "de-DE";
-        break;
-      case "YEN":
-        loc = "ja-JP";
-        break;
-      default:
-        return navigator.language;
-    }
-    return loc;
-  }
 
   function deleteElements() {
     console.log("deleteElements");
-
     $("#result-content a.result-row").remove();
   }
 
