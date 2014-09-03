@@ -179,6 +179,14 @@
     });
   }
 
+  function getCurrency() {
+    chrome.cookies.get({
+      "name" : 
+    }, function(details) {
+
+    });
+  }
+
   function deleteElements() {
     console.log("deleteElements");
 
