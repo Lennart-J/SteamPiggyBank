@@ -2,11 +2,16 @@
   "use strict";
 
   var appIds = [],
+    appIdsLength = 0,
     appIds_discount = [],
     appIds_discount_detailed = [],
     packageIds_discount = [],
     packageIds_discount_detailed = [];
-  var XHRs = [],
+  var XHRs = {
+      appFiltered: [],
+      appDetails: [],
+      packageDetails: []
+    },
     CHUNK_SIZE = 200,
     XHRsinProgress = false,
     retrievedCountryCode = false;
@@ -14,11 +19,11 @@
   chrome.runtime.onInstalled.addListener(function(details) {
     if (details.reason === "update") {
       if (!XHRsinProgress) {
-        XHRsinProgress = true;
+        /*XHRsinProgress = true;
         displayProgressInBadge_Start();
         //performing requests
         console.info("Extension updated.");
-        getAllApps(processAppDetails);
+        getAllApps(processAppDetails);*/
       }
     }
   });
@@ -45,11 +50,14 @@
         });
         //console.log(response.applist.apps);
         console.log(appIds);
+        appIds.reverse();
+        appIdsLength = appIds.length;
         if (callback !== "undefined") callback();
       });
   };
 
   var getAppDetails = function(appIds, urlParams) {
+    if (appIds === 0) return;
     return $.ajax({
       url: "http://store.steampowered.com/api/appdetails/?appids=" + appIds.toString() + urlParams,
       type: "GET",
@@ -140,6 +148,7 @@
   }
 
   var getPackageDetails = function(packageIds) {
+    if (packageIds === 0) return;
     return $.ajax({
       url: "http://store.steampowered.com/api/packagedetails/?packageids=" + packageIds.toString(),
       type: "GET",
@@ -165,23 +174,10 @@
   };
 
   var processAppDetails = function() {
-    var chunkCount = Math.floor(appIds.length / CHUNK_SIZE),
-      appIds_chunk = 0;
+    makeBadgeRequest();
 
-    var benchmark_begin,
-      benchmark_end;
-
-    benchmark_begin = Date.now();
-
-    for (var i = 0; i <= chunkCount; i++) {
-      appIds_chunk = makeChunk(appIds);
-      XHRs.push(getAppDetails(appIds_chunk, "&filters=price_overview,packages"));
-    }
-
-    var defer = $.when.apply($, XHRs);
+    var defer = $.when.apply($, XHRs.appFiltered);
     defer.done(function() {
-      benchmark_end = Date.now();
-      console.log((benchmark_end - benchmark_begin) / 1000);
       //ready to continue :)
       var todayUTC = new Date(new Date().toUTCString().substr(0, 25));
       if (todayUTC.getHours() < 17) {
@@ -196,20 +192,35 @@
         chrome.storage.local.set({
           //Remember last poll to steam api
           "lastAppListPoll": todayUTC.toString(),
-          "discounted_apps": appIds_discount,
-          "discounted_packages": packageIds_discount
+          // "discounted_apps": appIds_discount,
+          // "discounted_packages": packageIds_discount
         }, function() {
           console.info("commited in storage");
           //empty Ajax array
-          XHRs = [];
-          chrome.storage.local.getBytesInUse(["discounted_apps"], function(res) {
+          XHRs.appFiltered = [];
+          /*chrome.storage.local.getBytesInUse(["discounted_apps"], function(res) {
             console.log(res);
-          });
-          processDiscountedAppDetails();
+          });*/
+          processDiscountedAppDetails(appIds_discount);
+          if(appIds.length > 0) {
+            processAppDetails();
+          }
         });
       }, 1000);
     });
   };
+
+  function makeBadgeRequest() {
+    var appIds_chunk = 0,
+      p = 20*(appIds.length/appIdsLength).toFixed(2),
+      chunkCount = Math.floor(appIds.length / CHUNK_SIZE);
+
+    chunkCount = p > 5/20 ? chunkCount / p : chunkCount;
+    for (var i = 0; i <= chunkCount; i++) {
+      appIds_chunk = makeChunk(appIds);
+      XHRs.appFiltered.push(getAppDetails(appIds_chunk, "&filters=price_overview,packages"));
+    }
+  }
 
   function makeChunk(sourceArray) {
     return sourceArray.splice(0, CHUNK_SIZE);
@@ -221,7 +232,7 @@
     $.each(sourceArray, function(sourceIndex, sourceElement) {
       $.each(uniques, function(uniquesIndex, uniquesElement) {
         if (sourceElement === uniquesElement) {
-          console.log("Found duplicate app/package ", uniquesElement, sourceElement);
+          // console.log("Found duplicate app/package ", uniquesElement, sourceElement);
           uniques.splice(uniquesIndex, 1);
           return false;
         }
@@ -238,7 +249,7 @@
     $.each(sourceArray, function(sourceIndex, sourceElement) {
       $.each(uniques, function(uniquesIndex, uniquesElement) {
         if (sourceElement[id].toString() === uniquesElement[id].toString()) {
-          console.log("Found duplicate " + id, uniquesElement, sourceElement);
+          // console.log("Found duplicate " + id, uniquesElement, sourceElement);
           uniques.splice(uniquesIndex, 1);
           return false;
         }
@@ -249,44 +260,60 @@
     return uniques;
   }
 
-  var processDiscountedAppDetails = function() {
+  var processDiscountedAppDetails = function(discountedAppIds) {
     //CHUNK_SIZE set lower to ensure success
-    CHUNK_SIZE = 50;
-    var appsChunkCount = Math.floor(appIds_discount.length / CHUNK_SIZE),
+    var CHUNK_SIZE = 50;
+    var appsChunkCount = Math.floor(discountedAppIds.length / CHUNK_SIZE),
       packagesChunkCount = Math.floor(packageIds_discount.length / CHUNK_SIZE),
       appIds_chunk = 0,
       packageIds_chunk = 0;
 
     for (var i = 0; i <= appsChunkCount; i++) {
-      appIds_chunk = makeChunk(appIds_discount);
-      XHRs.push(getAppDetails(appIds_chunk, ""));
+      appIds_chunk = makeChunk(discountedAppIds);
+      XHRs.appDetails.push(getAppDetails(appIds_chunk, ""));
     }
     for (i = 0; i <= packagesChunkCount; i++) {
       packageIds_chunk = makeChunk(packageIds_discount);
-      XHRs.push(getPackageDetails(packageIds_chunk));
+      XHRs.packageDetails.push(getPackageDetails(packageIds_chunk));
     }
     //XHRs.push(getAppDetails(appIds_discount, "&cc=DE&l=english"));
-    var defer = $.when.apply($, XHRs);
+    var defer = $.when.apply($, XHRs.appDetails);
     defer.done(function() {
       //graceperiod so storage sets 
       setTimeout(function() {
-        appIds_discount_detailed = removeDuplicatesById(appIds_discount_detailed, "appid");
-        packageIds_discount_detailed = removeDuplicatesById(packageIds_discount_detailed, "packageid");
+        var appIds_total = [],
+          packageIds_total = [];
+
+        //appIds_discount_detailed = removeDuplicatesById(appIds_discount_detailed, "appid");
+        //packageIds_discount_detailed = removeDuplicatesById(packageIds_discount_detailed, "packageid");
         console.log("appIds_discount_detailed Length: " + appIds_discount_detailed.length);
         console.log("packageIds_discount_detailed Length: " + packageIds_discount_detailed.length);
-        chrome.storage.local.set({
-          "discounted_apps_detailed": appIds_discount_detailed,
-          "discounted_packages_detailed": packageIds_discount_detailed
-        }, function() {
-          console.info("commited in storage");
-          chrome.storage.local.getBytesInUse(["discounted_apps_detailed", "discounted_packages_detailed"], function(res) {
-            console.log("Bytes in Use discounted_apps/packages_detailed " + res);
+        chrome.storage.local.get(["discounted_apps_detailed", "discounted_packages_detailed"], function(items) {
+          if (items.discounted_apps_detailed) {
+            appIds_total = removeDuplicatesById(appIds_discount_detailed.concat(items.discounted_apps_detailed), "appid");
+          } else {
+            appIds_total = removeDuplicatesById(appIds_discount_detailed, "appid");
+          }
+
+          if (items.discounted_packages_detailed) {
+            packageIds_total = removeDuplicatesById(packageIds_discount_detailed.concat(items.discounted_packages_detailed), "packageid");
+          } else {
+            packageIds_total = removeDuplicatesById(packageIds_discount_detailed, "packageid");
+          }
+          chrome.storage.local.set({
+            "discounted_apps_detailed": appIds_total,
+            "discounted_packages_detailed": packageIds_total
+          }, function() {
+            console.info("commited in storage");
+            chrome.storage.local.getBytesInUse(["discounted_apps_detailed", "discounted_packages_detailed"], function(res) {
+              console.log("Bytes in Use discounted_apps/packages_detailed " + res);
+            });
+            //empty Ajax array
+            XHRs.appDetails = [];
+            //stop badge animation
+            XHRsinProgress = false;
+            displayProgressInBadge_End();
           });
-          //empty Ajax array
-          XHRs = [];
-          //stop badge animation
-          XHRsinProgress = false;
-          displayProgressInBadge_End();
         });
       }, 1000);
     });

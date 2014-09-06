@@ -12,7 +12,7 @@
     });
   };
 
-  var getDiscountedApps = function() {
+  var getDiscountedApps = function(appIds) {
     console.log("getDiscountedApps");
     chrome.storage.local.get(["discounted_apps_detailed"], function(items) {
       if (items.discounted_apps_detailed) {
@@ -24,7 +24,7 @@
         });
         console.log(appIds_discount_detailed);
 
-        createElements(appIds_discount_detailed);
+        createElements(appIds || appIds_discount_detailed);
 
         //dynamically display title if the name is cut off with an ellipsis
         $(".col.result-name h4").on("mouseenter", function() {
@@ -43,14 +43,56 @@
 
           if (this.offsetWidth < this.scrollWidth) $this.attr("title", $this.text());
         });
-      } else {
+      }
+      /*else {
         // TODO is there a better way?
         // try again after 10s, recursive
         console.warn("discounted_apps_detailed not in storage");
         setTimeout(getDiscountedApps, 10000);
-      }
+      }*/
     });
   };
+
+  chrome.storage.onChanged.addListener(function(changes) {
+    console.info("Storage changed ", changes);
+    var newAppIds = [],
+      outdatedApps = [];
+    //$.inArray("",changes)
+    if (changes.discounted_apps_detailed) {
+      if (changes.discounted_apps_detailed.newValue && changes.discounted_apps_detailed.oldValue) {
+        //ids that are in old value but NOT in new value
+        outdatedApps = changes.discounted_apps_detailed.oldValue;
+        newAppIds = changes.discounted_apps_detailed.newValue;
+
+        outdatedApps = outdatedApps.filter(function(val) {
+          var bool = true;
+          $.each(changes.discounted_apps_detailed.newValue, function(k, v) {
+            if (val.appid === v.appid) {
+              bool = false;
+            }
+          });
+          return bool;
+        });
+        newAppIds = newAppIds.filter(function(val) {
+          var bool = true;
+          $.each(changes.discounted_apps_detailed.oldValue, function(k, v) {
+            if (val.appid === v.appid) {
+              bool = false;
+            }
+          });
+          return bool;
+        });
+        console.log("outdatedApps: " + outdatedApps);
+        console.log("newAppIds: " + outdatedApps);
+        if (outdatedApps.length !== 0) {
+          deleteElementsByIds(outdatedApps);
+        } 
+        getDiscountedApps(newAppIds);
+      } else if (changes.discounted_apps_detailed.newValue) {
+        getDiscountedApps();
+      }
+    }
+  });
 
   function sortElements(sourceArray, args) {
     var parentObj = args.parentObj,
@@ -81,8 +123,7 @@
     var steamStoreAppUrl = "http://store.steampowered.com/app/",
       steamSmallCapsuleBaseUrl = "http://cdn.akamai.steamstatic.com/steam/apps/",
       steamSmallCapsuleAffix = "/capsule_sm_120.jpg",
-      $resultContent = $("#result-content"),
-      currency = "&euro;";
+      $resultContent = $("#result-content");
 
     console.log("createElements");
 
@@ -225,10 +266,9 @@
     $("#result-content a.result-row").remove();
   }
 
-  chrome.storage.onChanged.addListener(function(changes, namespace) {
-    console.info("Storage changed ", changes);
-    //$.inArray("",changes)
-  });
+  function deleteElementsByIds(appids) {
+    //TODO
+  }
 
   chrome.runtime.sendMessage("hello");
 
