@@ -19,11 +19,11 @@
   chrome.runtime.onInstalled.addListener(function(details) {
     if (details.reason === "update") {
       if (!XHRsinProgress) {
-        /*XHRsinProgress = true;
-        displayProgressInBadge_Start();
+        XHRsinProgress = true;
+        //displayProgressInBadge_Start();
         //performing requests
         console.info("Extension updated.");
-        getAllApps(processAppDetails);*/
+        getAllApps(processAppDetails);
       }
     }
   });
@@ -57,7 +57,7 @@
   };
 
   var getAppDetails = function(appIds, urlParams) {
-    if (appIds === 0) return;
+    if (appIds === "") return;
     return $.ajax({
       url: "http://store.steampowered.com/api/appdetails/?appids=" + appIds.toString() + urlParams,
       type: "GET",
@@ -148,7 +148,7 @@
   }
 
   var getPackageDetails = function(packageIds) {
-    if (packageIds === 0) return;
+    if (packageIds === "") return;
     return $.ajax({
       url: "http://store.steampowered.com/api/packagedetails/?packageids=" + packageIds.toString(),
       type: "GET",
@@ -213,12 +213,23 @@
   function makeBadgeRequest() {
     var appIds_chunk = 0,
       p = 20*(appIds.length/appIdsLength).toFixed(2),
-      chunkCount = Math.floor(appIds.length / CHUNK_SIZE);
+      chunkCount = Math.floor(appIdsLength / CHUNK_SIZE);
 
+    if (p > 5/20) {
+        chunkCount /= p;
+        chrome.runtime.sendMessage({status: 1/p}); 
+    }
+    else {
+        chrome.runtime.sendMessage({status: 1}); 
+    }
     chunkCount = p > 5/20 ? chunkCount / p : chunkCount;
+    console.warn(p,chunkCount);
+    chrome.runtime.sendMessage({status:});
     for (var i = 0; i <= chunkCount; i++) {
       appIds_chunk = makeChunk(appIds);
-      XHRs.appFiltered.push(getAppDetails(appIds_chunk, "&filters=price_overview,packages"));
+      if (appIds_chunk.length > 0) {
+        XHRs.appFiltered.push(getAppDetails(appIds_chunk, "&filters=price_overview,packages"));
+      }
     }
   }
 
@@ -312,7 +323,7 @@
             XHRs.appDetails = [];
             //stop badge animation
             XHRsinProgress = false;
-            displayProgressInBadge_End();
+            //displayProgressInBadge_End();
           });
         });
       }, 1000);
@@ -388,7 +399,7 @@
         dayDiff = 5;*/
           if (dayDiff > 0) {
             XHRsinProgress = true;
-            displayProgressInBadge_Start();
+            //displayProgressInBadge_Start();
 
             getAllApps(processAppDetails);
           } else {
@@ -396,7 +407,7 @@
           }
         } else {
           XHRsinProgress = true;
-          displayProgressInBadge_Start();
+          //displayProgressInBadge_Start();
           //no date in storage found
           console.info("No lastAppListPoll parameter found in storage.");
           getAllApps(processAppDetails);
