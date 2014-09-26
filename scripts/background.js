@@ -5,13 +5,16 @@ var appIds = [],
   packageIds_discount_detailed = [];
 var XHRs = [],
   CHUNK_SIZE = 200,
-  XHRsinProgress = false;
+  XHRsinProgress = false,
+  XHRsCount = 0,
+  XHRsCountDone = 0;
 
 chrome.runtime.onInstalled.addListener(function(details) {
   if (details.reason === "update") {
     if (!XHRsinProgress) {
       XHRsinProgress = true;
       displayProgressInBadge_Start();
+     // loadCanvas();
       //performing requests
       console.info("Extension updated.");
       getAllApps(processAppDetails);
@@ -46,12 +49,16 @@ var getAllApps = function(callback) {
 };
 
 var getAppDetails = function(appIds, urlParams) {
+  XHRsCount++;
   return $.ajax({
     url     : "http://store.steampowered.com/api/appdetails/?appids=" + appIds.toString() + urlParams,
     type    : "GET",
     accepts : "application/json",
     statusCode: {
       200: function(data, textStatus, jqXHR) {
+        XHRsCountDone++;
+        chrome.runtime.sendMessage({"status": XHRsCountDone/XHRsCount});
+
         $.each(data, function(key, value) {
           if (value.success === true && !$.isArray(value.data) && value.data.package_groups.length > 0) {
             if (urlParams.indexOf("filters=price_overview") > -1) {
@@ -253,6 +260,7 @@ var processDiscountedAppDetails = function() {
         //stop badge animation
         XHRsinProgress = false;
         displayProgressInBadge_End();
+       // canvas.visibility = false;
       });
     }, 1000);
   });
@@ -302,6 +310,13 @@ function displayProgressInBadge_End() {
     });
   }, 2000);
 }
+
+// Kreisladebalken
+
+
+
+
+
 //Immediate initialization function called on browser start, i.e. when bg script is initialized
 (function() {
   console.info('init');
@@ -325,6 +340,7 @@ function displayProgressInBadge_End() {
         if (dayDiff > 0) {
           XHRsinProgress = true;
           displayProgressInBadge_Start();
+         // loadCanvas();
 
           getAllApps(processAppDetails);
         } else {
@@ -333,6 +349,7 @@ function displayProgressInBadge_End() {
       } else {
         XHRsinProgress = true;
         displayProgressInBadge_Start();
+       // loadCanvas();
         //no date in storage found
         console.info("No lastAppListPoll parameter found in storage.");
         getAllApps(processAppDetails);

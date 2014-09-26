@@ -17,12 +17,49 @@ html {
   background-image: -webkit-linear-gradient(135deg, transparent, transparent 25%, rgba(0, 0, 0, 0.05) 25%, rgba(0, 0, 0, 0.05) 50%, transparent 50%, transparent 75%, rgba(0, 0, 0, 0.05) 75%, rgba(0, 0, 0, 0.05));
   background-image: linear-gradient(135deg, transparent, transparent 25%, rgba(0, 0, 0, 0.1) 25%, rgba(0, 0, 0, 0.1) 50%, transparent 50%, transparent 75%, rgba(0, 0, 0, 0.1) 75%, rgba(0, 0, 0, 0.1));
   background-size: 15px 15px;
-  text-align: center;
   position: relative;
   border-bottom: 1px solid black;
   padding: 10px; }
-  #header h2 {
-    font-weight: lighter; }
+
+h2 {
+  position: relative;
+  text-align: center;
+  font-weight: lighter; }
+
+#header img {
+  position: absolute;
+  left: 372;
+  top: 7; }
+
+img.stay {
+  visibility: visible; }
+
+img.mid {
+  visibility: hidden; }
+
+img.jump {
+  visibility: hidden; }
+
+img.mid2 {
+  visibility: hidden; }
+
+canvas {
+  position: absolute;
+  width: 40;
+  height: 40;
+  left: 367;
+  top: 2; }
+
+.circle {
+  background-color: black;
+  max-width: 40;
+  max-height: 40;
+  min-height: 40;
+  min-width: 40;
+  border-radius: 20;
+  position: absolute;
+  left: 367;
+  top: 2; }
 
 .overlay {
   position: absolute;
@@ -47,6 +84,47 @@ html {
   .arrow.down {
     border-top: 7px solid #b0aeac;
     visibility: visible; }
+
+.tabs {
+  width: 100%;
+  display: inline-block;
+  bckground: #b0aeac; }
+
+.tab-links:after {
+  display: block;
+  clear: both;
+  content: ''; }
+
+.tab-links li {
+  margin: 0px 5px;
+  float: left;
+  list-style: none; }
+
+.tab-links a {
+  padding: 9px 15px;
+  display: inline-block;
+  background: #b0aeac;
+  color: #262626;
+  transition: all linear 0.15s;
+  text-decoration: none; }
+
+.tab-links a:hover {
+  font-weight: bold;
+  color: #262626;
+  background: #b0aeac;
+  text-decoration: none; }
+
+li.active a, li.active a:hover {
+  font-weight: bold;
+  color: #b0aeac;
+  background: #262626;
+  text-decoration: none; }
+
+.tab {
+  display: none; }
+
+.tab.active {
+  display: block; }
 
 #result-header {
   height: 25px;

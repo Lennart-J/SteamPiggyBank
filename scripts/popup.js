@@ -1,5 +1,10 @@
 var appIds_discount = [],
   appIds_discount_detailed = [];
+var canvasLoaded = 0,
+  interval,
+  endValue=false;
+  animateValue=false;
+
 
 
 var getDiscountedApps = function() {
@@ -76,6 +81,8 @@ function createElements(sourceArray) {
 
   console.log('createElements');
 
+
+  //if ($('#appTab')
   $.each(sourceArray, function(index, value) {
     var isEven = false,
       aClass = '',
@@ -189,6 +196,8 @@ chrome.storage.onChanged.addListener(function(changes, namespace) {
 
 chrome.runtime.sendMessage("hello");
 
+
+
 //TODO show loading state
 function attachSortClickHandler() {
   var $priceCol = $('#result-header .col.result-price p'),
@@ -268,9 +277,84 @@ function colClickHandler(columnReference, sortCriteria) {
 
   createElements(appIds_discount_detailed);
 }
+
+function tabActionHandler() {
+  jQuery('.tabs .tab-links a').on('click', function(e) {
+    var currentAttrValue = jQuery(this).attr('href');
+
+    // Show/Hide Tabs
+    jQuery('.tabs ' + currentAttrValue).show().siblings().hide();
+
+    // Change current tab to active
+    jQuery(this).parent('li').addClass('active').siblings().removeClass('active');
+
+    e.preventDefault();
+  });
+}
+
+function loadCanvas(progress) {
+  var canvas = document.getElementById("canvas"),
+    context = canvas.getContext("2d"),
+    cx = 20, cy = 20, r = 18, lw = 4;
+
+  console.log("Canvas");
+  context.clearRect(0, 0, 40, 40);
+  context.beginPath();
+  context.arc(cx, cy, r, -(Math.PI / 180) * 90 - (Math.PI / 180) * progress * 3.6, -(Math.PI / 180) * 90, false);
+  context.lineWidth = lw;
+  context.strokeStyle = '#B0AEAC';
+  context.stroke();
+}
+
+function steamPig(animate,end){
+  if(animate===true){
+    if (document.getElementById("stay").style.visibility=="visible") {
+      document.getElementById("stay").style.visibility="hidden";
+      document.getElementById("mid").style.visibility="visible";
+    } else if (document.getElementById("mid").style.visibility=="visible") {
+      document.getElementById("mid").style.visibility="hidden";
+      document.getElementById("jump").style.visibility="visible";
+    } else if (document.getElementById("jump").style.visibility=="visible") {
+      document.getElementById("jump").style.visibility="hidden";
+      document.getElementById("mid2").style.visibility="visible";
+    } else if (document.getElementById("mid2").style.visibility=="visible") {
+      document.getElementById("mid2").style.visibility="hidden";
+      document.getElementById("stay").style.visibility="visible";   
+    }
+  } else {
+    document.getElementById("stay").style.visibility="visible";
+    document.getElementById("mid").style.visibility="hidden";
+    document.getElementById("mid2").style.visibility="hidden";
+    document.getElementById("jump").style.visibility="hidden";
+    if (end === true){
+      clearInterval(interval);
+      valueEnd=false;
+    }
+  }
+}
+
 //DOM Manipulation
 $(document).ready(function() {
-
+  chrome.runtime.onMessage.addListener(function(msg) {
+    console.log(Math.round(msg.status*100));
+    if (msg.status) {
+      if (msg.status < 1) {
+        loadCanvas(Math.round(msg.status*100));
+        animateValue=true;
+      } else if (msg.status == 1){
+        loadCanvas(100);
+        loadCanvas(0);
+        animateValue=false;
+        endValue=true;
+      } else {
+          animateValue=false;
+          endValue=true;
+          }
+    }
+  });
+  interval = setInterval(function(){steamPig(animateValue,endValue);
+    }, 150);
   getDiscountedApps();
   attachSortClickHandler();
+  tabActionHandler();
 });

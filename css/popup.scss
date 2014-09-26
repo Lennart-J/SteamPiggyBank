@@ -11,13 +11,14 @@ html {
 	font-family: $font-family;
 	font-size: 13px;
 	min-width: 420px;
-	max-width:420px;
+	max-width: 420px;
 	min-height: 500px;
-	max-height:500px;
+	max-height: 500px;
 }
 
+
 #header {
-	 background-color: $background-column;
+	background-color: $background-column;
     background-image: -webkit-linear-gradient(135deg, transparent,
                       transparent 25%, hsla(0,0%,0%,.05) 25%,
                       hsla(0,0%,0%,.05) 50%, transparent 50%,
@@ -29,14 +30,60 @@ html {
                       transparent 75%, hsla(0,0%,0%,.1) 75%,
                       hsla(0,0%,0%,.1));
     background-size: 15px 15px;
-	text-align:center;
-	position:relative;
+	position: relative;
 	border-bottom: 1px solid black;
-	padding:10px;
-	h2 {
-		font-weight: lighter;
-	}
+	padding: 10px;
 }
+
+	h2 {
+		position: relative;
+		text-align: center;
+		font-weight: lighter;
+	}	
+	
+	#header img {
+	 position: absolute;
+	 	left: 372;
+	 	top: 7;
+	}
+
+	img.stay {
+		visibility: visible;
+	}
+
+	img.mid{
+		visibility: hidden;
+	}
+
+	img.jump {
+		visibility: hidden;
+	}
+
+	img.mid2{
+		visibility: hidden;
+	}
+
+	canvas {
+		position: absolute;
+		width: 40;
+		height: 40;
+		left: 367;
+		top: 2;
+		//z-index: 6;
+	}
+
+
+.circle {
+		background-color: black;
+		max-width: 40;
+		max-height: 40;
+		min-height: 40;
+		min-width: 40;
+   		border-radius: 20;
+   		position: absolute;
+   		left: 367;
+   		top: 2;
+	}
 
 .overlay {
 	position:absolute;
@@ -67,7 +114,54 @@ html {
 	}
 }
 
+.tabs {
+    width:100%;
+    display:inline-block;
+    bckground: $textcolor-columns;
+}
 
+.tab-links:after {
+    display:block;
+    clear:both;
+    content:'';
+}
+ 
+.tab-links li {
+    margin:0px 5px;
+    float:left;
+    list-style:none;
+}
+ 
+.tab-links a {
+    padding:9px 15px;
+    display:inline-block;
+    background:$textcolor-columns;
+    color: $background-column;
+    transition:all linear 0.15s;
+    text-decoration:none;
+}
+ 
+.tab-links a:hover {
+    font-weight: bold;
+	color: $background-column;
+    background: $textcolor-columns;
+    text-decoration:none;
+}
+ 
+li.active a, li.active a:hover {
+    font-weight: bold;
+    color:$textcolor-columns;
+    background: $background-column;
+    text-decoration:none;
+}
+ 
+.tab {
+    display:none;
+}
+ 
+.tab.active {
+    display:block;
+}
 
 #result-header {
 	height: 25px;
