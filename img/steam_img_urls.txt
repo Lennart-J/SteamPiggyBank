@@ -1,5 +1,0 @@
-Small image capsule
-http://cdn.akamai.steamstatic.com/steam/apps/230230/capsule_sm_120.jpg
-
-icons
-http://store.akamai.steamstatic.com/public/images/ico/ico_singlePlayer.png
