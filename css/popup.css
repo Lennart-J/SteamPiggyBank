@@ -48,9 +48,26 @@ html {
     border-top: 7px solid #b0aeac;
     visibility: visible; }
 
+.popup {
+  z-index: 200;
+  position: absolute;
+  display: none;
+  box-shadow: 0 0 12px #000000; }
+
+.popup-body {
+  width: 100px;
+  max-width: 100px;
+  padding: 6px 0px;
+  background: #262626; }
+  .popup-body p {
+    padding: 3px 6px;
+    display: block !important;
+    text-align: left;
+    max-width: none !important; }
+
 #result-header {
   height: 25px;
-  color: #b0aeac;
+  color: #B0AEAC;
   background-color: #262626;
   margin-bottom: 1px; }
   #result-header div {
@@ -125,7 +142,7 @@ html {
   .result-row .result-metascore {
     min-width: 16px;
     font-weight: bold;
-    color: #8bc53f;
+    color: #8BC53F;
     margin-right: 30px; }
     .result-row .result-metascore.unavailable {
       color: #464646; }
@@ -145,3 +162,5 @@ html {
   .result-row:hover {
     border: 1px solid #8bb9e0;
     text-decoration: none; }
+
+/*# sourceMappingURL=popup.css.map */

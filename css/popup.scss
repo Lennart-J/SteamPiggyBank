@@ -67,7 +67,25 @@ html {
 	}
 }
 
-
+.popup {
+	
+	z-index: 200;
+	position:absolute;
+	display:none;
+	box-shadow: 0 0 12px #000000;
+}
+.popup-body {
+	width:100px;
+	max-width: 100px;
+	padding: 6px 0px;
+	background: $background-column;
+	p {
+		padding: 3px 6px;
+		display: block !important;
+		text-align: left;
+		max-width: none !important;
+	}
+}
 
 #result-header {
 	height: 25px;

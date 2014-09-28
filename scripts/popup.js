@@ -310,7 +310,8 @@
       var sortCriteria = {
         parentObj: "genres"
       };
-      colClickHandler($(this), sortCriteria);
+      //colClickHandler($(this), sortCriteria);
+      $(".popup").css("display", "block");
     });
 
     $nameCol.on("click", function() {
