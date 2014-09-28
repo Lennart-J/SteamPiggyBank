@@ -17,12 +17,60 @@ html {
   background-image: -webkit-linear-gradient(135deg, transparent, transparent 25%, rgba(0, 0, 0, 0.05) 25%, rgba(0, 0, 0, 0.05) 50%, transparent 50%, transparent 75%, rgba(0, 0, 0, 0.05) 75%, rgba(0, 0, 0, 0.05));
   background-image: linear-gradient(135deg, transparent, transparent 25%, rgba(0, 0, 0, 0.1) 25%, rgba(0, 0, 0, 0.1) 50%, transparent 50%, transparent 75%, rgba(0, 0, 0, 0.1) 75%, rgba(0, 0, 0, 0.1));
   background-size: 15px 15px;
-  text-align: center;
   position: relative;
   border-bottom: 1px solid black;
   padding: 10px; }
-  #header h2 {
-    font-weight: lighter; }
+
+h2 {
+  position: relative;
+  text-align: center;
+  font-weight: lighter; }
+
+#header img {
+  position: absolute;
+  left: 372;
+  top: 7; }
+
+#stay {
+  visibility: visible; }
+
+#mid {
+  visibility: hidden; }
+
+#jump {
+  visibility: hidden; }
+
+#mid2 {
+  visibility: hidden; }
+
+canvas {
+  position: absolute;
+  width: 40;
+  height: 40;
+  left: 367;
+  top: 2; }
+
+.circle {
+  background-color: black;
+  max-width: 40;
+  max-height: 40;
+  min-height: 40;
+  min-width: 40;
+  border-radius: 20;
+  position: absolute;
+  left: 367;
+  top: 2; }
+
+.circle-overlay {
+  max-width: 40;
+  max-height: 40;
+  min-height: 40;
+  min-width: 40;
+  border-radius: 20;
+  position: absolute;
+  left: 367;
+  top: 2;
+  background: linear-gradient(to bottom, transparent 5%, rgba(102, 192, 244, 0.2) 95%); }
 
 .overlay {
   position: absolute;
@@ -64,6 +112,47 @@ html {
     display: block !important;
     text-align: left;
     max-width: none !important; }
+
+.tabs {
+  width: 100%;
+  display: inline-block;
+  background: #B0AEAC; }
+
+.tab-links:after {
+  display: block;
+  clear: both;
+  content: ''; }
+
+.tab-links li {
+  margin: 0px 5px;
+  float: left;
+  list-style: none; }
+
+.tab-links a {
+  padding: 9px 15px;
+  display: inline-block;
+  background: #B0AEAC;
+  color: #262626;
+  transition: all linear 0.15s;
+  text-decoration: none; }
+
+.tab-links a:hover {
+  font-weight: bold;
+  color: #262626;
+  background: #B0AEAC;
+  text-decoration: none; }
+
+li.active a, li.active a:hover {
+  font-weight: bold;
+  color: #B0AEAC;
+  background: #262626;
+  text-decoration: none; }
+
+.tab {
+  display: none; }
+
+.tab.active {
+  display: block; }
 
 #result-header {
   height: 25px;

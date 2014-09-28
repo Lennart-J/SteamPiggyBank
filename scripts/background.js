@@ -38,7 +38,9 @@
 
   var getAllApps = function(callback) {
     console.info("Performing app requests.");
-
+    chrome.storage.local.set({
+      "status": 0
+    });
     $.ajax({
       url: "http://api.steampowered.com/ISteamApps/GetAppList/v2",
       type: "GET",
@@ -103,10 +105,6 @@
             console.log(appIds_discount, appIds_discount.length);
           } else {
             console.log(appIds_discount_detailed, appIds_discount_detailed.length);
-          }
-          if (!retrievedCountryCode) {
-            retrievedCountryCode = true;
-            parseSteamLocaleCookie();
           }
         }
       }
@@ -202,7 +200,7 @@
             console.log(res);
           });*/
           processDiscountedAppDetails(appIds_discount);
-          if(appIds.length > 0) {
+          if (appIds.length > 0) {
             processAppDetails();
           }
         });
@@ -212,19 +210,12 @@
 
   function makeBadgeRequest() {
     var appIds_chunk = 0,
-      p = 20*(appIds.length/appIdsLength).toFixed(2),
+      p = ((appIdsLength - appIds.length) + 1) / appIdsLength,
       chunkCount = Math.floor(appIdsLength / CHUNK_SIZE);
 
-    if (p > 5/20) {
-        chunkCount /= p;
-        chrome.runtime.sendMessage({status: 1/p}); 
-    }
-    else {
-        chrome.runtime.sendMessage({status: 1}); 
-    }
-    chunkCount = p > 5/20 ? chunkCount / p : chunkCount;
-    console.warn(p,chunkCount);
-    chrome.runtime.sendMessage({status:});
+    chunkCount = chunkCount * p;
+    console.warn("appIds.length: " + appIds.length, "appIdsTotalLength: " + appIdsLength);
+    console.warn("P: " + p, "chunkCount: " + chunkCount);
     for (var i = 0; i <= chunkCount; i++) {
       appIds_chunk = makeChunk(appIds);
       if (appIds_chunk.length > 0) {
@@ -313,67 +304,23 @@
           }
           chrome.storage.local.set({
             "discounted_apps_detailed": appIds_total,
-            "discounted_packages_detailed": packageIds_total
+            "discounted_packages_detailed": packageIds_total,
+            "status": ((appIdsLength - appIds.length) / appIdsLength)
           }, function() {
             console.info("commited in storage");
-            chrome.storage.local.getBytesInUse(["discounted_apps_detailed", "discounted_packages_detailed"], function(res) {
-              console.log("Bytes in Use discounted_apps/packages_detailed " + res);
+            chrome.runtime.sendMessage({
+              status: (appIdsLength - appIds.length) / appIdsLength
             });
             //empty Ajax array
             XHRs.appDetails = [];
             //stop badge animation
             XHRsinProgress = false;
-            //displayProgressInBadge_End();
           });
         });
       }, 1000);
     });
   };
 
-  function displayProgressInBadge() {
-
-    chrome.browserAction.getBadgeText({}, function(result) {
-      var newBadgeText = "";
-
-      if ((result === ".  " || result === ".. " || result === "...") && XHRsinProgress) {
-        if (result === ".  ") {
-          newBadgeText = ".. ";
-        } else if (result === ".. ") {
-          newBadgeText = "...";
-        } else if (result === "...") {
-          newBadgeText = ".  ";
-        }
-      } else {
-        return false;
-      }
-      chrome.browserAction.setBadgeText({
-        text: newBadgeText
-      });
-      setTimeout(displayProgressInBadge, 500);
-    });
-  }
-
-  function displayProgressInBadge_Start() {
-    chrome.browserAction.setBadgeBackgroundColor({
-      color: "#3366CC"
-    });
-    chrome.browserAction.setBadgeText({
-      text: ".  "
-    });
-
-    displayProgressInBadge();
-  }
-
-  function displayProgressInBadge_End() {
-    chrome.browserAction.setBadgeText({
-      text: "Ok"
-    });
-    setTimeout(function() {
-      chrome.browserAction.setBadgeText({
-        text: ""
-      });
-    }, 2000);
-  }
   //Immediate initialization function called on browser start, i.e. when bg script is initialized
   (function() {
     console.info("init");
@@ -399,7 +346,6 @@
         dayDiff = 5;*/
           if (dayDiff > 0) {
             XHRsinProgress = true;
-            //displayProgressInBadge_Start();
 
             getAllApps(processAppDetails);
           } else {
@@ -407,7 +353,6 @@
           }
         } else {
           XHRsinProgress = true;
-          //displayProgressInBadge_Start();
           //no date in storage found
           console.info("No lastAppListPoll parameter found in storage.");
           getAllApps(processAppDetails);

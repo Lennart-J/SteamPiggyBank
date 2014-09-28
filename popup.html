@@ -9,7 +9,14 @@
 	<body>
 	<div id="header">
 		<h2>Steam Piggy Bank</h2>
-	<div class="overlay"></div>
+		<div class="overlay"></div>
+		<div id="pigCircle" class="circle"></div>
+		<div class="circle-overlay"></div>
+		<canvas id="canvas" width="40" height="40">Your browser does not support the canvas element.</canvas>
+		<img id="stay" src="img/loadingPigStay.png">
+		<img id="mid" src="img/loadingPigMid.png">
+		<img id="jump" src="img/loadingPigJump.png">
+		<img id="mid2" src="img/loadingPigMid.png">
 
 	</div>
 	
@@ -61,22 +68,34 @@
 				</div>
 			</a> -->
 
-			<!-- <a class="result-row odd" href="http://store.steampowered.com/app/230230">
-				<div class="col result-price">
-					<p><del>39,99&euro;</del></p>
-					<p>29,99&euro;</p>
+
+			<div id="content">
+				<div id="result-header">
+					<div class="col result-price">
+						<p>Price</p>
+						<span class='arrow'></span>
+					</div>
+					<div class="col result-discount">
+						<p>Discount</p>
+						<span class='arrow'></span>
+					</div>
+					<div class="col result-metascore" title ="Metascore">
+						<p>Meta</p>
+						<span class='arrow'></span>
+					</div>
+					<div class="col result-genre">
+						<p>Genre</p>
+						<span class='arrow'></span>
+					</div>
+					<div class="col result-name">
+						<p>Title</p>
+						<span class='arrow'></span>
+					</div>
 				</div>
-				<div class="col result-discount">33%</div>
-				<div class="col result-metascore"></div>
-				<div class="col result-capsule">
-					<img src="http://cdn.akamai.steamstatic.com/steam/apps/230230/capsule_sm_120.jpg">
-				</div>
-				<div class="col result-name">
-					<h4>Teeeeeeeeeeeeeeeeeeeeeeest</h4>
-				</div>
-			</a> -->
+				<div id="result-content">
+				</div>	
+			</div>
 		</div>
-	</div>
 
 	<div id="footer">
 		

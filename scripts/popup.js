@@ -3,6 +3,9 @@
 
   var appIds_discount_detailed = [],
     steamLocale = "";
+  var canvasLoaded = 0,
+    interval,
+    animate=false;
 
   var getSteamLocale = function() {
     chrome.storage.local.get(["countryCode"], function(items) {
@@ -86,13 +89,37 @@
         console.log("newAppIds: " + outdatedApps);
         if (outdatedApps.length !== 0) {
           deleteElementsByIds(outdatedApps);
-        } 
+        }
         getDiscountedApps(newAppIds);
       } else if (changes.discounted_apps_detailed.newValue) {
         getDiscountedApps();
       }
     }
   });
+  
+  chrome.runtime.onMessage.addListener(function(msg) {
+      console.log(Math.round(msg.status * 100));
+      if (msg.status) {
+        if (msg.status < 1) {
+          console.log("listenser (status <1) animate= " + animate);
+          if (animate === false) {
+            console.log("listener animation begin");
+            beginAnimation();
+            animate=true;
+          }
+          loadCanvas(Math.round(msg.status * 100));
+        } else if (msg.status === 1) {
+          console.log("listener (status =1) animate= " + animate);
+          if (animate === true) {
+            console.log("listener animation end");
+            endAnimation();
+            animate=false;
+          }
+          loadCanvas(100);
+          loadCanvas(0);
+        } 
+      }
+    });
 
   function sortElements(sourceArray, args) {
     var parentObj = args.parentObj,
@@ -257,9 +284,7 @@
         currency: currency
       });
     }
-
   }
-
 
   function deleteElements() {
     console.log("deleteElements");
@@ -349,14 +374,83 @@
 
     deleteElements();
 
-
     createElements(appIds_discount_detailed);
   }
+
+
+  function loadCanvas(progress) {
+    var canvas = document.getElementById("canvas"),
+      context = canvas.getContext("2d"),
+      cx = 20,
+      cy = 20,
+      r = 18,
+      lw = 4;
+
+    console.log("Canvas");
+    context.clearRect(0, 0, 40, 40);
+    context.beginPath();
+    context.arc(cx, cy, r, -(Math.PI / 180) * 90 - (Math.PI / 180) * progress * 3.6, -(Math.PI / 180) * 90, false);
+    context.lineWidth = lw;
+    context.strokeStyle = "#67c1f5";
+    context.stroke();
+  }
+
+  var animation = function() {
+      console.log("animation function running");
+      if ($('#stay').css("visibility") === "visible") {
+        $('#stay').css("visibility", "hidden");
+        $('#mid').css("visibility", "visible");
+      } else if ($('#mid').css("visibility") === "visible") {
+        $('#mid').css("visibility", "hidden");
+        $('#jump').css("visibility", "visible");
+      } else if ($('#jump').css("visibility") === "visible") {
+        $('#jump').css("visibility", "hidden");
+        $('#mid2').css("visibility", "visible");
+      } else if ($('#mid2').css("visibility") === "visible") {
+        $('#mid2').css("visibility", "hidden");
+        $('#stay').css("visibility", "visible");
+      }
+  };
+
+  function beginAnimation() {
+      console.log("beginAnimation function running");
+      interval = setInterval(animation, 150);
+  }
+    
+  function endAnimation(){
+    console.log("endAnimation function running");
+    clearInterval(interval);
+    $('#stay').css("visibility", "visible");
+    $('#mid').css("visibility", "hidden");
+    $('#jump').css("visibility", "hidden");
+    $('#mid2').css("visibility", "hidden");
+  }
+
   //DOM Manipulation
   $(document).ready(function() {
-
+    chrome.storage.local.get(["status"], function(items) {
+      if (items.status) {
+        if (items.status < 1) {
+          console.log("storage (status <1) animate= " + animate);
+          if (animate === false) {
+            console.log("storage animation start");
+            beginAnimation();
+            animate=true;
+          }
+          loadCanvas(Math.round(items.status * 100));
+        } else if (items.status === 1) {
+          console.log("storage (status =1) animate= " + animate);
+           if (animate === true) {
+            console.log("storage animation end");
+            endAnimation();
+            animate=false;
+            loadCanvas(100);
+            loadCanvas(0);
+          }
+        } 
+      }
+    });
     steamLocale = getSteamLocale();
-
     getDiscountedApps();
     attachSortClickHandler();
   });
