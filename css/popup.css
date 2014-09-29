@@ -51,7 +51,7 @@ canvas {
   top: 2; }
 
 .circle {
-  background-color: black;
+  background-color: #111111;
   max-width: 40;
   max-height: 40;
   min-height: 40;
@@ -59,7 +59,8 @@ canvas {
   border-radius: 20;
   position: absolute;
   left: 367;
-  top: 2; }
+  top: 2;
+  box-shadow: 0 0 12px #111111; }
 
 .circle-overlay {
   max-width: 40;

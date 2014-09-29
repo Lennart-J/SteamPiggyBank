@@ -38,7 +38,15 @@
 
   var getAllApps = function(callback) {
     console.info("Performing app requests.");
+    var todayUTC = new Date(new Date().toUTCString().substr(0, 25));
+
+    if (todayUTC.getHours() < 17) {
+      //1 day back
+      todayUTC.setDate(todayUTC.getDate() - 1);
+    }
+    todayUTC.setHours(17, 1, 0, 0);
     chrome.storage.local.set({
+      "lastAppListPoll": todayUTC.toString(),
       "status": 0
     });
     $.ajax({
@@ -177,23 +185,12 @@
     var defer = $.when.apply($, XHRs.appFiltered);
     defer.done(function() {
       //ready to continue :)
-      var todayUTC = new Date(new Date().toUTCString().substr(0, 25));
-      if (todayUTC.getHours() < 17) {
-        //1 day back
-        todayUTC.setDate(todayUTC.getDate() - 1);
-      }
-      todayUTC.setHours(17, 1, 0, 0);
+      
       //graceperiod so storage sets 
       setTimeout(function() {
         appIds_discount = removeDuplicates(appIds_discount);
         packageIds_discount = removeDuplicates(packageIds_discount);
-        chrome.storage.local.set({
-          //Remember last poll to steam api
-          "lastAppListPoll": todayUTC.toString(),
-          // "discounted_apps": appIds_discount,
-          // "discounted_packages": packageIds_discount
-        }, function() {
-          console.info("commited in storage");
+        
           //empty Ajax array
           XHRs.appFiltered = [];
           /*chrome.storage.local.getBytesInUse(["discounted_apps"], function(res) {
@@ -203,7 +200,6 @@
           if (appIds.length > 0) {
             processAppDetails();
           }
-        });
       }, 1000);
     });
   };
@@ -220,6 +216,9 @@
       appIds_chunk = makeChunk(appIds);
       if (appIds_chunk.length > 0) {
         XHRs.appFiltered.push(getAppDetails(appIds_chunk, "&filters=price_overview,packages"));
+      }
+      else {
+        return;
       }
     }
   }

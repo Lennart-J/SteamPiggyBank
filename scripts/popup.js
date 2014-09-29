@@ -335,8 +335,8 @@
       var sortCriteria = {
         parentObj: "genres"
       };
-      //colClickHandler($(this), sortCriteria);
-      $(".popup").css("display", "block");
+      colClickHandler($(this), sortCriteria);
+      //$(".popup").css("display", "block");
     });
 
     $nameCol.on("click", function() {
@@ -429,7 +429,7 @@
   //DOM Manipulation
   $(document).ready(function() {
     chrome.storage.local.get(["status"], function(items) {
-      if (items.status) {
+      if (items.status !== undefined) {
         if (items.status < 1) {
           console.log("storage (status <1) animate= " + animate);
           if (animate === false) {
