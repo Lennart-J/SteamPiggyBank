@@ -5,10 +5,10 @@
   "version": "1.0",
   "description": "Get a quick overview of Steam's current sales",
   "icons": {
-      "128": "img/Icon128x128.png",
-      "16": "img/Icon16x16.png",
-      "48": "img/Icon48x48.png"
-   },
+    "128": "img/Icon128x128.png",
+    "16": "img/Icon16x16.png",
+    "48": "img/Icon48x48.png"
+  },
   "background": {
     "scripts": ["scripts/jquery-2.1.1.min.js", "scripts/background.js"],
     "persistent": false
