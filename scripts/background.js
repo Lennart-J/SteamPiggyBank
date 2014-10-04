@@ -15,6 +15,8 @@
     CHUNK_SIZE = 200,
     XHRsinProgress = false,
     retrievedCountryCode = false;
+  var genres = [],
+    genresObj = {};
 
   chrome.runtime.onInstalled.addListener(function(details) {
     if (details.reason === "update") {
@@ -47,6 +49,7 @@
     todayUTC.setHours(17, 1, 0, 0);
     chrome.storage.local.set({
       "lastAppListPoll": todayUTC.toString(),
+      //"genres": [],
       "status": 0
     });
     $.ajax({
@@ -106,6 +109,11 @@
                   recommendations: value.data.recommendations, //optional
                   controller_support: value.data.controller_support
                 });
+                if(value.data.genres) {
+                  $.each(value.data.genres, function(index,element){
+                    genresObj[element.id] = element.description;
+                  });
+                }
               }
             }
           });
@@ -185,21 +193,21 @@
     var defer = $.when.apply($, XHRs.appFiltered);
     defer.done(function() {
       //ready to continue :)
-      
+
       //graceperiod so storage sets 
       setTimeout(function() {
         appIds_discount = removeDuplicates(appIds_discount);
         packageIds_discount = removeDuplicates(packageIds_discount);
-        
-          //empty Ajax array
-          XHRs.appFiltered = [];
-          /*chrome.storage.local.getBytesInUse(["discounted_apps"], function(res) {
+
+        //empty Ajax array
+        XHRs.appFiltered = [];
+        /*chrome.storage.local.getBytesInUse(["discounted_apps"], function(res) {
             console.log(res);
           });*/
-          processDiscountedAppDetails(appIds_discount);
-          if (appIds.length > 0) {
-            processAppDetails();
-          }
+        processDiscountedAppDetails(appIds_discount);
+        if (appIds.length > 0) {
+          processAppDetails();
+        }
       }, 1000);
     });
   };
@@ -216,8 +224,7 @@
       appIds_chunk = makeChunk(appIds);
       if (appIds_chunk.length > 0) {
         XHRs.appFiltered.push(getAppDetails(appIds_chunk, "&filters=price_overview,packages"));
-      }
-      else {
+      } else {
         return;
       }
     }
@@ -283,7 +290,9 @@
       //graceperiod so storage sets 
       setTimeout(function() {
         var appIds_total = [],
-          packageIds_total = [];
+          packageIds_total = [],
+          genres_total = [],
+          status = ((appIdsLength - appIds.length) / appIdsLength);
 
         //appIds_discount_detailed = removeDuplicatesById(appIds_discount_detailed, "appid");
         //packageIds_discount_detailed = removeDuplicatesById(packageIds_discount_detailed, "packageid");
@@ -304,16 +313,16 @@
           chrome.storage.local.set({
             "discounted_apps_detailed": appIds_total,
             "discounted_packages_detailed": packageIds_total,
-            "status": ((appIdsLength - appIds.length) / appIdsLength)
+            "genres": genresObj,
+            "status": status
           }, function() {
             console.info("commited in storage");
             chrome.runtime.sendMessage({
-              status: (appIdsLength - appIds.length) / appIdsLength
+              status: status
             });
             //empty Ajax array
             XHRs.appDetails = [];
-            //stop badge animation
-            XHRsinProgress = false;
+            if (status === 1) XHRsinProgress = false;
           });
         });
       }, 1000);

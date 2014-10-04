@@ -5,7 +5,7 @@
     steamLocale = "";
   var canvasLoaded = 0,
     interval,
-    animate=false;
+    animate = false;
 
   var getSteamLocale = function() {
     chrome.storage.local.get(["countryCode"], function(items) {
@@ -30,22 +30,8 @@
         createElements(appIds || appIds_discount_detailed);
 
         //dynamically display title if the name is cut off with an ellipsis
-        $(".col.result-name h4").on("mouseenter", function() {
-          var $this = $(this),
-            title = $this.attr("title");
+        applyTooltips();
 
-          if (!title) {
-            if (this.offsetWidth < this.scrollWidth) $this.attr("title", $this.text());
-          } else {
-            if (this.offsetWidth >= this.scrollWidth && title === $this.text()) $this.removeAttr("title");
-          }
-        });
-
-        $(".col.result-genre p").each(function() {
-          var $this = $(this);
-
-          if (this.offsetWidth < this.scrollWidth) $this.attr("title", $this.text());
-        });
       }
       /*else {
         // TODO is there a better way?
@@ -95,31 +81,45 @@
         getDiscountedApps();
       }
     }
+
+    if (changes.genres) {
+      //!TODO
+      /*var genres = convertObjectToArray(changes.genres.newValue);;
+      if (changes.genres.newValue && changes.genres.oldValue) {
+        deletePopupContent();
+        populateGenrePopup(genres);
+        attachGenrePopupListeners();
+      } else if (changes.genres.newValue) {
+        populateGenrePopup(genres);
+        attachGenrePopupListeners();
+      }*/
+
+    }
   });
-  
+
   chrome.runtime.onMessage.addListener(function(msg) {
-      console.log(Math.round(msg.status * 100));
-      if (msg.status) {
-        if (msg.status < 1) {
-          console.log("listenser (status <1) animate= " + animate);
-          if (animate === false) {
-            console.log("listener animation begin");
-            beginAnimation();
-            animate=true;
-          }
-          loadCanvas(Math.round(msg.status * 100));
-        } else if (msg.status === 1) {
-          console.log("listener (status =1) animate= " + animate);
-          if (animate === true) {
-            console.log("listener animation end");
-            endAnimation();
-            animate=false;
-          }
-          loadCanvas(100);
-          loadCanvas(0);
-        } 
+    console.log(Math.round(msg.status * 100));
+    if (msg.status) {
+      if (msg.status < 1) {
+        console.log("listenser (status <1) animate= " + animate);
+        if (animate === false) {
+          console.log("listener animation begin");
+          beginAnimation();
+          animate = true;
+        }
+        loadCanvas(Math.round(msg.status * 100));
+      } else if (msg.status === 1) {
+        console.log("listener (status =1) animate= " + animate);
+        if (animate === true) {
+          console.log("listener animation end");
+          endAnimation();
+          animate = false;
+        }
+        loadCanvas(100);
+        loadCanvas(0);
       }
-    });
+    }
+  });
 
   function sortElements(sourceArray, args) {
     var parentObj = args.parentObj,
@@ -249,6 +249,14 @@
     });
   }
 
+  function applyTooltips() {
+    $(".col.result-genre p").each(function() {
+      var $this = $(this);
+
+      if (this.offsetWidth < this.scrollWidth) $this.attr("title", $this.text());
+    });
+  }
+
   var currencyLocaleMap = {
     "GBP": "en-GB",
     "USD": "en-US",
@@ -291,8 +299,30 @@
     $("#result-content a.result-row").remove();
   }
 
+  function populateGenrePopup(genres) {
+    console.log("populateGenrePopup");
+    try {
+      $.each(genres, function(index, element) {
+        $(".result-genre").find(".popup-body").append(
+          $("<p>").html(element)
+        );
+      });
+    }
+    catch (e) {
+      console.warn(e);
+    }
+  }
+
+  function deletePopupContent() {
+    $(".result-genre").find(".popup-body p").remove();
+  }
+
   function deleteElementsByIds(appids) {
-    //TODO
+    console.log("deleteElementsById: ", appIds);
+    $("#result-content a.result-row").each(function(index, element) {
+      el_appid = element.attr("href").replace("http://store.steampowered.com/app/", "");
+      if (appids.indexOf(el_appid) > -1) element.remove();
+    });
   }
 
   chrome.runtime.sendMessage("hello");
@@ -335,8 +365,8 @@
       var sortCriteria = {
         parentObj: "genres"
       };
-      colClickHandler($(this), sortCriteria);
-      //$(".popup").css("display", "block");
+      //colClickHandler($(this), sortCriteria);
+      $(".popup").css("display", "block");
     });
 
     $nameCol.on("click", function() {
@@ -375,6 +405,7 @@
     deleteElements();
 
     createElements(appIds_discount_detailed);
+    applyTooltips();
   }
 
 
@@ -396,28 +427,28 @@
   }
 
   var animation = function() {
-      console.log("animation function running");
-      if ($('#stay').css("visibility") === "visible") {
-        $('#stay').css("visibility", "hidden");
-        $('#mid').css("visibility", "visible");
-      } else if ($('#mid').css("visibility") === "visible") {
-        $('#mid').css("visibility", "hidden");
-        $('#jump').css("visibility", "visible");
-      } else if ($('#jump').css("visibility") === "visible") {
-        $('#jump').css("visibility", "hidden");
-        $('#mid2').css("visibility", "visible");
-      } else if ($('#mid2').css("visibility") === "visible") {
-        $('#mid2').css("visibility", "hidden");
-        $('#stay').css("visibility", "visible");
-      }
+    console.log("animation function running");
+    if ($('#stay').css("visibility") === "visible") {
+      $('#stay').css("visibility", "hidden");
+      $('#mid').css("visibility", "visible");
+    } else if ($('#mid').css("visibility") === "visible") {
+      $('#mid').css("visibility", "hidden");
+      $('#jump').css("visibility", "visible");
+    } else if ($('#jump').css("visibility") === "visible") {
+      $('#jump').css("visibility", "hidden");
+      $('#mid2').css("visibility", "visible");
+    } else if ($('#mid2').css("visibility") === "visible") {
+      $('#mid2').css("visibility", "hidden");
+      $('#stay').css("visibility", "visible");
+    }
   };
 
   function beginAnimation() {
-      console.log("beginAnimation function running");
-      interval = setInterval(animation, 150);
+    console.log("beginAnimation function running");
+    interval = setInterval(animation, 150);
   }
-    
-  function endAnimation(){
+
+  function endAnimation() {
     console.log("endAnimation function running");
     clearInterval(interval);
     $('#stay').css("visibility", "visible");
@@ -426,32 +457,75 @@
     $('#mid2').css("visibility", "hidden");
   }
 
+  var convertObjectToArray = function(obj) {
+    var arr = [];
+    try {
+      for (var i in obj) {
+        if (obj.hasOwnProperty(i)) {
+          if (typeof i === 'number') {
+            arr[i] = obj[i];
+          } else {
+            arr.push(obj[i]);
+          }
+        }
+      }
+      
+    }
+    catch (e) {
+      console.log(e);
+    }
+    return arr;
+  };
+
+  function attachGenrePopupListeners() {
+    $(".result-genre").find(".popup p").on("click", function() {
+      var that = $(this);
+
+      if (that.hasClass("selected")) {
+        that.removeClass("selected");
+      }
+      else {
+        that.addClass("selected");
+      }
+    });
+  }
+
   //DOM Manipulation
   $(document).ready(function() {
-    chrome.storage.local.get(["status"], function(items) {
+    var genres = [];
+    chrome.storage.local.get(["status", "genres"], function(items) {
+      console.log(items);
       if (items.status !== undefined) {
         if (items.status < 1) {
           console.log("storage (status <1) animate= " + animate);
           if (animate === false) {
             console.log("storage animation start");
             beginAnimation();
-            animate=true;
+            animate = true;
           }
           loadCanvas(Math.round(items.status * 100));
         } else if (items.status === 1) {
           console.log("storage (status =1) animate= " + animate);
-           if (animate === true) {
+          if (animate === true) {
             console.log("storage animation end");
             endAnimation();
-            animate=false;
+            animate = false;
             loadCanvas(100);
             loadCanvas(0);
           }
-        } 
+        }
+      }
+
+      if (items.genres) {
+        genres = convertObjectToArray(items.genres);
+        deletePopupContent();
+        populateGenrePopup(genres);
+        attachGenrePopupListeners();
       }
     });
     steamLocale = getSteamLocale();
     getDiscountedApps();
     attachSortClickHandler();
+
   });
 }());
