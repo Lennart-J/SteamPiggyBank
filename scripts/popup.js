@@ -30,22 +30,8 @@
         createElements(appIds || appIds_discount_detailed);
 
         //dynamically display title if the name is cut off with an ellipsis
-        $(".col.result-name h4").on("mouseenter", function() {
-          var $this = $(this),
-            title = $this.attr("title");
-
-          if (!title) {
-            if (this.offsetWidth < this.scrollWidth) $this.attr("title", $this.text());
-          } else {
-            if (this.offsetWidth >= this.scrollWidth && title === $this.text()) $this.removeAttr("title");
-          }
-        });
-
-        $(".col.result-genre p").each(function() {
-          var $this = $(this);
-
-          if (this.offsetWidth < this.scrollWidth) $this.attr("title", $this.text());
-        });
+        applyTooltips();
+        
       }
       /*else {
         // TODO is there a better way?
@@ -249,6 +235,14 @@
     });
   }
 
+  function applyTooltips() {
+    $(".col.result-genre p").each(function() {
+      var $this = $(this);
+
+      if (this.offsetWidth < this.scrollWidth) $this.attr("title", $this.text());
+    });
+  }
+
   var currencyLocaleMap = {
     "GBP": "en-GB",
     "USD": "en-US",
@@ -375,6 +369,7 @@
     deleteElements();
 
     createElements(appIds_discount_detailed);
+    applyTooltips();
   }
 
 
