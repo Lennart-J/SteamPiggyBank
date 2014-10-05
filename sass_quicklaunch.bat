@@ -1,2 +1,2 @@
 @echo off
-sass --watch css/. --cache false --sourcemap=none
+sass --watch css/. --cache ../sass-cache --sourcemap=none

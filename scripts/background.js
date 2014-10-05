@@ -25,7 +25,7 @@
         //displayProgressInBadge_Start();
         //performing requests
         console.info("Extension updated.");
-        //verifyDiscountedAppsInStorage();
+        verifyDiscountedAppsInStorage();
         getAllApps(processAppDetails);
       }
     }
@@ -125,7 +125,9 @@
     var discounted_appIds = [],
       updated_apps = [],
       appIds_chunk,
-      appsChunkCount = 0;
+      appsChunkCount = 0,
+      outdated_appIds_length = 0,
+      isOutdated = false;
 
     console.warn("Verifying!!");
     chrome.storage.local.get(["discounted_apps_detailed"], function(items) {
@@ -136,26 +138,40 @@
 
         appsChunkCount = Math.floor(discounted_appIds.length / CHUNK_SIZE);
         for (var i = 0; i <= appsChunkCount; i++) {
-           console.warn("Verifying!!" + i);
+          console.warn("Verifying Request" + i);
           appIds_chunk = makeChunk(discounted_appIds);
           XHRs.appVerification.push(verifyAppDetails(appIds_chunk));
         }
+
         var defer = $.when.apply($, XHRs.appVerification);
         defer.done(function() {
-          if (outdated_appIds.length > 0) {
-            $.each(items.discounted_apps_detailed, function(index, element) {
-              $.each(outdated_appIds, function(key) {
-                if (element.appid !== key.toString()) {
+          console.warn("Verifying Requests done", outdated_appIds);
+          setTimeout(function() {
+            if (outdated_appIds.length > 0) {
+              outdated_appIds_length = outdated_appIds.length;
+
+              $.each(items.discounted_apps_detailed, function(index, element) {
+                for (var j = 0; j < outdated_appIds_length; j++) {
+                  if (outdated_appIds[j] === element.appid) {
+                    isOutdated = true;
+                    console.log(isOutdated);
+                    return;
+                  }
+                }
+                if (!isOutdated) {
                   updated_apps.push(element);
                 }
+                isOutdated = false;
               });
-            });
-            chrome.storage.local.set({
-              "discounted_apps_detailed": updated_apps
-            }, function() {
-              console.log("Removed old apps");
-            });
-          }
+
+              console.warn("Comparison done, updated apps: ", updated_apps);
+              chrome.storage.local.set({
+                "discounted_apps_detailed": updated_apps
+              }, function() {
+                console.log("Removed old apps, updated apps: ", updated_apps);
+              });
+            }
+          }, 1000);
         });
       }
     });
@@ -170,7 +186,8 @@
         200: function(data) {
           $.each(data, function(key, value) {
             if (value.success === true && !$.isArray(value.data)) {
-              if (value.data.price_overview && (value.data.price_overview.initial / value.data.price_overview.final) > 1) {
+              //WARNING change to === 1
+              if (value.data.price_overview && (value.data.price_overview.initial / value.data.price_overview.final) === 1) {
                 //not discounted
                 outdated_appIds.push(key);
                 //TODO
@@ -395,9 +412,6 @@
     console.log("XHRsinProgress: " + XHRsinProgress);
     if (!XHRsinProgress) {
       chrome.storage.local.get(["countryCode", "lastAppListPoll"], function(items) {
-        /*if (items.countryCode) {
-          retrievedCountryCode = true;
-        }*/
         if (items.lastAppListPoll) {
           //Steam update time set to 17:01 UTC
           var storedDate = new Date(items.lastAppListPoll),
@@ -409,8 +423,6 @@
           console.log(diff, "today gt storedDate: ", today > storedDate, "today lt storedDate: ", today < storedDate);
           var dayDiff = Math.floor(diff / (1000 * 60 * 60 * 24));
 
-          /*console.warn("DEBUG - OVERWRITING dayDiff");
-        dayDiff = 5;*/
           if (dayDiff > 0) {
             XHRsinProgress = true;
 
