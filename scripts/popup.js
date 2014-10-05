@@ -31,7 +31,6 @@
 
         //dynamically display title if the name is cut off with an ellipsis
         applyTooltips();
-
       }
       /*else {
         // TODO is there a better way?
@@ -281,15 +280,22 @@
   function formatPrice(val, currency) {
     var locale = currencyLocaleMap[currency];
 
-    if (locale !== "") {
-      return Number((val / 100).toFixed(2)).toLocaleString(locale, {
+    console.log(Number(val.toFixed(2)/100).toLocaleString(locale, {
         style: "currency",
-        currency: currency
+        currency: currency,
+        minimumFractionDigits: 2
+      }));
+    if (locale !== "") {
+      return Number(val.toFixed(2)/100).toLocaleString(locale, {
+        style: "currency",
+        currency: currency,
+        minimumFractionDigits: 2
       });
     } else {
-      return Number((val / 100).toFixed(2)).toLocaleString({
+      return Number(val.toFixed(2)/100).toLocaleString({
         style: "currency",
-        currency: currency
+        currency: currency,
+        minimumFractionDigits: 2
       });
     }
   }
@@ -307,8 +313,7 @@
           $("<p>").html(element)
         );
       });
-    }
-    catch (e) {
+    } catch (e) {
       console.warn(e);
     }
   }
@@ -469,9 +474,8 @@
           }
         }
       }
-      
-    }
-    catch (e) {
+
+    } catch (e) {
       console.log(e);
     }
     return arr;
@@ -483,8 +487,7 @@
 
       if (that.hasClass("selected")) {
         that.removeClass("selected");
-      }
-      else {
+      } else {
         that.addClass("selected");
       }
     });
