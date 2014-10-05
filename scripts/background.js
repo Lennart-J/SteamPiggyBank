@@ -25,7 +25,7 @@
         //displayProgressInBadge_Start();
         //performing requests
         console.info("Extension updated.");
-        verifyDiscountedAppsInStorage();
+        //verifyDiscountedAppsInStorage();
         getAllApps(processAppDetails);
       }
     }
@@ -127,6 +127,7 @@
       appIds_chunk,
       appsChunkCount = 0;
 
+    console.warn("Verifying!!");
     chrome.storage.local.get(["discounted_apps_detailed"], function(items) {
       if (items.discounted_apps_detailed) {
         $.each(items.discounted_apps_detailed, function(index, element) {
@@ -135,6 +136,7 @@
 
         appsChunkCount = Math.floor(discounted_appIds.length / CHUNK_SIZE);
         for (var i = 0; i <= appsChunkCount; i++) {
+           console.warn("Verifying!!" + i);
           appIds_chunk = makeChunk(discounted_appIds);
           XHRs.appVerification.push(verifyAppDetails(appIds_chunk));
         }
@@ -168,7 +170,7 @@
         200: function(data) {
           $.each(data, function(key, value) {
             if (value.success === true && !$.isArray(value.data)) {
-              if (value.data.price_overview && (value.data.price_overview.initial / value.data.price_overview.final) === 1) {
+              if (value.data.price_overview && (value.data.price_overview.initial / value.data.price_overview.final) > 1) {
                 //not discounted
                 outdated_appIds.push(key);
                 //TODO
@@ -178,8 +180,7 @@
               //not?
             }
           });
-
-
+          console.log("outdated Apps: ", outdated_appIds);
         }
       }
     });
