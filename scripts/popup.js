@@ -7,6 +7,9 @@
     interval,
     animate = false;
 
+  //load background script when popup is loaded
+  chrome.runtime.sendMessage("hello");
+
   var getSteamLocale = function() {
     chrome.storage.local.get(["countryCode"], function(items) {
       if (items.countryCode) {
@@ -97,8 +100,8 @@
   });
 
   chrome.runtime.onMessage.addListener(function(msg) {
-    console.log(Math.round(msg.status * 100));
     if (msg.status) {
+      console.log(Math.round(msg.status * 100));
       if (msg.status < 1) {
         console.log("listenser (status <1) animate= " + animate);
         if (animate === false) {
@@ -280,19 +283,14 @@
   function formatPrice(val, currency) {
     var locale = currencyLocaleMap[currency];
 
-    console.log(Number(val.toFixed(2)/100).toLocaleString(locale, {
-        style: "currency",
-        currency: currency,
-        minimumFractionDigits: 2
-      }));
     if (locale !== "") {
-      return Number(val.toFixed(2)/100).toLocaleString(locale, {
+      return Number(val.toFixed(2) / 100).toLocaleString(locale, {
         style: "currency",
         currency: currency,
         minimumFractionDigits: 2
       });
     } else {
-      return Number(val.toFixed(2)/100).toLocaleString({
+      return Number(val.toFixed(2) / 100).toLocaleString({
         style: "currency",
         currency: currency,
         minimumFractionDigits: 2
@@ -305,32 +303,13 @@
     $("#result-content a.result-row").remove();
   }
 
-  function populateGenrePopup(genres) {
-    console.log("populateGenrePopup");
-    try {
-      $.each(genres, function(index, element) {
-        $(".result-genre").find(".popup-body").append(
-          $("<p>").html(element)
-        );
-      });
-    } catch (e) {
-      console.warn(e);
-    }
-  }
-
-  function deletePopupContent() {
-    $(".result-genre").find(".popup-body p").remove();
-  }
-
   function deleteElementsByIds(appids) {
-    console.log("deleteElementsById: ", appIds);
+    console.log("deleteElementsById: ", appids);
     $("#result-content a.result-row").each(function(index, element) {
-      el_appid = element.attr("href").replace("http://store.steampowered.com/app/", "");
-      if (appids.indexOf(el_appid) > -1) element.remove();
+      var el_appid = $(element).attr("href").replace("http://store.steampowered.com/app/", "");
+      if (appids.indexOf(el_appid) > -1) $(element).remove();
     });
   }
-
-  chrome.runtime.sendMessage("hello");
 
   //TODO show loading state
   function attachSortClickHandler() {
@@ -348,6 +327,7 @@
         filter: "final"
       };
       colClickHandler($(this), sortCriteria);
+      filterBySelectedGenres(readPopupSelection());
     });
 
     $discountCol.on("click", function() {
@@ -356,6 +336,7 @@
         filter: "discount_percent"
       };
       colClickHandler($(this), sortCriteria);
+      filterBySelectedGenres(readPopupSelection());
     });
 
     $metaCol.on("click", function() {
@@ -364,6 +345,7 @@
         filter: "score"
       };
       colClickHandler($(this), sortCriteria);
+      filterBySelectedGenres(readPopupSelection());
     });
 
     $genreCol.on("click", function() {
@@ -371,7 +353,7 @@
         parentObj: "genres"
       };
       //colClickHandler($(this), sortCriteria);
-      $(".popup").css("display", "block");
+      showGenrePopup();
     });
 
     $nameCol.on("click", function() {
@@ -379,6 +361,7 @@
         parentObj: "name"
       };
       colClickHandler($(this), sortCriteria);
+      filterBySelectedGenres(readPopupSelection());
     });
   }
 
@@ -481,6 +464,68 @@
     return arr;
   };
 
+  function populateGenrePopup(genres) {
+    console.log("populateGenrePopup");
+    try {
+      $.each(genres, function(index, element) {
+        $(".result-genre").find(".popup-body").append(
+          $("<p>").html(element)
+        );
+      });
+    } catch (e) {
+      console.warn(e);
+    }
+  }
+
+  function deletePopupContent() {
+    $(".result-genre").find(".popup-body p").remove();
+  }
+
+
+  function readPopupSelection() {
+    var selectedGenres = [];
+
+    $(".result-genre").find(".popup-body p.selected").each(function(index, element) {
+      selectedGenres.push($(element).html());
+    });
+
+    return selectedGenres;
+  }
+
+  function filterBySelectedGenres(genres) {
+    var el_genreString = "",
+      el_genreArray = [];
+
+    resetGenreFilter();
+
+    $("#result-content a.result-row").each(function(index, element) {
+      el_genreString = $(element).find(".col.result-genre p").html();
+      el_genreArray = el_genreString.split(", ");
+
+      for (var i = 0, genresLength = genres.length; i < genresLength; i++) {
+        if (el_genreArray.indexOf(genres[i]) === -1) {
+          $(element).hide();
+        } 
+      }
+    });
+  }
+
+  function resetGenreFilter() {
+    $("#result-content a.result-row").show();
+  }
+
+  function clearPopupSelection() {
+    $(".result-genre").find(".popup-body p.selected").each(function(index, element) {
+      $(element).removeClass("selected");
+    });
+  }
+
+  function showGenrePopup() {
+    $(".result-genre .popup").show();
+    $(".result-genre .popup").focus();
+  }
+
+
   function attachGenrePopupListeners() {
     $(".result-genre").find(".popup p").on("click", function() {
       var that = $(this);
@@ -490,6 +535,24 @@
       } else {
         that.addClass("selected");
       }
+    });
+
+    $(".result-genre").find(".submit").on("click", function() {
+      
+    });
+
+    $(".result-genre").find(".dismiss").on("click", function() {
+      clearPopupSelection();
+      resetGenreFilter();
+      $(".result-genre .popup").blur();
+    });
+
+     $(".result-genre .popup").find('p').on("click", function() {
+      filterBySelectedGenres(readPopupSelection());
+     });
+
+    $(".result-genre .popup").on('blur', function() {
+      $(this).fadeOut(300);
     });
   }
 
