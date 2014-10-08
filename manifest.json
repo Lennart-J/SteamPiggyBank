@@ -2,7 +2,7 @@
   "manifest_version": 2,
   "name": "Steam Piggy Bank",
   "short_name": "SPB",
-  "version": "1.1",
+  "version": "1.2",
   "description": "Get a quick overview of Steam's current sales",
   "icons": {
     "128": "img/Icon128x128.png",
