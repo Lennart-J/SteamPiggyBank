@@ -155,7 +155,7 @@
         }
 
         var defer = $.when.apply($, XHRs.appVerification);
-        defer.done(function() {
+        defer.always(function() {
           console.warn("Verifying Requests done", outdated_appIds);
           
           setTimeout(function() {
@@ -288,7 +288,7 @@
     makeBadgeRequest();
 
     var defer = $.when.apply($, XHRs.appFiltered);
-    defer.done(function() {
+    defer.always(function() {
       //ready to continue :)
 
       //graceperiod so storage sets 
@@ -391,7 +391,7 @@
     }
     //XHRs.push(getAppDetails(appIds_discount, "&cc=DE&l=english"));
     var defer = $.when.apply($, XHRs.appDetails);
-    defer.done(function() {
+    defer.always(function() {
       console.log("procDiscAppDet Deferred Done");
       //graceperiod so storage sets 
       setTimeout(function() {
@@ -433,8 +433,8 @@
         });
       }, 1000);
     });
-    defer.fail(function() {
-      console.error("Request failed!");
+    defer.fail(function(data) {
+      console.error("Request failed!", data);
     });
     defer.progress(function() {
       console.info("Deferred Progress!");
