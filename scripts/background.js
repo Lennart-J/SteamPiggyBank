@@ -112,8 +112,8 @@
                   recommendations: value.data.recommendations, //optional
                   controller_support: value.data.controller_support
                 });
-                if(value.data.genres) {
-                  $.each(value.data.genres, function(index,element){
+                if (value.data.genres) {
+                  $.each(value.data.genres, function(index, element) {
                     genresObj[element.id] = element.description;
                   });
                 }
@@ -124,6 +124,9 @@
             console.log(appIds_discount, appIds_discount.length);
 
           }
+        },
+        500: function(data) {
+          console.error("Request failed! ", data);
         }
       }
     });
@@ -154,6 +157,7 @@
         var defer = $.when.apply($, XHRs.appVerification);
         defer.done(function() {
           console.warn("Verifying Requests done", outdated_appIds);
+          
           setTimeout(function() {
             if (outdated_appIds.length > 0) {
               outdated_appIds_length = outdated_appIds.length;
@@ -181,6 +185,9 @@
             }
           }, 1000);
         });
+        defer.progress(function() {
+          console.info("Deferred Progress!");
+        });
       }
     });
   }
@@ -206,6 +213,9 @@
             }
           });
           console.log("outdated Apps: ", outdated_appIds);
+        },
+        500: function(data) {
+          console.error("Request failed! ", data);
         }
       }
     });
@@ -254,7 +264,7 @@
       statusCode: {
         200: function(data) {
           $.each(data, function(key, value) {
-            //TODO get Multi Packages (apps.length === 1)
+            //TODO get Multi Packages (apps.length === 1) 2/3/4 Packs
             if (value.success === true && !$.isArray(value.data) && value.data.apps && value.data.apps.length > 1) {
 
               packageIds_discount_detailed.push({
@@ -266,6 +276,9 @@
             }
           });
           console.log(packageIds_discount_detailed, packageIds_discount_detailed.length);
+        },
+        500: function(data) {
+          console.error("Request failed! ", data);
         }
       }
     });
@@ -293,6 +306,12 @@
           processAppDetails();
         }
       }, 1000);
+    });
+    defer.fail(function() {
+      console.error("Request failed!");
+    });
+    defer.progress(function() {
+      console.info("Deferred Progress!");
     });
   };
 
@@ -373,6 +392,7 @@
     //XHRs.push(getAppDetails(appIds_discount, "&cc=DE&l=english"));
     var defer = $.when.apply($, XHRs.appDetails);
     defer.done(function() {
+      console.log("procDiscAppDet Deferred Done");
       //graceperiod so storage sets 
       setTimeout(function() {
         var appIds_total = [],
@@ -412,6 +432,12 @@
           });
         });
       }, 1000);
+    });
+    defer.fail(function() {
+      console.error("Request failed!");
+    });
+    defer.progress(function() {
+      console.info("Deferred Progress!");
     });
   };
 
