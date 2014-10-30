@@ -14,7 +14,7 @@
       appVerification: [],
       packageDetails: []
     },
-    CHUNK_SIZE = 200,
+    CHUNK_SIZE = 170,
     XHRsinProgress = false,
     retrievedCountryCode = false;
   var genres = [],
@@ -150,7 +150,7 @@
         appsChunkCount = Math.floor(discounted_appIds.length / CHUNK_SIZE);
         for (var i = 0; i <= appsChunkCount; i++) {
           console.warn("Verifying Request" + i);
-          appIds_chunk = makeChunk(discounted_appIds);
+          appIds_chunk = makeChunk(discounted_appIds, 50);
           XHRs.appVerification.push(verifyAppDetails(appIds_chunk));
         }
 
@@ -333,8 +333,9 @@
     }
   }
 
-  function makeChunk(sourceArray) {
-    return sourceArray.splice(0, CHUNK_SIZE);
+  function makeChunk(sourceArray, chunkSize) {
+    if (chunkSize === undefined) var chunkSize = CHUNK_SIZE;
+    return sourceArray.splice(0, chunkSize);
   }
 
   function removeDuplicates(sourceArray) {
@@ -373,18 +374,18 @@
 
   var processDiscountedAppDetails = function(discountedAppIds) {
     //CHUNK_SIZE set lower to ensure success
-    var CHUNK_SIZE = 50;
+    var CHUNK_SIZE = 40;
     var appsChunkCount = Math.floor(discountedAppIds.length / CHUNK_SIZE),
       packagesChunkCount = Math.floor(packageIds_discount.length / CHUNK_SIZE),
       appIds_chunk = 0,
       packageIds_chunk = 0;
 
     for (var i = 0; i <= appsChunkCount; i++) {
-      appIds_chunk = makeChunk(discountedAppIds);
+      appIds_chunk = makeChunk(discountedAppIds, CHUNK_SIZE);
       XHRs.appDetails.push(getAppDetails(appIds_chunk, ""));
     }
     for (i = 0; i <= packagesChunkCount; i++) {
-      packageIds_chunk = makeChunk(packageIds_discount);
+      packageIds_chunk = makeChunk(packageIds_discount, CHUNK_SIZE);
       if (packageIds_chunk.length > 0) {
         XHRs.packageDetails.push(getPackageDetails(packageIds_chunk));
       }
