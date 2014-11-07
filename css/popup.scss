@@ -144,9 +144,9 @@ html {
 }
 .popup-body {
 	overflow-y:auto;
-	width:100px;
-	max-width: 100px;
-	max-height: 80px;
+	width:140px;
+	max-width: 140px;
+	max-height: 100px;
 	padding: 6px 0px;
 	background-color: $background-column;
 	p {
@@ -172,7 +172,7 @@ html {
 	.dismiss {
 		position: absolute;
 		top: 4px;
-		width:80%;
+		width:85%;
 		padding: 2px 10px;
 		border: 1px solid black;
 		cursor: pointer;
@@ -260,7 +260,7 @@ li.active a, li.active a:hover {
 		float:none;
 		text-align: left;
 	}
-	.result-genre {
+	.result-usertags {
 		margin-right:18px;
 	}
 }
@@ -273,11 +273,11 @@ li.active a, li.active a:hover {
 	}
 }
 
-.result-discount, .result-metascore {
+.result-discount, .result-urc {
 	margin-right:5px;
 }
 
-.result-genre {
+.result-usertags {
 	margin-right: 10px;
 }
 
@@ -300,13 +300,13 @@ li.active a, li.active a:hover {
 		background-color: $background-row-odd;
 		border-color: $background-row-odd;
 	}
-	.result-price, .result-discount, .result-metascore, .result-genre {
+	.result-price, .result-discount, .result-urc, .result-usertags {
 		float: right;
 		padding: 4px 0px 0px 8px;
 		margin-left: 10px;
 		margin-top: 18px;
 	}
-	.result-genre {
+	.result-usertags {
 		min-width:60px;
 		max-width: 60px;
 		p {
@@ -324,13 +324,16 @@ li.active a, li.active a:hover {
 		margin-top:9px;
 		padding-right:16px;
 	}
-	.result-metascore {
+	.result-urc {
 		min-width:16px;
 		font-weight: bold;
-		color: $textcolor-metascore;
+		color: $textcolor-urc;
 		margin-right:30px;
-		&.unavailable {
-			color: #464646;
+		&.unavailable, &.mixed {
+			color: #FFCC00;
+		}
+		&.negative {
+			color: #D11919;
 		}
 	}
 	.result-name {

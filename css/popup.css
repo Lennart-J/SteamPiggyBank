@@ -110,9 +110,9 @@ canvas {
 
 .popup-body {
   overflow-y: auto;
-  width: 100px;
-  max-width: 100px;
-  max-height: 80px;
+  width: 140px;
+  max-width: 140px;
+  max-height: 100px;
   padding: 6px 0px;
   background-color: #262626; }
   .popup-body p {
@@ -135,7 +135,7 @@ canvas {
   .popup-footer .dismiss {
     position: absolute;
     top: 4px;
-    width: 80%;
+    width: 85%;
     padding: 2px 10px;
     border: 1px solid black;
     cursor: pointer;
@@ -208,7 +208,7 @@ li.active a, li.active a:hover {
     padding-left: 16px;
     float: none;
     text-align: left; }
-  #result-header .result-genre {
+  #result-header .result-usertags {
     margin-right: 18px; }
 
 .result-price {
@@ -217,10 +217,10 @@ li.active a, li.active a:hover {
   .result-price del {
     color: #888888; }
 
-.result-discount, .result-metascore {
+.result-discount, .result-urc {
   margin-right: 5px; }
 
-.result-genre {
+.result-usertags {
   margin-right: 10px; }
 
 .result-row {
@@ -239,15 +239,15 @@ li.active a, li.active a:hover {
   .result-row.odd {
     background-color: #1a1a1a;
     border-color: #1a1a1a; }
-  .result-row .result-price, .result-row .result-discount, .result-row .result-metascore, .result-row .result-genre {
+  .result-row .result-price, .result-row .result-discount, .result-row .result-urc, .result-row .result-usertags {
     float: right;
     padding: 4px 0px 0px 8px;
     margin-left: 10px;
     margin-top: 18px; }
-  .result-row .result-genre {
+  .result-row .result-usertags {
     min-width: 60px;
     max-width: 60px; }
-    .result-row .result-genre p {
+    .result-row .result-usertags p {
       text-align: left;
       overflow: hidden;
       white-space: nowrap;
@@ -258,13 +258,15 @@ li.active a, li.active a:hover {
     margin-left: 1px;
     margin-top: 9px;
     padding-right: 16px; }
-  .result-row .result-metascore {
+  .result-row .result-urc {
     min-width: 16px;
     font-weight: bold;
     color: #8BC53F;
     margin-right: 30px; }
-    .result-row .result-metascore.unavailable {
-      color: #464646; }
+    .result-row .result-urc.unavailable, .result-row .result-urc.mixed {
+      color: #FFCC00; }
+    .result-row .result-urc.negative {
+      color: #D11919; }
   .result-row .result-name {
     margin: 14px 14px 0 153px; }
     .result-row .result-name h4 {
