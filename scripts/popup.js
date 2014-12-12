@@ -1,4 +1,4 @@
-(function() {
+(function(){
   "use strict";
 
   var appIds_discount_detailed = [],
@@ -10,9 +10,6 @@
   //load background script when popup is loaded
   chrome.runtime.sendMessage("hello");
 
-  var getSteamLocale = function() {
-
-  };
 
   var getDiscountedApps = function(appIds) {
     console.log("getDiscountedApps");
@@ -133,8 +130,7 @@
     console.log("createElements");
 
     $.each(sourceArray, function(index, value) {
-      var isEven = false,
-        aClass = "",
+      var aClass = "",
         urcClass = "",
         urcText = "-",
         usertags = [],
@@ -142,11 +138,8 @@
         urcTooltip = '',
         urcPercent = '';
       // http://cdn.akamai.steamstatic.com/steam/subs/1741/capsule_sm_120.jpg
-      console.log("each " + index + " ", value);
-      isEven = index % 2 === 0 ? true : false;
-      aClass = isEven === true ? "even" : "odd";
-
-
+      // console.log("each " + index + " ", value);
+      aClass = index % 2 === 0 ? "even" : "odd";
 
       if (value.packageid) {
         steamStoreAppUrl = "http://store.steampowered.com/sub/";
@@ -167,7 +160,7 @@
       }
       if (value.urcClass) {
         urcText = value.urcText;
-        urcClass = value.urcClass
+        urcClass = value.urcClass;
       } else {
         urcClass = "unavailable";
       }
@@ -222,7 +215,6 @@
             window.open($(this).attr("href"), "_blank");
           })
         );
-
       } catch (ex) {
         console.error("Error in createElements: ", ex);
         console.error("At " + index + "with " + value);
@@ -565,7 +557,7 @@
         attachUserTagPopupListeners();
       }
     });
-    getDiscountedApps();
+    setTimeout(getDiscountedApps, 1000);
     attachSortClickHandler();
 
   });

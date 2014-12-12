@@ -33,7 +33,7 @@
     });
   });
 
-  var getAllApps = function(callback) {
+  var getAllApps = function() {
     var XHRs = [],
       response = '',
       parent = {},
@@ -59,7 +59,7 @@
       console.log(allUserTags);
 
       var pattern = /^(0|[1-9][0-9]{0,2}(?:(,[0-9]{3})*|[0-9]*))(\.[0-9]+){0,1}$/;
-      var deb = $(tmp_list[0]).find('.search_reviewscore span').data('storeTooltip')
+      var deb = $(tmp_list[0]).find('.search_reviewscore span').data('storeTooltip');
       console.log(deb.replace(/^\D+/g, ''));
 
       allItemsOnSale = allItemsOnSale.concat(parseDOMElementList(tmp_list));
@@ -102,11 +102,11 @@
 
     var findLastSalePage = function(parent) {
       return parent.find('.pagebtn').prev().html();
-    }
+    };
 
     var findSaleItems = function(parent) {
       return parent.find('.search_rule').next().children('a');
-    }
+    };
 
     var findAllUserTags = function(parent) {
       var tag_array = [],
@@ -117,15 +117,14 @@
       });
 
       return tag_array;
-    }
+    };
 
-    var parseDOMElementList = function(list, callback) {
+    var parseDOMElementList = function(list) {
       var appitems = [],
         appitem = {};
       $.each(list, function(key, el) {
         var $el = $(el),
           urcText = getUserReviewScoreText($el);
-
 
         appitem.appid = getAppId($el);
         appitem.packageid = getPackageId($el);
@@ -144,8 +143,6 @@
       });
 
       return appitems;
-
-
 
       function getAppId(element) {
         return element.data("dsAppid").toString();
@@ -188,7 +185,7 @@
       }
 
       function getUserReviewScoreText(element) {
-        return element.find('.search_reviewscore span').data('storeTooltip')
+        return element.find('.search_reviewscore span').data('storeTooltip');
       }
 
       function getUrcScore(str) {
@@ -221,8 +218,12 @@
         return arr;
       }
 
-    }
-  }
+    };
+  };
+
+  var getUserTags = function (callback) {
+
+  };
 
   function removeDuplicates(sourceArray) {
     var uniques = [];
@@ -261,6 +262,7 @@
   //Immediate initialization function called on browser start, i.e. when bg script is initialized
   (function() {
     console.info("init");
+    
     getAllApps();
 
   })();
