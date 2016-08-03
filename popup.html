@@ -1,76 +1,103 @@
-<html>
-	<head>
-		<title>Steam Piggy Bank</title>
-		<script type="text/javascript" src="scripts/jquery-2.1.1.min.js"></script>
-		<script type="text/javascript" src='scripts/popup.js'></script>
-		<link rel="stylesheet" type="text/css" href="css/popup.css" />
-	</head>
+<!DOCTYPE html>
+<html ng-app="SteamPiggyBank">
+    <head>
+        <link rel="stylesheet" href="css/popup.css">
 
-	<body>
-	<div id="header">
-		<h2>Steam Piggy Bank</h2>
-		<div class="overlay"></div>
-		<div id="pigCircle" class="circle"></div>
-		<div class="circle-overlay"></div>
-		<canvas id="canvas" width="40" height="40">Your browser does not support the canvas element.</canvas>
-		<img id="stay" src="img/loadingPigStay.png">
-		<img id="mid" src="img/loadingPigMid.png">
-		<img id="jump" src="img/loadingPigJump.png">
-		<img id="mid2" src="img/loadingPigMid.png">
+        <script src="scripts/lib/ga.js"></script>
+        <script src="scripts/lib/jquery-2.1.1.min.js"></script>
+        <script src="scripts/lib/angular.min.js"></script>
+        <script type="text/javascript" src="scripts/lib/ui-utils-0.2.3/ui-utils.min.js"></script>
 
-	</div>
-	
-	<div id="content">
-		
-		<div id="result-header">
-			<div class="col result-price">
-				<p>Price</p>
-				<span class='arrow'></span>
-			</div>
-			<div class="col result-discount">
-				<p>Discount</p>
-				<span class='arrow'></span>
-			</div>
-			<div class="col result-urc" title ="User Review Score">
-				<p>URC</p>
-				<span class='arrow'></span>
-			</div>
-			<div class="col result-usertags" title="Available in the upcoming version">
-				<p>Tags</p>
-				<span class='arrow'></span>
-				<div class="popup" tabindex="-1">
-					<div class="popup-body">
-						<p>No Tags yet</p>
-					</div>
-					<div class="popup-footer">
-						<div class="dismiss">Clear</div>
-					</div>
-				</div>
-			</div>
-			<div class="col result-name">
-				<p>Title</p>
-				<span class='arrow'></span>
-			</div>
-		</div>
-		<div id="result-content">
-			<!-- <a class="result-row even" href="http://store.steampowered.com/app/230230">
-				<div class="col result-price">
-					<p><del>39,99&euro;</del></p>
-					<p>29,99&euro;</p>
-				</div>
-				<div class="col result-discount">33%</div>
-				<div class="col result-urc"></div>
-				<div class="col result-capsule">
-					<img src="http://cdn.akamai.steamstatic.com/steam/apps/230230/capsule_sm_120.jpg">
-				</div>
-				<div class="col result-name">
-					<h4>Test</h4>
-				</div>
-			</a> -->
-		</div>
+        <script type="text/javascript" src="scripts/lib/select.min.js"></script>
+        
+        <script src="scripts/app/app.js"></script>
+        <script src="scripts/app/service.js"></script>
+        <script src="scripts/app/controller.js"></script>
 
-	<div id="footer">
-		
-	</div>
-	</body>
+        <style>
+
+        .select2 > .select2-choice.ui-select-match {
+          /* Because of the inclusion of Bootstrap */
+          height: 29px;
+        }
+
+        .selectize-control > .selectize-dropdown {
+          top: 36px;
+        }
+      </style>
+    </head>
+    <body ng-controller="PopupController">
+        <div id="header">
+            <h2>Steam Piggy Bank</h2>
+            <div class="overlay"></div>
+            <div id="pigCircle" class="circle"></div>
+            <div class="circle-overlay"></div>
+            <canvas id="canvas" width="40" height="40">Your browser does not support the canvas element.</canvas>
+            <img id="stay" src="img/loadingPigStay.png">
+            <img id="mid" src="img/loadingPigMid.png">
+            <img id="jump" src="img/loadingPigJump.png">
+            <img id="mid2" src="img/loadingPigMid.png">
+        </div>
+
+        <header>
+           <input type="search" placeholder="Search" id="search" ng-model="query[queryBy]" ng-disabled="disabled">
+           <!--  <ui-select id="tags" multiple ng-model="activeTags" theme="select2" ng-disabled="disabled">
+                <ui-select-match placeholder=" Select Tags...">{{$item}}</ui-select-match>
+                <ui-select-choices repeat="tag in uniqueTags | filter:$select.search">
+                    {{tag}}
+                </ui-select-choices>
+            </ui-select> -->
+        </header>
+
+        <div id="result-header">
+            <div class="col result-price" ng-click="changeOrder('finalprice');">
+                <p>Price</p>
+                <span class='arrow' ng-class='{"down" : orderExp === "finalprice" && orderReverse === false, "up" : orderExp === "finalprice" && orderReverse === true}'></span>
+            </div>
+            <div class="col result-discount" ng-click="changeOrder('discount', true);">
+                <p>Discount</p>
+                <span class='arrow' ng-class='{"down" : orderExp === "discount" && orderReverse === true, "up" : orderExp === "discount" && orderReverse === false}'></span>
+            </div>
+            <div class="col result-urc" title ="User Review Score" ng-click="changeOrder('urcScore');">
+                <p>URC</p>
+                <span class='arrow' ng-class='{"down" : orderExp === "urcScore" && orderReverse === false, "up" : orderExp === "urcScore" && orderReverse === true}'></span>
+            </div>
+            <div class="col result-usertags">
+                <p>Tags</p>
+                <span class='arrow'></span>
+                <div class="popup" tabindex="-1">
+                    <div class="popup-body">
+                        <p>No Tags yet</p>
+                    </div>
+                    <div class="popup-footer">
+                        <div class="dismiss">Clear</div>
+                    </div>
+                </div>
+            </div>
+            <div class="col result-name" ng-click="changeOrder('name');">
+                <p>Title</p>
+                <span class='arrow' ng-class='{"down" : orderExp === "name" && orderReverse === false, "up" : orderExp === "name" && orderReverse === true}'></span>
+            </div>
+        </div>
+
+        <div id="result-content">
+            <a href="" ng-repeat="app in appItems | filter:query | orderBy : orderExp : orderReverse | unique : 'name'" class="result-row" ng-class-even="'even'" ng-class-odd="'odd'" ng-href="{{app.url}}" ng-attr-title="{{app.name}}" ng-click="onAppClick(app, $event)">
+                <div class="col result-price">
+                    <p><del>{{app.originalprice}}</del></p>
+                    <p>{{app.finalprice}}</p>
+                </div>
+                <div class="col result-discount">-{{app.discount}}%</div>
+                <div class="col result-urc">{{app.urcPercent}}</div>
+                <div class="col result-usertags">{{app.userTags[0]}}</div>
+                <div class="col result-capsule">
+                    <img ng-if="app.appid && app.appid.indexOf(',') === -1" ng-src="http://cdn.akamai.steamstatic.com/steam/apps/{{app.appid}}/header.jpg">
+                    <img ng-if="app.packageid && (isNaN(appItem.appid) || app.appid.indexOf(',') > -1)" ng-src="http://cdn.akamai.steamstatic.com/steam/subs/{{app.packageid}}/header.jpg">
+                </div>
+                <div class="col result-name">
+                </div>
+            </a>
+        </div>
+
+        <!-- <script src="scripts/test.js"></script> -->
+    </body>
 </html>
