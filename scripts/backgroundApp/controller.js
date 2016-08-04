@@ -2,7 +2,6 @@
 angular.module('backgroundApp.controllers', [])
 
 .controller('BackgroundController', function($scope, $rootScope, requestService, $q) {
-    console.log("Hello");
     $scope.appItems = [];
     $scope.uniqueTags = [];
     $scope.inProgress = false;
@@ -21,7 +20,7 @@ angular.module('backgroundApp.controllers', [])
                 }
                 $scope.inProgress = true;
                 requestService.getAllApps().then(function(allApps) {
-                    console.log("Done: ", allApps);
+                    //console.log("Done: ", allApps);
                 }, function(reason) {
                     //console.log(reason);
                 }, function(update) {
@@ -41,7 +40,7 @@ angular.module('backgroundApp.controllers', [])
                 }).then(function() {
                     return requestService.getAllUserTags();
                 }).then(function(tags) {
-                        console.log("All User Tags: ", tags);
+                        //console.log("All User Tags: ", tags);
                         var tmp_tags = [];
 
                         for (var i = tags.length - 1; i >= 0; i--) {
@@ -62,11 +61,11 @@ angular.module('backgroundApp.controllers', [])
                         $scope.uniqueTags = tmp_tags;
                     },
                     function(reason) {
-                        console.log(reason);
+                        //console.log(reason);
                     },
                     function(userTagChunk) {
                         if (!userTagChunk) return;
-                        console.log(userTagChunk);
+                        //console.log(userTagChunk);
                         for (var i = $scope.appItems.length - 1; i >= 0; i--) {
                             for (var j = userTagChunk.length - 1; j >= 0; j--) {
                                 if (userTagChunk[j].appId) {

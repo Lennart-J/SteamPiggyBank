@@ -62,7 +62,6 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
         animate_status: animate
     }, function(response) {
         if (response !== undefined) {
-            console.log(response);
             $scope.appItems = response.appItems;
             $scope.$apply();
         }
@@ -72,7 +71,6 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
 
     chrome.runtime.onMessage.addListener(
         function(request, sender, response) {
-            console.log(request.message);
             if (request.message === "loadCanvas") {
 
                 loadCanvas(request.arg);
@@ -91,7 +89,6 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
             } else if (request.message === "update") {
                 $scope.appItems = $scope.appItems.concat(request.appItems);
                 $scope.$apply();
-                console.log($scope.appItems);
             } else if (request.message === "tags") {
                 $scope.uniqueTags = request.tags;
             } else if (request.message === "tagsUpdate") {
@@ -100,67 +97,9 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
             }
         }
     );
-    /*requestService.getAllApps().then(function(allApps) {
-      console.log("Done: ", allApps);
-    }, function(reason) {
-      //console.log(reason);
-    }, function(update) {
-      if (animate === false) {
-        console.log("listener animation begin");
-        beginAnimation();
-        animate = true;
-      }
-      loadCanvas(Math.round(update[1] * 100));
-      $scope.appItems = $scope.appItems.concat(update[0]);
-    }).then(function() {
-      return requestService.getAllUserTags();
-    }).then(function(tags) {
-      console.log("All User Tags: ", tags);
-      var tmp_tags = [];
-
-      for(var i = tags.length - 1; i >= 0; i--) {
-        for (var j = tags[i].userTags.length - 1; j >= 0; j--) {
-          tmp_tags.push(tags[i].userTags[j]);
-        }
-      }
-      $scope.uniqueTags = uniques(tmp_tags);
-      console.log("uniqueTags: ", $scope.uniqueTags);
-      loadCanvas(100);
-      $scope.disabled = false;
-      endAnimation();
-      setTimeout(function() {
-        loadCanvas(0);
-      }, 2000);
-    }, function(reason) {
-      console.log(reason);
-    }, function(userTagChunk) {
-      if(!userTagChunk) return;
-      console.log(userTagChunk);
-      for (var i = $scope.appItems.length - 1; i >= 0; i--) {
-        for (var j = userTagChunk.length - 1; j >= 0; j--) {
-          if (userTagChunk[j].appId) {
-            if ($scope.appItems[i].appid === userTagChunk[j].appId) {
-              $scope.appItems[i].userTags = userTagChunk[j].userTags;
-              break;
-            }
-          } else if (userTagChunk[j].packageId) {
-            if ($scope.appItems[i].packageId === userTagChunk[j].packageId) {
-              $scope.appItems[i].userTags = userTagChunk[j].userTags;
-              break;
-            }
-          }
-        }
-      }
-      );
-      });
-    }).catch(function(err) {
-      console.error(err);
-    });*/
-
-
 
     $scope.changeOrder = function(order) {
-        console.log("Old order: " + $scope.orderExp + " Old reverse: " + $scope.orderReverse);
+        //console.log("Old order: " + $scope.orderExp + " Old reverse: " + $scope.orderReverse);
         if ($scope.orderExp === order) {
             if (!($scope.orderReverse === false || order === 'discount')) {
                 $scope.orderExp = '';
@@ -186,7 +125,6 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
     $(window).bind("scroll", function() {
         if ($(window).scrollTop() + $(window).height() > $(document).height() - 50
             && $scope.displayLimitChanged === false) {
-            console.log("more");
             $scope.displayLimit += 10;
             $scope.$apply();
             $scope.displayLimitChanged = true;
@@ -221,7 +159,6 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
             r = 18,
             lw = 4;
 
-        console.log("Canvas, progress: ", progress);
         context.clearRect(0, 0, 40, 40);
         context.beginPath();
         context.arc(cx, cy, r, -(Math.PI / 180) * 90 - (Math.PI / 180) * progress * 3.6, -(Math.PI / 180) * 90, false);
@@ -231,7 +168,6 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
     }
 
     var animation = function() {
-        console.log("animation function running");
         if ($('#stay').css("visibility") === "visible") {
             $('#stay').css("visibility", "hidden");
             $('#mid').css("visibility", "visible");
@@ -248,12 +184,10 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
     };
 
     function beginAnimation() {
-        console.log("beginAnimation function started");
         interval = setInterval(animation, 150);
     }
 
     function endAnimation() {
-        console.log("endAnimation function done");
         clearInterval(interval);
         $('#stay').css("visibility", "visible");
         $('#mid').css("visibility", "hidden");
