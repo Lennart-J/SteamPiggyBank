@@ -1,5 +1,5 @@
 'use strict';
-angular.module('SteamPiggyBank.services', [])
+angular.module('backgroundApp.services', [])
 
 .service('util', function() {
   var currencyLocaleMap = {

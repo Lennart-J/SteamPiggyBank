@@ -40,7 +40,7 @@
         </div>
 
         <header>
-           <input type="search" placeholder="Search" id="search" ng-model="query[queryBy]" ng-disabled="disabled">
+           <input type="search" placeholder="Search" id="search" ng-model="query[queryBy]" ng-disabled="isLoading()">
            <!--  <ui-select id="tags" multiple ng-model="activeTags" theme="select2" ng-disabled="disabled">
                 <ui-select-match placeholder=" Select Tags...">{{$item}}</ui-select-match>
                 <ui-select-choices repeat="tag in uniqueTags | filter:$select.search">
@@ -81,7 +81,7 @@
         </div>
 
         <div id="result-content">
-            <a href="" ng-repeat="app in appItems | filter:query | orderBy : orderExp : orderReverse | unique : 'name'" class="result-row" ng-class-even="'even'" ng-class-odd="'odd'" ng-href="{{app.url}}" ng-attr-title="{{app.name}}" ng-click="onAppClick(app, $event)">
+            <a href="" ng-repeat="app in appItems | filter:query | orderBy : orderExp : orderReverse | unique : 'name' | limitTo:displayLimit" class="result-row" ng-class-even="'even'" ng-class-odd="'odd'" ng-href="{{app.url}}" ng-attr-title="{{app.name}}" ng-click="onAppClick(app, $event)">
                 <div class="col result-price">
                     <p><del>{{app.originalprice}}</del></p>
                     <p>{{app.finalprice}}</p>
