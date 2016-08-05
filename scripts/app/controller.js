@@ -1,39 +1,7 @@
 'use strict';
 angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
 
-/* .filter('propsFilter', function() {
-  return function(items, props) {
-    var out = [];
-
-    if (angular.isArray(items)) {
-      var keys = Object.keys(props);
-        
-      items.forEach(function(item) {
-        var itemMatches = false;
-
-        for (var i = 0; i < keys.length; i++) {
-          var prop = keys[i];
-          var text = props[prop].toLowerCase();
-          if (item[prop].toString().toLowerCase().indexOf(text) !== -1) {
-            itemMatches = true;
-            break;
-          }
-        }
-
-        if (itemMatches) {
-          out.push(item);
-        }
-      });
-    } else {
-      // Let the output be the input untouched
-      out = items;
-    }
-
-    return out;
-  };
-})*/
-
-.controller('PopupController', function($scope, $rootScope, $window, requestService, $q) {
+.controller('PopupController', function($scope, $rootScope, $window, $q) {
     Object.defineProperty($scope, "queryFilter", {
         get: function() {
             var out = {};
@@ -142,26 +110,16 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
     }
 
     $scope.authorize = function() {
-        /*passport.use(new SteamStrategy({
-                returnURL: 'https://mnadageogkcibhmepnladdkgajhppakd.chromiumapp.org/index.html',
-                realm: 'http://localhost:3000/',
-                apiKey: '780979B5681D3BE94F837360F9A82D73'
-            },
-            function(identifier, profile, done) {
-                User.findByOpenID({
-                    openId: identifier
-                }, function(err, user) {
-                    return done(err, user);
-                });
-            }
-        ));*/
+        $.get()
+
+        //openid flow, scheint zu gehen
         chrome.identity.launchWebAuthFlow({
                 'url': 'https://steamcommunity.com/openid/login?openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&openid.mode=checkid_setup&openid.realm=https%3A%2F%2Fmnadageogkcibhmepnladdkgajhppakd.chromiumapp.org%2F&openid.return_to=https%3A%2F%2Fmnadageogkcibhmepnladdkgajhppakd.chromiumapp.org%2Findex.html',
                 'interactive': true
             },
-            function(redirect_url) { 
-                console.log(redirect_url);
-        });
+            function(redirect_url) {
+                console.log(parseURL(redirect_url));
+            });
     }
 
 
@@ -218,6 +176,22 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
         $('#mid2').css("visibility", "hidden");
     }
 
+    //for openid
+    function parseURL(url) {
+        var parser = document.createElement('a'),
+            searchObject = {},
+            queries, split, i;
+        // Let the browser do the work
+        parser.href = url;
+        // Convert query string to object
+        queries = parser.search.replace(/^\?/, '').split('&');
+        console.log(queries);
+        for (i = 0; i < queries.length; i++) {
+            split = queries[i].split('=');
+            searchObject[split[0]] = split[1];
+        }
+        return searchObject;
+    }
 
 
 });

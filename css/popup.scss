@@ -129,7 +129,7 @@ html {
 	border-collapse: separate;
 	transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
 	box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
-	border: 1px solid #777;
+	border: 1px solid #555;
 	height: 34px;
   padding: 6px 12px;
   font-size: 14px;
@@ -311,7 +311,7 @@ li.active a, li.active a:hover {
 		}
 	}
 	.col {
-		border-left: 1px solid #000000;
+		border-left: 1px solid #555;
 		text-align: center;
 		padding: 4px 0px 0px 10px;
 	}
@@ -323,7 +323,7 @@ li.active a, li.active a:hover {
 	.result-name {
 		border:none;
 		padding-left:16px;
-		float:none;
+		position: absolute;
 		text-align: left;
 	}
 	.result-usertags {
