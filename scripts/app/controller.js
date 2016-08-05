@@ -89,10 +89,13 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
             } else if (request.message === "update") {
                 $scope.appItems = $scope.appItems.concat(request.appItems);
                 $scope.$apply();
+            } else if (request.message === "appItemsDone") {
+                $scope.disabled = false;
             } else if (request.message === "tags") {
+                console.log("tags")
                 $scope.uniqueTags = request.tags;
             } else if (request.message === "tagsUpdate") {
-                $scope.appItems[request.appItemIndex].userTags = request.tags;
+                $scope.appItems = request.appItems;
                 $scope.$apply();
             }
         }
@@ -123,13 +126,11 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
     }
 
     $(window).bind("scroll", function() {
-        if ($(window).scrollTop() + $(window).height() > $(document).height() - 50
-            && $scope.displayLimitChanged === false) {
+        if ($(window).scrollTop() + $(window).height() > $(document).height() - 50 && $scope.displayLimitChanged === false) {
             $scope.displayLimit += 10;
             $scope.$apply();
             $scope.displayLimitChanged = true;
-        }
-        else if ($(window).scrollTop() <= 50) {
+        } else if ($(window).scrollTop() <= 50) {
             $scope.displayLimit = 15;
             $scope.$apply();
             $scope.displayLimitChanged = true;
