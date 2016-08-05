@@ -22,9 +22,9 @@
     "key": "MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEArVMq4i+Ku++icCHK19OxyHVh1e0Gtm3NITPdZSFkZC70RLkghR1jVryU0yTCWH0WYUZuqqZI9aLuGx6XcqV15Wk4wwRXZEEYAYqLHNeJHnEDqGi+2P/EUTwfohQto++3pI6DT6FkCtZMx48meeuGtXcfUvOVukMtX1ZvAomVvqbbvjAnsom3vqpBA80z3gcJjkK0mPzSOh28pfSaSMUB5TLSad3nkgEKYgSJt3NjsiijWRyCayOlejSlkgOh20diekhAbIED2tIp/UYY9RTRdwDSfqbcqUwvdw83HCLRfMoMx+ghDVA40zWJuHuRbEndJs1jbN6A/T+n2ClOaD4xmQIDAQAB",
     "manifest_version": 2,
     "name": "Steam Piggy Bank",
-    "permissions": ["storage", "cookies", "http://store.steampowered.com/*", "http://api.steampowered.com/*"],
+    "permissions": ["storage", "identity", "cookies", "http://store.steampowered.com/*", "http://api.steampowered.com/*"],
     "short_name": "SPB",
     "update_url": "https://clients2.google.com/service/update2/crx",
-    "version": "1.4.2",
+    "version": "1.4.3",
     "web_accessible_resources": ["images/*.png"]
 }
