@@ -19,7 +19,7 @@ angular.module('backgroundApp.controllers', [])
                 }
                 $scope.inProgress = true;
                 requestService.getAllApps().then(function(allApps) {
-                    //console.log("Done: ", allApps);
+                    console.log("Done: ", allApps);
                 }, function(reason) {
                     //console.log(reason);
                 }, function(update) {

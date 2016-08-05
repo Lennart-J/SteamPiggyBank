@@ -387,6 +387,7 @@ angular.module('backgroundApp.services', [])
       appitem.released = getReleaseDate($el);
       appitem.originalprice = getOriginalPrice($el);
       appitem.finalprice = getFinalPrice($el);
+      appitem.finalpricesize = parseFloat(getFinalPrice($el).replace(",", "."))
       appitem.discount = getDiscount($el);
       appitem.urcText = urcText;
       appitem.urcScore = getUrcScore(urcText);
@@ -496,6 +497,7 @@ angular.module('backgroundApp.services', [])
     dealitem.packageid = getPackageId(parent);
     dealitem.originalprice = getOriginalPrice(parent);
     dealitem.finalprice = getFinalPrice(parent);
+    dealitem.finalpricesize = parseFloat(getFinalPrice(parent).replace(",", "."))
     dealitem.discount = getDiscountPercent(parent);
     dealitem.timeremaining = getTimeRemaining(parent);
 
@@ -543,6 +545,7 @@ angular.module('backgroundApp.services', [])
             deal.appid = null;
           }
           deal.name = el.name;
+          this.finalpricesize = el.final_price;
           deal.originalprice = util.formatPrice(el.original_price, el.currency);
           deal.finalprice = util.formatPrice(el.final_price, el.currency);
           deal.discount = "-" + el.discount_percent + "%";
