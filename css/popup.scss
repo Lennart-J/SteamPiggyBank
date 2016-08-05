@@ -124,12 +124,11 @@ html {
 
 #search{
 	display:block;
-	margin-left: 30%;
+    width: 100%;
 	box-sizing: border-box;
 	border-collapse: separate;
 	transition: border-color ease-in-out .15s,box-shadow ease-in-out .15s;
 	box-shadow: inset 0 1px 1px rgba(0,0,0,.075);
-	border-radius: 4px;
 	border: 1px solid #777;
 	height: 34px;
   padding: 6px 12px;
@@ -317,7 +316,7 @@ li.active a, li.active a:hover {
 		padding: 4px 0px 0px 10px;
 	}
 	.result-price {
-		padding-right: 16px;
+		padding-right: 8px;
 		padding-left:0;
 		text-align:right;
 	}
@@ -328,7 +327,7 @@ li.active a, li.active a:hover {
 		text-align: left;
 	}
 	.result-usertags {
-		margin-right:15px;
+		margin-right:40px;
 	}
 }
 	
