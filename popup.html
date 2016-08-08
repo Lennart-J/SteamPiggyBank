@@ -40,14 +40,14 @@
         </div>
 
         <header>
-           <input type="search" placeholder="Search" id="search" ng-model="query[queryBy]" ng-disabled="isLoading()">
+           <input type="search" placeholder="Search" id="search" ng-model="query[queryBy]" ng-disabled="isLoading('appitems')" ng-click="track('search')">
            <!-- <img ng-click="authorize();" src="img/sits_01.png"> -->
-           <!--  <ui-select id="tags" multiple ng-model="activeTags" theme="select2" ng-disabled="disabled">
+            <ui-select id="tags" multiple ng-model="tags.active" limit="5" close-on-select="false" theme="select2" ng-disabled="isLoading('tags')" ng-click="track('tags')">
                 <ui-select-match placeholder=" Select Tags...">{{$item}}</ui-select-match>
-                <ui-select-choices repeat="tag in uniqueTags | filter:$select.search">
+                <ui-select-choices repeat="tag in tags.unique | filter:$select.search">
                     {{tag}}
                 </ui-select-choices>
-            </ui-select> -->
+            </ui-select>
         </header>
 
         <div id="result-header">
@@ -82,17 +82,18 @@
         </div>
 
         <div id="result-content">
-            <a href="" ng-repeat="app in appItems | filter:query | orderBy : orderExp : orderReverse | unique : 'name' | limitTo:displayLimit" class="result-row" ng-class-even="'even'" ng-class-odd="'odd'" ng-href="{{app.url}}" ng-attr-title="{{app.name}}" ng-click="onAppClick(app, $event)">
+            <a href="" ng-repeat="app in appItems.filtered | filter:query | orderBy : orderExp : orderReverse | unique : 'name' | limitTo:displayLimit" class="result-row" ng-class-even="'even'" ng-class-odd="'odd'" ng-href="{{app.url}}" ng-attr-title="{{app.name}}" ng-click="onAppClick(app, $event)">
                 <div class="col result-price">
                     <p><del>{{app.originalprice}}</del></p>
                     <p>{{app.finalprice}}</p>
                 </div>
-                <div class="col result-discount">-{{app.discount}}%</div>
-                <div class="col result-urc">{{app.urcPercent}}</div>
+                <div class="col result-discount"><span ng-if="app.discount > 0">-{{app.discount}}%</span></div>
+                <div class="col result-urc" ng-attr-title="{{app.urcText}}">{{app.urcPercent}}</div>
                 <div class="col result-usertags">{{app.userTags[0]}}</div>
                 <div class="col result-capsule">
-                    <img ng-if="app.appid && app.appid.indexOf(',') === -1" ng-src="http://cdn.akamai.steamstatic.com/steam/apps/{{app.appid}}/header.jpg">
-                    <img ng-if="app.packageid && (isNaN(appItem.appid) || app.appid.indexOf(',') > -1)" ng-src="http://cdn.akamai.steamstatic.com/steam/subs/{{app.packageid}}/header.jpg">
+                    <!-- <img ng-if="app.appid && app.appid.indexOf(',') === -1" ng-src="http://cdn.akamai.steamstatic.com/steam/apps/{{app.appid}}/header.jpg">
+                    <img ng-if="app.packageid && (isNaN(appItem.appid) || app.appid.indexOf(',') > -1)" ng-src="http://cdn.akamai.steamstatic.com/steam/subs/{{app.packageid}}/header.jpg"> -->
+                    <img ng-src="{{app.imageUrl}}">
                 </div>
                 <div class="col result-name">
                 </div>
