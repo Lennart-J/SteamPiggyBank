@@ -18,14 +18,18 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
         filtered: []
     };
     $scope.tags = {
-            unique: [],
-            active: []
-        }
-        /*$scope.uniqueTags = [];
-        $scope.activeTags = [];*/
+        unique: [],
+        active: []
+    };
+    $scope.options = {
+        view: "default"
+    };
+    /*$scope.uniqueTags = [];
+    $scope.activeTags = [];*/
     $scope.query = {};
     $scope.queryBy = '$';
     $scope.orderExp = '';
+
     $scope.orderReverse = false;
     $scope.displayLimit = 15;
     $scope.displayLimitChanged = false;
@@ -42,7 +46,16 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
         if (response !== undefined) {
             $scope.appItems.all = response.appItems;
             $scope.appItems.filtered = response.appItems;
+            $scope.tags.unique = response.uniqueTags;
+            $scope.disabled.search = false;
+            $scope.disabled.select = false;
             $scope.$apply();
+        }
+    });
+
+    chrome.storage.local.get(["options"], function(items) {
+        if (items.options) {
+            $scope.options = items.options;
         }
     });
 
@@ -71,7 +84,6 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
             } else if (request.message === "appItemsDone") {
                 $scope.disabled.search = false;
             } else if (request.message === "tags") {
-                console.log("tags");
                 $scope.tags.unique = request.tags;
                 $scope.disabled.select = false;
                 $scope.$apply();
@@ -135,13 +147,63 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
 
     $scope.authorize = function() {
         //openid flow, scheint zu gehen
-        chrome.identity.launchWebAuthFlow({
-                'url': 'https://steamcommunity.com/openid/login?openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&openid.mode=checkid_setup&openid.realm=https%3A%2F%2Fmnadageogkcibhmepnladdkgajhppakd.chromiumapp.org%2F&openid.return_to=https%3A%2F%2Fmnadageogkcibhmepnladdkgajhppakd.chromiumapp.org%2Findex.html',
-                'interactive': true
-            },
-            function(redirect_url) {
-                console.log(parseURL(redirect_url));
-            });
+
+        // chrome.identity.launchWebAuthFlow({
+        //         'url': 'https://steamcommunity.com/openid/login?openid.identity=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.claimed_id=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0%2Fidentifier_select&openid.ns=http%3A%2F%2Fspecs.openid.net%2Fauth%2F2.0&openid.mode=checkid_setup&openid.realm=https%3A%2F%2Fmnadageogkcibhmepnladdkgajhppakd.chromiumapp.org%2F&openid.return_to=https%3A%2F%2Fmnadageogkcibhmepnladdkgajhppakd.chromiumapp.org%2Findex.html',
+        //         'interactive': true
+        //     },
+        //     function(redirect_url) {
+        //         console.log(parseURL(redirect_url));
+        //     });
+    }
+
+    $scope.changeView = function() {
+        $scope.track("change_view");
+        chrome.storage.local.get(["options"], function(items) {
+            var new_options = {
+                options: {}
+            };
+            if (items.options) {
+                if (items.options.view === "panel") {
+                    new_options["options"]["view"] = "default";
+                    chrome.storage.local.set(new_options);
+                    
+                    chrome.browserAction.setPopup({
+                        popup: 'popup.html'
+                    });
+                    window.close();
+                } else {
+                    new_options["options"]["view"] = "panel";
+                    chrome.storage.local.set(new_options);
+                    $scope.options["view"] = "panel";
+                    
+                    chrome.windows.create({
+                            url: 'popup.html',
+                            type: 'panel',
+                            state: 'docked',
+                            height: 500,
+                            width: 430
+                        },
+                        function(windowInfo) {
+                            if (!windowInfo.alwaysOnTop) {
+                                chrome.windows.remove(windowInfo.id);
+                                chrome.windows.create({
+                                    url: 'popup.html',
+                                    type: 'panel',
+                                    state: 'popup',
+                                    height: 500,
+                                    width: 420
+                                });
+                            }
+                            chrome.browserAction.setPopup({
+                                popup: ''
+                            });
+                            window.close();
+                        });
+                }
+                
+            }
+        });
     }
 
     $scope.$watch('query[queryBy]', function() {
@@ -150,7 +212,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
     });
 
     $scope.$watch('tags.active', function() {
-        console.log($scope.tags.active);
+        //console.log($scope.tags.active);
 
         var tmp = [];
 
@@ -231,7 +293,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
         parser.href = url;
         // Convert query string to object
         queries = parser.search.replace(/^\?/, '').split('&');
-        console.log(queries);
+        //console.log(queries);
         for (i = 0; i < queries.length; i++) {
             split = queries[i].split('=');
             searchObject[split[0]] = split[1];

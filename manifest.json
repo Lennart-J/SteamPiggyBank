@@ -25,6 +25,6 @@
     "permissions": ["storage", "identity", "cookies", "http://store.steampowered.com/*", "http://api.steampowered.com/*"],
     "short_name": "SPB",
     "update_url": "https://clients2.google.com/service/update2/crx",
-    "version": "1.4.7",
+    "version": "1.4.8",
     "web_accessible_resources": ["images/*.png"]
 }

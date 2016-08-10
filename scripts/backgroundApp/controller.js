@@ -9,90 +9,135 @@ angular.module('backgroundApp.controllers', [])
     chrome.runtime.onMessage.addListener(
 
         function(request, sender, sendResponse) {
-
             if (request.message === "init") {
                 if ($scope.inProgress === true) {
                     sendResponse({
                         message: 'cache',
-                        appItems: $scope.appItems
-                    })
+                        appItems: $scope.appItems,
+                        uniqueTags : $scope.uniqueTags
+                    });
+                    //return;
                 }
-                $scope.inProgress = true;
-                requestService.getAllApps().then(function(allApps) {
-                    console.log("Done: ", allApps);
-                }, function(reason) {
-                    //console.log(reason);
-                }, function(update) {
-                    var tmp_appItems = update[0];
-                    var tmp_loadCanvasArg = Math.round(update[1] * 100);
-                    if (request.animate_status === true) {
-                        chrome.runtime.sendMessage({
-                            message: "loadCanvas",
-                            arg: tmp_loadCanvasArg
-                        });
-                    }
-                    chrome.runtime.sendMessage({
-                        message: "update",
-                        appItems: tmp_appItems
-                    });
-                    $scope.appItems = $scope.appItems.concat(update[0]);
-                }).then(function() {
-                    chrome.runtime.sendMessage({
-                        message: "appItemsDone"
-                    });
-                    return requestService.getAllUserTags();
-                }).then(function(tags) {
-                        console.log("Done - All User Tags: ", tags);
-                        var tmp_tags = [];
 
-                        for (var i = tags.length - 1; i >= 0; i--) {
-                            for (var j = tags[i].userTags.length - 1; j >= 0; j--) {
-                                tmp_tags.push(tags[i].userTags[j]);
-                            }
+                if ($scope.inProgress === false) {
+                    $scope.inProgress = true;
+                    requestService.getAllApps().then(function(allApps) {
+                        //console.log("Done: ", allApps);
+                    }, function(reason) {
+                        //console.log(reason);
+                    }, function(update) {
+                        var tmp_appItems = update[0];
+                        var tmp_loadCanvasArg = Math.round(update[1] * 100);
+                        if (request.animate_status === true) {
+                            chrome.runtime.sendMessage({
+                                message: "loadCanvas",
+                                arg: tmp_loadCanvasArg
+                            });
                         }
-                        tmp_tags = uniques(tmp_tags);
-
                         chrome.runtime.sendMessage({
-                            message: "loadCanvas",
-                            arg: 100
+                            message: "update",
+                            appItems: tmp_appItems
                         });
+                        $scope.appItems = $scope.appItems.concat(update[0]);
+                    }).then(function() {
                         chrome.runtime.sendMessage({
-                            message: "tags",
-                            tags: tmp_tags
+                            message: "appItemsDone"
                         });
-                        $scope.uniqueTags = tmp_tags;
-                    },
-                    function(reason) {
-                        console.log(reason);
-                    },
-                    function(userTagChunk) {
-                        if (!userTagChunk) return;
+                        return requestService.getAllUserTags();
+                    }).then(function(tags) {
+                            //console.log("Done - All User Tags: ", tags);
+                            var tmp_tags = [];
 
-                        //console.log(userTagChunk);
-                        for (var i = $scope.appItems.length - 1; i >= 0; i--) {
-                            for (var j = userTagChunk.length - 1; j >= 0; j--) {
-                                if (userTagChunk[j].appId) {
-                                    if ($scope.appItems[i].appid === userTagChunk[j].appId) {
-                                        $scope.appItems[i].userTags = userTagChunk[j].userTags;
-                                        break;
-                                    }
-                                } else if (userTagChunk[j].packageId) {
-                                    if ($scope.appItems[i].packageId === userTagChunk[j].packageId) {
-                                        $scope.appItems[i].userTags = userTagChunk[j].userTags;
-                                        break;
-                                    }
+                            $.each(tags, function(index, value) {
+                                for (var j = value.length - 1; j >= 0; j--) {
+                                    tmp_tags.push(value[j]);
                                 }
+                            });
+
+                            tmp_tags = uniques(tmp_tags);
+
+                            chrome.runtime.sendMessage({
+                                message: "loadCanvas",
+                                arg: 100
+                            });
+                            chrome.runtime.sendMessage({
+                                message: "tags",
+                                tags: tmp_tags
+                            });
+                            $scope.uniqueTags = tmp_tags;
+
+                            for (var i = $scope.appItems.length - 1; i >= 0; i--) {
+                                if ($scope.appItems[i].type === 'app') {
+                                    $scope.appItems[i].userTags = tags[$scope.appItems[i].appid];
+
+                                } else if ($scope.appItems[i].type === 'package') {
+                                    $scope.appItems[i].userTags = tags[$scope.appItems[i].packageid];
+                                } else if ($scope.appItems[i].type === 'bundle') {
+                                    $scope.appItems[i].userTags = tags[$scope.appItems[i].bundleid];
+                                }
+
                             }
+                            chrome.runtime.sendMessage({
+                                message: "tagsUpdate",
+                                appItems: $scope.appItems
+                            });
+                        },
+                        function(reason) {
+                            //console.log(reason);
+                        },
+                        function(userTagChunk) {
+                            //console.log(userTagChunk);
                         }
-                        chrome.runtime.sendMessage({
-                            message: "tagsUpdate",
-                            appItems: $scope.appItems
-                        });
-                    }
-                )
+                    );
+                }
+
             }
 
         });
+
+    this.init = function() {
+        chrome.storage.local.get(["options"], function(items) {
+            if (items.options) {
+                if (items.options.view === "panel") {
+                    chrome.browserAction.setPopup({
+                        popup: ''
+                    })
+                    chrome.browserAction.onClicked.addListener(function() {
+                        chrome.runtime.sendMessage({
+                            message: "clickedBrowserAction"
+                        });
+                        chrome.windows.create({
+                                url: 'popup.html',
+                                type: 'panel',
+                                state: 'docked',
+                                height: 500,
+                                width: 430
+                            },
+                            function(windowInfo) {
+                                if (!windowInfo.alwaysOnTop) {
+                                    chrome.windows.remove(windowInfo.id);
+                                    chrome.windows.create({
+                                        url: 'popup.html',
+                                        type: 'panel',
+                                        state: 'popup',
+                                        height: 500,
+                                        width: 420
+                                    });
+                                }
+                                window.close();
+                            });
+                    });
+                }
+            } else {
+                var store = {
+                    options: {}
+                };
+                store["options"]["view"] = "default";
+                chrome.storage.local.set(store);
+            }
+        });
+    }
+
 
     function uniques(arr) {
         var a = [];
@@ -103,4 +148,5 @@ angular.module('backgroundApp.controllers', [])
         }
         return a;
     }
+    this.init();
 });

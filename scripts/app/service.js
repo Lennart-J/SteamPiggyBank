@@ -68,7 +68,7 @@ angular.module('SteamPiggyBank.services', [])
 
   this.getFilter = function(name) {
     $.each(filters, function(index, filter) {
-      console.log(filter.name, name);
+      //console.log(filter.name, name);
       if (filter.name === name) {
         return filter;
       }

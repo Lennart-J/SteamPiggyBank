@@ -129,6 +129,7 @@ angular.module('backgroundApp.services', [])
 .service('requestService', function($http, $q, util) {
 
     var allAppsOnSale = [];
+    var storage_reference = {};
 
     this.getCurrentApp = function(appId, packageId) {
         var currentApp;
@@ -161,6 +162,27 @@ angular.module('backgroundApp.services', [])
             defer = $q.defer(),
             status = 0;
 
+        //get storage reference
+        chrome.storage.local.get(null, function(items) {
+            if (items && items['app']) {
+                //console.log("Got storage reference")
+                storage_reference = items;
+            } else {
+                storage_reference = {
+                    'bundle': {
+                        '0': ['great', 'awesome']
+                    },
+                    'app': {
+                        '0': ['great', 'awesome']
+                    },
+                    'package': {
+                        '0': ['great', 'awesome']
+                    }
+                };
+            }
+
+        });
+
         // first call to access information like maxPage
         $http.get('http://store.steampowered.com/search/?specials=1')
             .success(function(data) {
@@ -168,7 +190,7 @@ angular.module('backgroundApp.services', [])
                 parent = $data.find('#search_result_container');
                 maxPage = findLastSalePage($data);
                 tmpList = findSaleItems(parent);
-                allUserTags = findAllUserTags($data);
+                //allUserTags = findAllUserTags($data);
 
                 allAppsOnSale = allAppsOnSale.concat(parseDOMElementList(tmpList));
                 defer.notify([parseDOMElementList(tmpList), status]);
@@ -192,7 +214,7 @@ angular.module('backgroundApp.services', [])
                     );
                 }
                 $q.all(XHRs).then(function() {
-                    console.log("resolve all apps on sale");
+                    //console.log("resolve all apps on sale");
                     defer.resolve(allAppsOnSale);
                 });
             });
@@ -227,14 +249,14 @@ angular.module('backgroundApp.services', [])
             .success(function(data) {
                 featuredDeals = parseFeaturedDeals(data);
                 allAppsOnSale = allAppsOnSale.concat(featuredDeals);
-                console.log('allAppsOnSale: ', allAppsOnSale);
+                //console.log('allAppsOnSale: ', allAppsOnSale);
                 defer.resolve(featuredDeals);
             });
 
         return defer.promise;
     };
 
-    this.getAppItemDetails = function(appId, packageId) {
+    this.getAppItemDetails = function(appitem) {
         var categories = [],
             description, $data, defer = $q.defer(),
             app, userTags = [];
@@ -242,40 +264,59 @@ angular.module('backgroundApp.services', [])
         //app = this.getCurrentApp(appId, packageId);
         /*console.log("appId: ", appId);
         console.log("packageId: ", packageId);*/
-        if (appId) {
-            $http.get('http://store.steampowered.com/apphover/' + appId)
-                .success(function(data) {
-                    $data = $(data);
-                    categories = getCategories($data);
-                    userTags = getUserTags($data);
-                    description = getDescription($data);
-                    defer.resolve({
-                        'appId': appId,
-                        'categories': categories,
-                        'userTags': userTags,
-                        'description': description
-                    });
-                    //console.log('getDescription: ', description);
-                });
-        } else if (packageId) {
-            $http.get('http://store.steampowered.com/subhover/' + packageId)
-                .success(function(data) {
-                    $data = $(data);
-                    categories = getCategories($data);
-                    userTags = getUserTags($data);
-                    description = getDescription($data);
-                    defer.resolve({
-                        'packageId': packageId,
-                        'categories': categories,
-                        'userTags': userTags,
-                        'description': description
-                    });
-                    //console.log('getCategories: ', categories);
-                });
+        var id = getIdFromType(appitem, appitem.type);
+        var url = getUrlFromType(appitem, appitem.type);
+
+        var res = {};
+
+        if (storage_reference[appitem["type"]][id]) {
+            //console.log("Found in storage");
+            res[id] = storage_reference[appitem.type][id];
+            defer.resolve(res);
         } else {
-            defer.reject("You need to specifiy an app or package id.");
+            $http.get(url)
+                .success(function(data) {
+                    $data = $(data);
+                    categories = getCategories($data);
+                    userTags = getUserTags($data);
+                    description = getDescription($data);
+                    
+                    // defer.resolve({
+                    //     'id': id,
+                    //     'type': appitem.type,
+                    //     'categories': categories,
+                    //     'userTags': userTags,
+                    //     'description': description
+                    // });
+
+                    storage_reference[appitem.type][id] = userTags;
+                    res[id] = userTags;
+                    defer.resolve(res);
+                });
         }
+
+
         return defer.promise;
+
+        function getIdFromType(appitem, type) {
+            if (type === 'app') {
+                return appitem.appid;
+            } else if (type === 'package') {
+                return appitem.packageid;
+            } else if (type === 'bundle') {
+                return appitem.bundleid;
+            }
+        }
+
+        function getUrlFromType(appitem, type) {
+            if (type === 'app') {
+                return 'http://store.steampowered.com/apphover/' + appitem.appid;
+            } else if (type === 'package') {
+                return 'http://store.steampowered.com/subhover/' + appitem.packageid;
+            } else if (type === 'bundle') {
+                return 'http://store.steampowered.com/bundle/' + appitem.bundleid + '/hover_public/';
+            }
+        }
     };
 
     this.getMetaScore = function(appId, packageId) {
@@ -337,29 +378,30 @@ angular.module('backgroundApp.services', [])
             defer = $q.defer(),
             ctr = 0,
             tmp_results = [],
-            all_results = [];
+            all_results = {};
 
         for (var i = 0, len = allAppsOnSale.length; i < len; i++) {
-            if (allAppsOnSale[i].appid || allAppsOnSale[i].packageid) {
-                XHRs.push(
-                    this.getAppItemDetails(allAppsOnSale[i].appid, allAppsOnSale[i].packageid)
-                    .then(function(data) {
-                        ctr++;
-                        tmp_results.push(data);
-                        all_results.push(data);
-                        if (ctr % 25 === 0) {
-                            defer.notify(tmp_results);
-                            tmp_results = [];
-                        }
-                    })
-                );
-            }
-            
+            XHRs.push(
+                this.getAppItemDetails(allAppsOnSale[i])
+                .then(function(data) {
+                    //ctr++;
+                    //tmp_results.push(data);
+                    all_results[Object.keys(data)[0]] = data[Object.keys(data)[0]];
+                    // if (ctr % 25 === 0) {
+                    //     defer.notify(tmp_results);
+                    //     tmp_results = [];
+                    // }
+                })
+            );
         }
+
         $q.all(XHRs).then(function() {
-            console.log("resolve all tags");
+            //console.log("resolve all tags");
+            //console.log("Saving tags in local storage: ", storage_reference);
+            chrome.storage.local.set(storage_reference);
             defer.resolve(all_results);
         });
+
         return defer.promise;
     };
 
@@ -444,6 +486,16 @@ angular.module('backgroundApp.services', [])
     var parseDOMElementList = function(list) {
         var appitems = [],
             appitem = {};
+
+        // chrome.storage.local.set(
+        //     {'bundle': {'213' : ['great', 'awesome'], '123': ['great', 'awesome']}, 
+        //     'app': {'213' : ['great', 'awesome'], '123': ['great', 'awesome']}}, 
+        //     function() {
+        //   // Notify that we saved.
+        //   chrome.storage.local.get(null, function(items) {
+        //     console.log(items);
+        //   });
+        // });
         $.each(list, function(key, el) {
             var $el = $(el),
                 urcText = getUserReviewScoreText($el),
@@ -464,11 +516,15 @@ angular.module('backgroundApp.services', [])
             //appitem.imageUrl = appitem.packageid ? getPackageImage(appitem.packageid) : getAppImage(appitem.appid);
             appitem.imageUrl = getAppImage($el);
             appitem.url = getUrl($el);
+            appitem.type = getType(appitem.appid, appitem.packageid, appitem.bundleid);
 
             if (urcText) {
                 appitem.urcPercent = urcPattern.exec(urcText)[0];
                 appitem.urcText = urcText.replace(/<br>/ig, ': ');
             }
+
+            //make promise out of this push on resolve
+            //XHRs.push(retrieveUserTags(appitem));
 
             appitems.push(appitem);
             appitem = {};
@@ -601,6 +657,56 @@ angular.module('backgroundApp.services', [])
                 }
             }
         }
+
+        function getType(appid, packageid, bundleid) {
+            if (appid) {
+                return 'app';
+            } else if (packageid) {
+                return 'package';
+            } else if (bundleid) {
+                return 'bundle';
+            }
+        }
+
+        // function retrieveUserTags(appitem) {
+        //     var id = getIdFromType(appitem, appitem.type);
+        //     var newTags = {};
+        //     var XHRs = [];
+
+        //     if (storage) {
+        //         for (var i = storage[appitem.type].length - 1; i >= 0; i--) {
+        //             if (storage[appitem.type][i].id === id) {
+        //                 appitem.userTags = storage[appitem.type][i].userTags;
+        //             } else {
+        //                 //make apphover request and save in storage
+        //                 var url = getUrlByType(appitem, appitem.type);
+        //                 defer = $http.get(url)
+        //                     .success(function(data) {
+        //                         $data = $(data);
+        //                         var local_item = {};
+
+        //                         var results = {
+        //                             categories: getCategories($data),
+        //                             userTags: getUserTags($data),
+        //                             description: getDescription($data),
+        //                         };
+        //                         newTags[id] = results.userTags;
+        //                         appitem.userTags = results.userTags;
+
+
+        //                     });
+
+        //             }
+        //         }
+
+        //     } else {
+        //         //no storage set up yet
+        //         console.warn("No storage items!");
+        //     }
+
+
+        //     return defer.promise;
+        // }
     };
 
     var findDailyDeal = function(page) {

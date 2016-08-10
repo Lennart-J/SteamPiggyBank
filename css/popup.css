@@ -795,7 +795,9 @@ html {
   min-width: 420px;
   max-width: 420px;
   min-height: 500px;
-  max-height: 500px; }
+  max-height: 500px;
+  overflow-x:hidden; 
+}
 
 #header, #content, #footer {
   color: #b0aeac;
@@ -814,7 +816,8 @@ html {
 h2 {
   position: relative;
   text-align: center;
-  font-weight: lighter; }
+  font-weight: lighter; 
+pointer-events:none; }
 
 #header img {
   position: absolute;
@@ -890,6 +893,7 @@ canvas {
   background: linear-gradient(to bottom, transparent 5%, rgba(102, 192, 244, 0.2) 95%); }
 
 .overlay {
+pointer-events:none; 
   position: absolute;
   right: 0;
   top: 0;
@@ -1121,4 +1125,11 @@ li.active a, li.active a:hover {
     left: 50px;
     font-size : 32px;
     position: absolute;
+}
+#change-view-icon i {
+    color: #777;
+    font-size : 24px;
+    position: relative;
+    float : left;
+    pointer-events:auto;
 }
