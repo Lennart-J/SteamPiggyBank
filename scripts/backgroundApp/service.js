@@ -170,7 +170,8 @@ angular.module('backgroundApp.services', [])
                 tmpList = findSaleItems(parent);
                 allUserTags = findAllUserTags($data);
 
-                allItemsOnSale = allItemsOnSale.concat(parseDOMElementList(tmpList));
+                allAppsOnSale = allAppsOnSale.concat(parseDOMElementList(tmpList));
+                defer.notify([parseDOMElementList(tmpList), status]);
                 currentPage++;
                 tmpList = [];
                 tmpItems = [];
@@ -191,6 +192,7 @@ angular.module('backgroundApp.services', [])
                     );
                 }
                 $q.all(XHRs).then(function() {
+                    console.log("resolve all apps on sale");
                     defer.resolve(allAppsOnSale);
                 });
             });
@@ -237,7 +239,7 @@ angular.module('backgroundApp.services', [])
             description, $data, defer = $q.defer(),
             app, userTags = [];
 
-        app = this.getCurrentApp(appId, packageId);
+        //app = this.getCurrentApp(appId, packageId);
         /*console.log("appId: ", appId);
         console.log("packageId: ", packageId);*/
         if (appId) {
@@ -338,20 +340,24 @@ angular.module('backgroundApp.services', [])
             all_results = [];
 
         for (var i = 0, len = allAppsOnSale.length; i < len; i++) {
-            XHRs.push(
-                this.getAppItemDetails(allAppsOnSale[i].appid, allAppsOnSale.packageid)
-                .then(function(data) {
-                    ctr++;
-                    tmp_results.push(data);
-                    all_results.push(data);
-                    if (ctr % 25 === 0) {
-                        defer.notify(tmp_results);
-                        tmp_results = [];
-                    }
-                })
-            );
+            if (allAppsOnSale[i].appid || allAppsOnSale[i].packageid) {
+                XHRs.push(
+                    this.getAppItemDetails(allAppsOnSale[i].appid, allAppsOnSale[i].packageid)
+                    .then(function(data) {
+                        ctr++;
+                        tmp_results.push(data);
+                        all_results.push(data);
+                        if (ctr % 25 === 0) {
+                            defer.notify(tmp_results);
+                            tmp_results = [];
+                        }
+                    })
+                );
+            }
+            
         }
         $q.all(XHRs).then(function() {
+            console.log("resolve all tags");
             defer.resolve(all_results);
         });
         return defer.promise;

@@ -2,6 +2,7 @@
 <html ng-app="SteamPiggyBank">
     <head>
         <link rel="stylesheet" href="css/popup.css">
+        <link rel="stylesheet" href="css/ionicons.css">
 
         <script src="scripts/lib/ga.js"></script>
         <script src="scripts/lib/jquery-2.1.1.min.js"></script>
@@ -28,6 +29,13 @@
     </head>
     <body ng-controller="PopupController">
         <div id="header">
+            <!-- <div id="wishlist-icon">
+                <i class="icon ion-android-clipboard"></i>
+                <i class="icon ion-heart"></i>
+            </div>
+            <div id="user-icon">
+                <i class="icon ion-android-person"></i>
+            </div> -->
             <h2>Steam Piggy Bank</h2>
             <div class="overlay"></div>
             <div id="pigCircle" class="circle"></div>
@@ -40,6 +48,7 @@
         </div>
 
         <header>
+            
            <input type="search" placeholder="Search" id="search" ng-model="query[queryBy]" ng-disabled="isLoading('appitems')" ng-click="track('search')">
            <!-- <img ng-click="authorize();" src="img/sits_01.png"> -->
             <ui-select id="tags" multiple ng-model="tags.active" limit="5" close-on-select="false" theme="select2" ng-disabled="isLoading('tags')" ng-click="track('tags')">

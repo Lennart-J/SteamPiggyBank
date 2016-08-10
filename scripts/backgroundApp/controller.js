@@ -42,7 +42,7 @@ angular.module('backgroundApp.controllers', [])
                     });
                     return requestService.getAllUserTags();
                 }).then(function(tags) {
-                        //console.log("All User Tags: ", tags);
+                        console.log("Done - All User Tags: ", tags);
                         var tmp_tags = [];
 
                         for (var i = tags.length - 1; i >= 0; i--) {
@@ -63,7 +63,7 @@ angular.module('backgroundApp.controllers', [])
                         $scope.uniqueTags = tmp_tags;
                     },
                     function(reason) {
-                        //console.log(reason);
+                        console.log(reason);
                     },
                     function(userTagChunk) {
                         if (!userTagChunk) return;
