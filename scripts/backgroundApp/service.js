@@ -192,7 +192,7 @@ angular.module('backgroundApp.services', [])
                 tmpList = findSaleItems(parent);
                 //allUserTags = findAllUserTags($data);
 
-                allAppsOnSale = allAppsOnSale.concat(parseDOMElementList(tmpList));
+                allAppsOnSale = allAppsOnSale.concat(parseDOMElementList(tmpList, currentPage));
                 defer.notify([parseDOMElementList(tmpList), status]);
                 currentPage++;
                 tmpList = [];
@@ -207,7 +207,7 @@ angular.module('backgroundApp.services', [])
                             parent = $data.find('#search_result_container');
                             tmpList = findSaleItems(parent);
                             defer.notify([parseDOMElementList(tmpList), status]);
-                            allAppsOnSale = allAppsOnSale.concat(parseDOMElementList(tmpList));
+                            allAppsOnSale = allAppsOnSale.concat(parseDOMElementList(tmpList, currentPage));
 
                             tmpList = [];
                         })
@@ -483,7 +483,7 @@ angular.module('backgroundApp.services', [])
         return tagArray;
     };
 
-    var parseDOMElementList = function(list) {
+    var parseDOMElementList = function(list, page) {
         var appitems = [],
             appitem = {};
 
@@ -595,8 +595,8 @@ angular.module('backgroundApp.services', [])
         }
 
         function getDiscount(element, bundleData) {
-            if (bundleData !== undefined) {
-                return bundleData.m_nDiscountPct;
+            if (bundleData && bundleData.m_nDiscountPct > 0) {
+                return parseInt(bundleData.m_nDiscountPct | 0);
             }
             var discount = parseInt(element.find('.search_discount span').text().replace(/\-|\%/g, ''));
             return discount ? discount : 0;

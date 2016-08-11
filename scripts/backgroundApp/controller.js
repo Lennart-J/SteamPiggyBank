@@ -10,11 +10,12 @@ angular.module('backgroundApp.controllers', [])
 
         function(request, sender, sendResponse) {
             if (request.message === "init") {
+                init();
                 if ($scope.inProgress === true) {
                     sendResponse({
                         message: 'cache',
                         appItems: $scope.appItems,
-                        uniqueTags : $scope.uniqueTags
+                        uniqueTags: $scope.uniqueTags
                     });
                     //return;
                 }
@@ -22,7 +23,7 @@ angular.module('backgroundApp.controllers', [])
                 if ($scope.inProgress === false) {
                     $scope.inProgress = true;
                     requestService.getAllApps().then(function(allApps) {
-                        //console.log("Done: ", allApps);
+                        console.log("Done: ", allApps);
                     }, function(reason) {
                         //console.log(reason);
                     }, function(update) {
@@ -95,38 +96,18 @@ angular.module('backgroundApp.controllers', [])
 
         });
 
-    this.init = function() {
+    var init = function() {
         chrome.storage.local.get(["options"], function(items) {
             if (items.options) {
                 if (items.options.view === "panel") {
                     chrome.browserAction.setPopup({
                         popup: ''
-                    })
-                    chrome.browserAction.onClicked.addListener(function() {
-                        chrome.runtime.sendMessage({
-                            message: "clickedBrowserAction"
-                        });
-                        chrome.windows.create({
-                                url: 'popup.html',
-                                type: 'panel',
-                                state: 'docked',
-                                height: 500,
-                                width: 430
-                            },
-                            function(windowInfo) {
-                                if (!windowInfo.alwaysOnTop) {
-                                    chrome.windows.remove(windowInfo.id);
-                                    chrome.windows.create({
-                                        url: 'popup.html',
-                                        type: 'panel',
-                                        state: 'popup',
-                                        height: 500,
-                                        width: 420
-                                    });
-                                }
-                                window.close();
-                            });
                     });
+                    chrome.browserAction.onClicked.removeListener(onBrowserActionClicked);
+                    chrome.browserAction.onClicked.addListener(onBrowserActionClicked);
+                }
+                else {
+                    chrome.browserAction.onClicked.removeListener(onBrowserActionClicked);
                 }
             } else {
                 var store = {
@@ -136,8 +117,35 @@ angular.module('backgroundApp.controllers', [])
                 chrome.storage.local.set(store);
             }
         });
-    }
+    };
 
+    function onBrowserActionClicked() {
+
+        chrome.runtime.sendMessage({
+            message: "clickedBrowserAction"
+        });
+        chrome.windows.create({
+                url: 'popup.html',
+                type: 'panel',
+                state: 'docked',
+                height: 500,
+                width: 430
+            },
+            function(windowInfo) {
+                //     if (!windowInfo.alwaysOnTop) {
+                //     chrome.windows.remove(windowInfo.id);
+                //     chrome.windows.create({
+                //         url: 'popup.html',
+                //         type: 'popup',
+                //         state: 'normal',
+                //         height: 500,
+                //         width: 420
+                //     });
+                // }
+                window.close();
+            });
+
+    }
 
     function uniques(arr) {
         var a = [];
@@ -148,5 +156,9 @@ angular.module('backgroundApp.controllers', [])
         }
         return a;
     }
-    this.init();
+    init();
+
+    chrome.runtime.onStartup.addListener(function(){
+        init();
+    });
 });

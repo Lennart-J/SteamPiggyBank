@@ -55,6 +55,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
 
     chrome.storage.local.get(["options"], function(items) {
         if (items.options) {
+            console.log("Got options: ", items.options);    
             $scope.options = items.options;
         }
     });
@@ -166,17 +167,18 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
             if (items.options) {
                 if (items.options.view === "panel") {
                     new_options["options"]["view"] = "default";
+                    $scope.options["view"] = "default";
                     chrome.storage.local.set(new_options);
                     
                     chrome.browserAction.setPopup({
                         popup: 'popup.html'
                     });
-                    window.close();
-                } else {
+                    chrome.runtime.reload()
+                    setTimeout(window.close(),1000);
+                } else if (items.options.view === "default") {
                     new_options["options"]["view"] = "panel";
                     chrome.storage.local.set(new_options);
                     $scope.options["view"] = "panel";
-                    
                     chrome.windows.create({
                             url: 'popup.html',
                             type: 'panel',
@@ -185,19 +187,19 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
                             width: 430
                         },
                         function(windowInfo) {
-                            if (!windowInfo.alwaysOnTop) {
-                                chrome.windows.remove(windowInfo.id);
-                                chrome.windows.create({
-                                    url: 'popup.html',
-                                    type: 'panel',
-                                    state: 'popup',
-                                    height: 500,
-                                    width: 420
-                                });
-                            }
-                            chrome.browserAction.setPopup({
-                                popup: ''
-                            });
+                            // if (!windowInfo.alwaysOnTop) {
+                            //     chrome.windows.remove(windowInfo.id);
+                            //     chrome.windows.create({
+                            //         url: 'popup.html',
+                            //         type: 'popup',
+                            //         state: 'normal',
+                            //         height: 500,
+                            //         width: 420
+                            //     });
+                            // }
+                            // chrome.browserAction.setPopup({
+                            //     popup: ''
+                            // });
                             window.close();
                         });
                 }
