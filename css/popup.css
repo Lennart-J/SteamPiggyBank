@@ -793,7 +793,7 @@ input:disabled::-webkit-input-placeholder {
 html {
   background: black;
   min-width: 420px;
-  max-width: 420px;
+ /* max-width: 420px;*/
   min-height: 500px;
   max-height: 500px;
   overflow-x:hidden; 
@@ -821,7 +821,8 @@ pointer-events:none; }
 
 #header img {
   position: absolute;
-  left: 372px;
+  /*left: 372px;*/
+  right: 15px;
   top: 7px; }
 
 #stay {
@@ -840,7 +841,8 @@ canvas {
   position: absolute;
   width: 40px;
   height: 40px;
-  left: 367px;
+  /*left: 367px;*/
+  right: 10px;
   top: 2px; }
 
 #search {
@@ -877,7 +879,8 @@ canvas {
   min-width: 40px;
   border-radius: 20px;
   position: absolute;
-  left: 367px;
+  /*left: 367px;*/
+  right: 10px;
   top: 2px;
   box-shadow: 0 0 12px #111111; }
 
@@ -888,7 +891,8 @@ canvas {
   min-width: 40px;
   border-radius: 20px;
   position: absolute;
-  left: 367px;
+  /*left: 367px;*/
+  right: 10px;
   top: 2px;
   background: linear-gradient(to bottom, transparent 5%, rgba(102, 192, 244, 0.2) 95%); }
 
