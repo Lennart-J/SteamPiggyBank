@@ -124,9 +124,9 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
 
     $scope.track = function(type, element, action) {
         if (type === 'event') {
-            //ga('send', 'event', element, action);
+            ga('send', 'event', element, action);
         } else if (type === 'pageview') {
-            //ga('send', 'pageview', element);
+            ga('send', 'pageview', element);
         }
         
     };
@@ -194,19 +194,6 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
                             width: 430
                         },
                         function(windowInfo) {
-                            // if (!windowInfo.alwaysOnTop) {
-                            //     chrome.windows.remove(windowInfo.id);
-                            //     chrome.windows.create({
-                            //         url: 'popup.html',
-                            //         type: 'popup',
-                            //         state: 'normal',
-                            //         height: 500,
-                            //         width: 420
-                            //     });
-                            // }
-                            // chrome.browserAction.setPopup({
-                            //     popup: ''
-                            // });
                             window.close();
                         });
                 }
@@ -214,11 +201,6 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
             }
         });
     };
-
-    $scope.$watch('query[queryBy]', function() {
-        /*console.log($scope.query);
-        console.log($scope.queryBy);*/
-    });
 
     $scope.$watch('tags.active', function() {
         //console.log($scope.tags.active);
