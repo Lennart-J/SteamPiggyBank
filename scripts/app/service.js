@@ -79,7 +79,9 @@ angular.module('SteamPiggyBank.services', [])
     for (var i = 0, filterLength = filters.length; i < filterLength; i++) {
       if (filters[i].name === filterName) {
         for (var j = 0, valuesLength = filters[i].values.length; j < valuesLength; j++) {
-          if (filters[i].values[j].name === valueName) return filters[i].values[j].value;
+          if (filters[i].values[j].name === valueName) {
+                return filters[i].values[j].value;
+            }
         }
       }
     }

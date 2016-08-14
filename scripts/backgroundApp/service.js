@@ -117,7 +117,9 @@ angular.module('backgroundApp.services', [])
         for (var i = 0, filterLength = filters.length; i < filterLength; i++) {
             if (filters[i].name === filterName) {
                 for (var j = 0, valuesLength = filters[i].values.length; j < valuesLength; j++) {
-                    if (filters[i].values[j].name === valueName) return filters[i].values[j].value;
+                    if (filters[i].values[j].name === valueName) {
+                        return filters[i].values[j].value;
+                    } 
                 }
             }
         }
@@ -164,7 +166,7 @@ angular.module('backgroundApp.services', [])
 
         //get storage reference
         chrome.storage.local.get(null, function(items) {
-            if (items && items['app']) {
+            if (items && items.app) {
                 //console.log("Got storage reference")
                 storage_reference = items;
             } else {
@@ -201,18 +203,21 @@ angular.module('backgroundApp.services', [])
                 for (; currentPage <= maxPage; currentPage++) {
                     XHRs.push(
                         $http.get('http://store.steampowered.com/search/?specials=1&page=' + currentPage)
-                        .success(function(data) {
-                            status += 1 / maxPage;
-                            $data = $(data.replace(/<img src=/ig, '<img title='));
-                            parent = $data.find('#search_result_container');
-                            tmpList = findSaleItems(parent);
-                            defer.notify([parseDOMElementList(tmpList), status]);
-                            allAppsOnSale = allAppsOnSale.concat(parseDOMElementList(tmpList, currentPage));
-
-                            tmpList = [];
-                        })
+                        .success(successCallback)
                     );
                 }
+
+                function successCallback(data) {
+                    status += 1 / maxPage;
+                    $data = $(data.replace(/<img src=/ig, '<img title='));
+                    parent = $data.find('#search_result_container');
+                    tmpList = findSaleItems(parent);
+                    defer.notify([parseDOMElementList(tmpList), status]);
+                    allAppsOnSale = allAppsOnSale.concat(parseDOMElementList(tmpList, currentPage));
+
+                    tmpList = [];
+                }
+
                 $q.all(XHRs).then(function() {
                     //console.log("resolve all apps on sale");
                     defer.resolve(allAppsOnSale);
@@ -280,7 +285,7 @@ angular.module('backgroundApp.services', [])
                     categories = getCategories($data);
                     userTags = getUserTags($data);
                     description = getDescription($data);
-                    
+
                     // defer.resolve({
                     //     'id': id,
                     //     'type': appitem.type,
@@ -383,16 +388,18 @@ angular.module('backgroundApp.services', [])
         for (var i = 0, len = allAppsOnSale.length; i < len; i++) {
             XHRs.push(
                 this.getAppItemDetails(allAppsOnSale[i])
-                .then(function(data) {
-                    //ctr++;
-                    //tmp_results.push(data);
-                    all_results[Object.keys(data)[0]] = data[Object.keys(data)[0]];
-                    // if (ctr % 25 === 0) {
-                    //     defer.notify(tmp_results);
-                    //     tmp_results = [];
-                    // }
-                })
+                .then(thenCallback)
             );
+        }
+
+        function thenCallback(data) {
+            //ctr++;
+            //tmp_results.push(data);
+            all_results[Object.keys(data)[0]] = data[Object.keys(data)[0]];
+            // if (ctr % 25 === 0) {
+            //     defer.notify(tmp_results);
+            //     tmp_results = [];
+            // }
         }
 
         $q.all(XHRs).then(function() {
@@ -487,15 +494,6 @@ angular.module('backgroundApp.services', [])
         var appitems = [],
             appitem = {};
 
-        // chrome.storage.local.set(
-        //     {'bundle': {'213' : ['great', 'awesome'], '123': ['great', 'awesome']}, 
-        //     'app': {'213' : ['great', 'awesome'], '123': ['great', 'awesome']}}, 
-        //     function() {
-        //   // Notify that we saved.
-        //   chrome.storage.local.get(null, function(items) {
-        //     console.log(items);
-        //   });
-        // });
         $.each(list, function(key, el) {
             var $el = $(el),
                 urcText = getUserReviewScoreText($el),
@@ -509,11 +507,10 @@ angular.module('backgroundApp.services', [])
             appitem.released = getReleaseDate($el);
             appitem.originalprice = getOriginalPrice($el);
             appitem.finalprice = getFinalPrice($el);
-            appitem.finalpricesize = parseFloat(getFinalPrice($el).replace(",", "."))
+            appitem.finalpricesize = parseFloat(getFinalPrice($el).replace(",", "."));
             appitem.discount = getDiscount($el, appitem.bundledata);
             appitem.urcScore = getUrcScore(urcText);
             appitem.urcClass = getUserReviewScoreClass($el);
-            //appitem.imageUrl = appitem.packageid ? getPackageImage(appitem.packageid) : getAppImage(appitem.appid);
             appitem.imageUrl = getAppImage($el);
             appitem.url = getUrl($el);
             appitem.type = getType(appitem.appid, appitem.packageid, appitem.bundleid);
@@ -522,9 +519,6 @@ angular.module('backgroundApp.services', [])
                 appitem.urcPercent = urcPattern.exec(urcText)[0];
                 appitem.urcText = urcText.replace(/<br>/ig, ': ');
             }
-
-            //make promise out of this push on resolve
-            //XHRs.push(retrieveUserTags(appitem));
 
             appitems.push(appitem);
             appitem = {};
@@ -634,7 +628,10 @@ angular.module('backgroundApp.services', [])
         }
 
         function getUrcScore(str) {
-            if (str === undefined) return 0;
+            if (str === undefined) {
+                return 0;
+            }
+            
             var urcPercent = findUrcPercent(str),
                 urcCount = findUrcCount(str.replace(/\d+\s?%/g, ''));
 
@@ -659,54 +656,16 @@ angular.module('backgroundApp.services', [])
         }
 
         function getType(appid, packageid, bundleid) {
-            if (appid) {
+            if (appid && !packageid) {
                 return 'app';
             } else if (packageid) {
                 return 'package';
             } else if (bundleid) {
                 return 'bundle';
+            } else {
+                return 'app';
             }
         }
-
-        // function retrieveUserTags(appitem) {
-        //     var id = getIdFromType(appitem, appitem.type);
-        //     var newTags = {};
-        //     var XHRs = [];
-
-        //     if (storage) {
-        //         for (var i = storage[appitem.type].length - 1; i >= 0; i--) {
-        //             if (storage[appitem.type][i].id === id) {
-        //                 appitem.userTags = storage[appitem.type][i].userTags;
-        //             } else {
-        //                 //make apphover request and save in storage
-        //                 var url = getUrlByType(appitem, appitem.type);
-        //                 defer = $http.get(url)
-        //                     .success(function(data) {
-        //                         $data = $(data);
-        //                         var local_item = {};
-
-        //                         var results = {
-        //                             categories: getCategories($data),
-        //                             userTags: getUserTags($data),
-        //                             description: getDescription($data),
-        //                         };
-        //                         newTags[id] = results.userTags;
-        //                         appitem.userTags = results.userTags;
-
-
-        //                     });
-
-        //             }
-        //         }
-
-        //     } else {
-        //         //no storage set up yet
-        //         console.warn("No storage items!");
-        //     }
-
-
-        //     return defer.promise;
-        // }
     };
 
     var findDailyDeal = function(page) {
@@ -719,7 +678,7 @@ angular.module('backgroundApp.services', [])
         dealitem.packageid = getPackageId(parent);
         dealitem.originalprice = getOriginalPrice(parent);
         dealitem.finalprice = getFinalPrice(parent);
-        dealitem.finalpricesize = parseFloat(getFinalPrice(parent).replace(",", "."))
+        dealitem.finalpricesize = parseFloat(getFinalPrice(parent).replace(",", "."));
         dealitem.discount = getDiscountPercent(parent);
         dealitem.timeremaining = getTimeRemaining(parent);
 

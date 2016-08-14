@@ -1,3 +1,4 @@
+'use strict';
 var app = angular.module('backgroundApp', ['backgroundApp.controllers', 'backgroundApp.services']);
 
 app.run(function() {

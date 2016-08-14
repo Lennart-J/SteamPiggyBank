@@ -12,7 +12,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
     $scope.disabled = {
         search: true,
         select: true
-    }
+    };
     $scope.appItems = {
         all: [],
         filtered: []
@@ -62,6 +62,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
 
     beginAnimation();
 
+
     chrome.runtime.onMessage.addListener(
         function(request, sender, response) {
             if (request.message === "loadCanvas") {
@@ -99,7 +100,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
 
     $scope.changeOrder = function(order) {
         //console.log("Old order: " + $scope.orderExp + " Old reverse: " + $scope.orderReverse);
-        $scope.track("change_order");
+        $scope.track("event", "change_order", "click");
         if ($scope.orderExp === order) {
             if (!($scope.orderReverse === false || order === 'discount')) {
                 $scope.orderExp = '';
@@ -114,16 +115,22 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
     };
 
     $scope.onAppClick = function(app, event) {
-        $scope.track("Apps");
+        $scope.track("event", "Apps", "click");
         event.preventDefault();
         if (event.which === 1) {
             window.open(app.url, "_blank");
         }
-    }
+    };
 
-    $scope.track = function(element) {
-        ga('send', 'event', element, 'click');
-    }
+    $scope.track = function(type, element, action) {
+        if (type === 'event') {
+            //ga('send', 'event', element, action);
+        } else if (type === 'pageview') {
+            //ga('send', 'pageview', element);
+        }
+        
+    };
+    $scope.track('pageview', '/popup.html');
 
     $(window).bind("scroll", function() {
         if ($(window).scrollTop() + $(window).height() > $(document).height() - 50 && $scope.displayLimitChanged === false) {
@@ -144,7 +151,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
         } else if (request === "tags") {
             return $scope.disabled.select;
         }
-    }
+    };
 
     $scope.authorize = function() {
         //openid flow, scheint zu gehen
@@ -156,28 +163,28 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
         //     function(redirect_url) {
         //         console.log(parseURL(redirect_url));
         //     });
-    }
+    };
 
     $scope.changeView = function() {
-        $scope.track("change_view");
+        $scope.track("event", "change_view", "click");
         chrome.storage.local.get(["options"], function(items) {
-            var new_options = {
+            var newOptions = {
                 options: {}
             };
             if (items.options) {
                 if (items.options.view === "panel") {
-                    new_options["options"]["view"] = "default";
+                    newOptions["options"]["view"] = "default";
                     $scope.options["view"] = "default";
-                    chrome.storage.local.set(new_options);
+                    chrome.storage.local.set(newOptions);
                     
                     chrome.browserAction.setPopup({
                         popup: 'popup.html'
                     });
-                    chrome.runtime.reload()
+                    chrome.runtime.reload();
                     setTimeout(window.close(),1000);
                 } else if (items.options.view === "default") {
-                    new_options["options"]["view"] = "panel";
-                    chrome.storage.local.set(new_options);
+                    newOptions["options"]["view"] = "panel";
+                    chrome.storage.local.set(newOptions);
                     $scope.options["view"] = "panel";
                     chrome.windows.create({
                             url: 'popup.html',
@@ -206,7 +213,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
                 
             }
         });
-    }
+    };
 
     $scope.$watch('query[queryBy]', function() {
         /*console.log($scope.query);
@@ -221,7 +228,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
         for (var i = $scope.appItems.all.length - 1; i >= 0; i--) {
             var bool = true;
             for (var j = $scope.tags.active.length - 1; j >= 0; j--) {
-                if (!($.inArray($scope.tags.active[j], $scope.appItems.all[i].userTags) > -1)) {
+                if ( $.inArray($scope.tags.active[j], $scope.appItems.all[i].userTags) === -1) {
                     bool = false;
                 }
             }
@@ -237,7 +244,9 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
 
     function extend(obj, src) {
         for (var key in src) {
-            if (src.hasOwnProperty(key)) obj[key] = src[key];
+            if (src.hasOwnProperty(key)) {
+                obj[key] = src[key];
+            }
         }
         return obj;
     }
