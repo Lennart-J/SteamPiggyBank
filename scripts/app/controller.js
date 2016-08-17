@@ -1,7 +1,7 @@
 'use strict';
-angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
+angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid', 'ui.grid.selection', 'ui.grid.resizeColumns', 'ui.grid.saveState', 'ui.grid.moveColumns', 'ui.grid.pinning'])
 
-.controller('PopupController', function($scope, $rootScope, $window, $q) {
+.controller('PopupController', function($scope, $rootScope, $window, $q, uiGridConstants) {
     Object.defineProperty($scope, "queryFilter", {
         get: function() {
             var out = {};
@@ -19,10 +19,107 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
     };
     $scope.tags = {
         unique: [],
-        active: []
+        active: [],
+        newUnique: []
     };
     $scope.options = {
         view: "default"
+    };
+    $scope.gridOptions = {
+        enableSorting: true,
+        rowHeight: 45,
+        enableFiltering: true,
+        enableGridMenu: true,
+        onRegisterApi: function(gridApi) {
+            $scope.gridApi = gridApi;
+        },
+        columnDefs: [{
+            field: 'name',
+            type: 'string',
+            displayName: 'Title',
+            cellTemplate: "templates/titleTemplate.html",
+            cellClass: "result-capsule",
+            minWidth: 130
+        }, {
+            field: 'userTags',
+            cellTemplate: "templates/tagsTemplate.html",
+            filter: {
+                condition: function(searchTerm, cellValue) {
+                    //var separators = ['-', '/', ':', ';', ','];
+                    var strippedValue = searchTerm.split(/\s?,\s?/).filter(Boolean);
+
+                    if (cellValue && cellValue.length) {
+                        for (var i = strippedValue.length - 1; i >= 0; i--) {
+                            var sValueToTest = strippedValue[i].replace('\\', '');
+                            var bReturnValue = false;
+                            for (var j = cellValue.length - 1; j >= 0; j--) {
+                                if (cellValue[j].toLowerCase().indexOf(sValueToTest.toLowerCase()) !== -1) {
+                                    bReturnValue = true;
+                                }
+                            }
+                            if (bReturnValue === false) {
+                                break;
+                            }
+                        }
+
+                    }
+
+
+                    return bReturnValue;
+                }
+            }
+        }, {
+            field: 'released',
+            displayName: 'Release Date',
+            type: 'date',
+            visible: false
+        }, {
+            field: 'type',
+            displayName: 'Type',
+            visible: false,
+            filter: {
+                type: uiGridConstants.filter.SELECT,
+                selectOptions: [{}]
+            }
+        }, {
+            field: 'urcScore',
+            displayName: 'URC',
+            type: 'number',
+            width: '15%',
+            cellTemplate: 'templates/urcTemplate.html',
+            filters: [{
+                condition: uiGridConstants.filter.GREATER_THAN,
+                placeholder: 'from...'
+            }, {
+                condition: uiGridConstants.filter.LESS_THAN,
+                placeholder: '...to'
+            }]
+        }, {
+            field: 'discount',
+            cellTemplate: 'templates/discountTemplate.html',
+            width: '15%',
+            filters: [{
+                condition: uiGridConstants.filter.GREATER_THAN,
+                placeholder: 'from...'
+            }, {
+                condition: uiGridConstants.filter.LESS_THAN,
+                placeholder: '...to'
+            }]
+        }, {
+            field: 'finalpricesize',
+            displayName: 'Price',
+            type: 'number',
+            width: '15%',
+            cellTemplate: 'templates/priceTemplate.html',
+            filters: [{
+                condition: uiGridConstants.filter.GREATER_THAN,
+                placeholder: 'from...'
+            }, {
+                condition: uiGridConstants.filter.LESS_THAN,
+                placeholder: '...to'
+            }]
+        }],
+        data: []
     };
     /*$scope.uniqueTags = [];
     $scope.activeTags = [];*/
@@ -46,7 +143,16 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
         if (response !== undefined) {
             $scope.appItems.all = response.appItems;
             $scope.appItems.filtered = response.appItems;
+            $scope.gridOptions.data = response.appItems;
             $scope.tags.unique = response.uniqueTags;
+            /*var tmpTags = [];
+            for (var i = response.uniqueTags.length - 1; i >= 0; i--) {
+                tmpTags[i] = {};
+                tmpTags[i].value = i;
+                tmpTags[i].label = response.uniqueTags[i];
+            }
+            console.log("tmpTags: ", tmpTags);
+            $scope.gridOptions.columnDefs[1].filter.selectOptions = tmpTags;*/
             $scope.disabled.search = false;
             $scope.disabled.select = false;
             $scope.$apply();
@@ -55,7 +161,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
 
     chrome.storage.local.get(["options"], function(items) {
         if (items.options) {
-            console.log("Got options: ", items.options);    
+            console.log("Got options: ", items.options);
             $scope.options = items.options;
         }
     });
@@ -87,6 +193,14 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
                 $scope.disabled.search = false;
             } else if (request.message === "tags") {
                 $scope.tags.unique = request.tags;
+                /*var tmpTags = [];
+                for (var i = request.tags.length - 1; i >= 0; i--) {
+                    tmpTags[i] = {};
+                    tmpTags[i].value = i;
+                    tmpTags[i].label = request.tags[i];
+                }
+                console.log("tmpTags: ", tmpTags);
+                $scope.gridOptions.columnDefs[1].filter.selectOptions = tmpTags;*/
                 $scope.disabled.select = false;
                 $scope.$apply();
             } else if (request.message === "tagsUpdate") {
@@ -95,6 +209,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
             }
             //might cause errors!
             $scope.appItems.filtered = $scope.appItems.all;
+            $scope.gridOptions.data = $scope.appItems.all;
         }
     );
 
@@ -124,11 +239,11 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
 
     $scope.track = function(type, element, action) {
         if (type === 'event') {
-            ga('send', 'event', element, action);
+            //ga('send', 'event', element, action);
         } else if (type === 'pageview') {
-            ga('send', 'pageview', element);
+            //ga('send', 'pageview', element);
         }
-        
+
     };
     $scope.track('pageview', '/popup.html');
 
@@ -176,12 +291,12 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
                     newOptions["options"]["view"] = "default";
                     $scope.options["view"] = "default";
                     chrome.storage.local.set(newOptions);
-                    
+
                     chrome.browserAction.setPopup({
                         popup: 'popup.html'
                     });
                     chrome.runtime.reload();
-                    setTimeout(window.close(),1000);
+                    setTimeout(window.close(), 1000);
                 } else if (items.options.view === "default") {
                     newOptions["options"]["view"] = "panel";
                     chrome.storage.local.set(newOptions);
@@ -197,7 +312,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
                             window.close();
                         });
                 }
-                
+
             }
         });
     };
@@ -210,7 +325,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
         for (var i = $scope.appItems.all.length - 1; i >= 0; i--) {
             var bool = true;
             for (var j = $scope.tags.active.length - 1; j >= 0; j--) {
-                if ( $.inArray($scope.tags.active[j], $scope.appItems.all[i].userTags) === -1) {
+                if ($.inArray($scope.tags.active[j], $scope.appItems.all[i].userTags) === -1) {
                     bool = false;
                 }
             }
@@ -221,6 +336,13 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select'])
         $scope.appItems.filtered = tmp;
     });
 
+
+    //=====================
+
+    $scope.toggleFiltering = function() {
+        $scope.gridOptions.enableFiltering = !$scope.gridOptions.enableFiltering;
+        $scope.gridApi.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
+    };
 
     //=====================
 

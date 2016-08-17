@@ -105,8 +105,7 @@ angular.module('backgroundApp.controllers', [])
                     });
                     chrome.browserAction.onClicked.removeListener(onBrowserActionClicked);
                     chrome.browserAction.onClicked.addListener(onBrowserActionClicked);
-                }
-                else {
+                } else {
                     chrome.browserAction.onClicked.removeListener(onBrowserActionClicked);
                 }
             } else {
@@ -147,6 +146,59 @@ angular.module('backgroundApp.controllers', [])
 
     }
 
+    chrome.runtime.onStartup.addListener(function() {
+        init();
+    });
+
+    chrome.alarms.create("spb", {
+        when: Date.now() + 10000,
+        delayInMinutes: null,
+        periodInMinutes: 1
+    });
+
+    chrome.alarms.onAlarm.addListener(function(alarm) {
+        if (alarm.name === "spb") {
+            var d = new Date();
+            console.log("SPB alert: ", d.toUTCString());
+            var opt = {
+                type: "basic",
+                title: "Psssssst...",
+                message: "",
+                iconUrl: "img/Icon128x128small.png",
+                /*items: [{
+                    title: "Item1",
+                    message: "This is item1"
+                }, {
+                    title: "Item1",
+                    message: "This is item1"
+                }]*/
+                buttons: [{
+                    title: "View"
+                }]
+            };
+
+           /* chrome.notifications.create("spb_newSales", opt, function() {
+                //console.log(notificationId);
+            });*/
+        }
+    });
+
+    chrome.notifications.onButtonClicked.addListener(function(notificationId, buttonIndex) {
+        if (notificationId === "spb_newSales") {
+            var views = chrome.extension.getViews();
+            var views2 = chrome.windows.getAll();
+            console.log("Views: ", views);
+            console.log("Views2: ", views2);
+            if (views) {
+                console.log("panel open");
+                //onBrowserActionClicked();
+            }
+            if (views.length === 0) {
+                console.log("popup open");
+            }
+        }
+    });
+
     function uniques(arr) {
         var a = [];
         for (var i = 0, l = arr.length; i < l; i++) {
@@ -156,9 +208,6 @@ angular.module('backgroundApp.controllers', [])
         }
         return a;
     }
-    init();
 
-    chrome.runtime.onStartup.addListener(function(){
-        init();
-    });
+    init();
 });

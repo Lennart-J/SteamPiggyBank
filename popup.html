@@ -9,6 +9,9 @@
         <script src="scripts/lib/angular.min.js"></script>
         <script type="text/javascript" src="scripts/lib/ui-utils-0.2.3/ui-utils.min.js"></script>
 
+        <link rel="stylesheet" href="scripts/lib/bower_components/angular-ui-grid/ui-grid.min.css"/>
+        <script src="scripts/lib/bower_components/angular-ui-grid/ui-grid.min.js"></script>
+
         <script type="text/javascript" src="scripts/lib/select.min.js"></script>
         
         <script src="scripts/app/app.js"></script>
@@ -54,17 +57,25 @@
 
         <header>
             
-           <input type="search" placeholder="Search" id="search" ng-model="query[queryBy]" ng-disabled="isLoading('appitems')" ng-click="track('search')">
+           <!-- <input type="search" placeholder="Search" id="search" ng-model="query[queryBy]" ng-disabled="isLoading('appitems')" ng-click="track('search')"> -->
            <!-- <img ng-click="authorize();" src="img/sits_01.png"> -->
-            <ui-select id="tags" multiple ng-model="tags.active" limit="5" close-on-select="false" theme="select2" ng-disabled="isLoading('tags')" ng-click="track('tags')">
+            <!-- <ui-select id="tags" multiple ng-model="tags.active" limit="5" close-on-select="false" theme="select2" ng-disabled="isLoading('tags')" ng-click="track('tags')">
                 <ui-select-match placeholder=" Select Tags...">{{$item}}</ui-select-match>
                 <ui-select-choices repeat="tag in tags.unique | filter:$select.search">
                     {{tag}}
                 </ui-select-choices>
-            </ui-select>
+            </ui-select> -->
         </header>
 
-        <div id="result-header">
+        <button id='toggleFiltering' ng-click="toggleFiltering()" class="btn btn-success">Toggle Filtering</button>
+        <div ui-grid="gridOptions" class="mainGrid" 
+            ui-grid-resize-columns 
+            ui-grid-save-state 
+            ui-grid-move-columns
+            ui-grid-pinning>
+        </div>
+
+        <!-- <div id="result-header">
             <div class="col result-price" ng-click="changeOrder('finalpricesize');">
                 <p>Price</p>
                 <span class='arrow' ng-class='{"down" : orderExp === "finalpricesize" && orderReverse === false, "up" : orderExp === "finalpricesize" && orderReverse === true}'></span>
@@ -105,14 +116,12 @@
                 <div class="col result-urc" ng-attr-title="{{app.urcText}}">{{app.urcPercent}}</div>
                 <div class="col result-usertags">{{app.userTags[0]}}</div>
                 <div class="col result-capsule">
-                    <!-- <img ng-if="app.appid && app.appid.indexOf(',') === -1" ng-src="http://cdn.akamai.steamstatic.com/steam/apps/{{app.appid}}/header.jpg">
-                    <img ng-if="app.packageid && (isNaN(appItem.appid) || app.appid.indexOf(',') > -1)" ng-src="http://cdn.akamai.steamstatic.com/steam/subs/{{app.packageid}}/header.jpg"> -->
                     <img ng-src="{{app.imageUrl}}">
                 </div>
                 <div class="col result-name">
                 </div>
             </a>
-        </div>
+        </div> -->
 
         <!-- <script src="scripts/test.js"></script> -->
     </body>
