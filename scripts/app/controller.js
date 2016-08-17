@@ -39,19 +39,25 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
             displayName: 'Title',
             cellTemplate: "templates/titleTemplate.html",
             cellClass: "result-capsule",
+            filter: {
+                placeholder: 'Name...'
+            },
             minWidth: 130
         }, {
             field: 'userTags',
+            enableSorting: false,
             cellTemplate: "templates/tagsTemplate.html",
             filter: {
+                placeholder: 'fps, rpg, ...',
                 condition: function(searchTerm, cellValue) {
                     //var separators = ['-', '/', ':', ';', ','];
                     var strippedValue = searchTerm.split(/\s?,\s?/).filter(Boolean);
+                    var bReturnValue = false;
 
                     if (cellValue && cellValue.length) {
                         for (var i = strippedValue.length - 1; i >= 0; i--) {
                             var sValueToTest = strippedValue[i].replace('\\', '');
-                            var bReturnValue = false;
+                            bReturnValue = false;
                             for (var j = cellValue.length - 1; j >= 0; j--) {
                                 if (cellValue[j].toLowerCase().indexOf(sValueToTest.toLowerCase()) !== -1) {
                                     bReturnValue = true;
@@ -82,41 +88,76 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
                 selectOptions: [{}]
             }
         }, {
-            field: 'urcScore',
+            field: 'urc',
             displayName: 'URC',
             type: 'number',
             width: '15%',
             cellTemplate: 'templates/urcTemplate.html',
             filters: [{
-                condition: uiGridConstants.filter.GREATER_THAN,
-                placeholder: 'from...'
+                condition: function(searchTerm, cellValue) {
+                    if (cellValue.percent && parseInt(cellValue.percent.replace('%','')) >= parseInt(searchTerm)) {
+                        return true;
+                    }
+                },
+                placeholder: 'from...',
+                disableCancelFilterButton: true
             }, {
-                condition: uiGridConstants.filter.LESS_THAN,
-                placeholder: '...to'
-            }]
+                condition: function(searchTerm, cellValue) {
+                    if (cellValue.percent && parseInt(cellValue.percent.replace('%','')) <= parseInt(searchTerm)) {
+                        return true;
+                    }
+                },
+                placeholder: '...to',
+                disableCancelFilterButton: true
+            }],
+            sortingAlgorithm: function(a, b) {
+                //compare age property of the object
+                if (a.score < b.score) {
+                    return -1;
+                } else if (a.score > b.score) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
         }, {
-            field: 'discount',
+            field: 'price.discount',
             cellTemplate: 'templates/discountTemplate.html',
+            displayName: 'Discount',
             width: '15%',
             filters: [{
-                condition: uiGridConstants.filter.GREATER_THAN,
-                placeholder: 'from...'
+                condition: uiGridConstants.filter.GREATER_THAN_OR_EQUAL,
+                placeholder: 'from...',
+                disableCancelFilterButton: true
             }, {
-                condition: uiGridConstants.filter.LESS_THAN,
-                placeholder: '...to'
-            }]
+                condition: uiGridConstants.filter.LESS_THAN_OR_EQUAL,
+                placeholder: '...to',
+                disableCancelFilterButton: true
+            }],
+            sortingAlgorithm: function(a, b) {
+                //compare age property of the object
+                if (a > b) {
+                    return -1;
+                } else if (a < b) {
+                    return 1;
+                } else {
+                    return 0;
+                }
+            }
         }, {
-            field: 'finalpricesize',
+            field: 'price.finalsize',
             displayName: 'Price',
             type: 'number',
             width: '15%',
             cellTemplate: 'templates/priceTemplate.html',
             filters: [{
-                condition: uiGridConstants.filter.GREATER_THAN,
-                placeholder: 'from...'
+                condition: uiGridConstants.filter.GREATER_THAN_OR_EQUAL,
+                placeholder: 'from...',
+                disableCancelFilterButton: true
             }, {
-                condition: uiGridConstants.filter.LESS_THAN,
-                placeholder: '...to'
+                condition: uiGridConstants.filter.LESS_THAN_OR_EQUAL,
+                placeholder: '...to',
+                disableCancelFilterButton: true
             }]
         }],
         data: []
@@ -342,6 +383,10 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
     $scope.toggleFiltering = function() {
         $scope.gridOptions.enableFiltering = !$scope.gridOptions.enableFiltering;
         $scope.gridApi.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
+    };
+
+    $scope.urcFilter = function(row) {
+
     };
 
     //=====================

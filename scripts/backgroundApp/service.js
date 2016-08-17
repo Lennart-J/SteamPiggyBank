@@ -505,19 +505,24 @@ angular.module('backgroundApp.services', [])
             appitem.bundledata = getBundleData($el);
             appitem.name = getName($el).replace(/&amp;/g, '&');
             appitem.released = getReleaseDate($el);
-            appitem.originalprice = getOriginalPrice($el);
-            appitem.finalprice = getFinalPrice($el);
-            appitem.finalpricesize = parseFloat(getFinalPrice($el).replace(",", "."));
-            appitem.discount = getDiscount($el, appitem.bundledata);
-            appitem.urcScore = getUrcScore(urcText);
-            appitem.urcClass = getUserReviewScoreClass($el);
+
+            appitem.price = {};
+            appitem.price.original = getOriginalPrice($el);
+            appitem.price.final = getFinalPrice($el);
+            appitem.price.finalsize = parseFloat(getFinalPrice($el).replace(",", "."));
+            appitem.price.discount = getDiscount($el, appitem.bundledata);
+
+            appitem.urc = {};
+            appitem.urc.score = getUrcScore(urcText);
+            appitem.urc.class = getUserReviewScoreClass($el);
+
             appitem.imageUrl = getAppImage($el);
             appitem.url = getUrl($el);
             appitem.type = getType(appitem.appid, appitem.packageid, appitem.bundleid);
 
             if (urcText) {
-                appitem.urcPercent = urcPattern.exec(urcText)[0];
-                appitem.urcText = urcText.replace(/<br>/ig, ': ');
+                appitem.urc.percent = urcPattern.exec(urcText)[0];
+                appitem.urc.text = urcText.replace(/<br>/ig, ': ');
             }
 
             appitems.push(appitem);
