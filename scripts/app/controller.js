@@ -95,7 +95,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
             cellTemplate: 'templates/urcTemplate.html',
             filters: [{
                 condition: function(searchTerm, cellValue) {
-                    if (cellValue.percent && parseInt(cellValue.percent.replace('%','')) >= parseInt(searchTerm)) {
+                    if (cellValue.percent && parseInt(cellValue.percent.replace('%', '')) >= parseInt(searchTerm)) {
                         return true;
                     }
                 },
@@ -103,7 +103,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
                 disableCancelFilterButton: true
             }, {
                 condition: function(searchTerm, cellValue) {
-                    if (cellValue.percent && parseInt(cellValue.percent.replace('%','')) <= parseInt(searchTerm)) {
+                    if (cellValue.percent && parseInt(cellValue.percent.replace('%', '')) <= parseInt(searchTerm)) {
                         return true;
                     }
                 },
@@ -177,6 +177,8 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
         interval,
         animate = true;
 
+    // Init
+
     chrome.runtime.sendMessage({
         message: "init",
         animate_status: animate
@@ -204,12 +206,16 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
         if (items.options) {
             console.log("Got options: ", items.options);
             $scope.options = items.options;
+            if (items.options.states) {
+                $scope.restoreState(); 
+            }
         }
     });
 
     beginAnimation();
 
-
+    // Init end 
+    
     chrome.runtime.onMessage.addListener(
         function(request, sender, response) {
             if (request.message === "loadCanvas") {
@@ -328,6 +334,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
                 options: {}
             };
             if (items.options) {
+                newOptions["options"] = items.options;
                 if (items.options.view === "panel") {
                     newOptions["options"]["view"] = "default";
                     $scope.options["view"] = "default";
@@ -385,8 +392,33 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
         $scope.gridApi.core.notifyDataChange(uiGridConstants.dataChange.COLUMN);
     };
 
-    $scope.urcFilter = function(row) {
+    $scope.saveState = function(state) {
+        var name = state ? state : "default";
 
+        $scope.state = $scope.gridApi.saveState.save();
+        chrome.storage.local.get(["options"], function(items) {
+            var newOptions = {
+                options: {}
+            };
+            if (items.options) {
+                newOptions["options"] = items.options;
+                if (!items.options.states) {
+                    newOptions["options"]["states"] = {};
+                }
+                newOptions["options"]["states"][name] = $scope.state;
+                chrome.storage.local.set(newOptions);
+            }
+        });
+        
+    };
+    $scope.restoreState = function(state) {
+        var name = state ? state : "default";
+
+        chrome.storage.local.get(["options"], function(items) {
+            if (items.options && items.options.states) {
+                $scope.gridApi.saveState.restore($scope, items.options.states[name]);
+            }
+        });
     };
 
     //=====================
