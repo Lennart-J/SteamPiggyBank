@@ -207,7 +207,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
             console.log("Got options: ", items.options);
             $scope.options = items.options;
             if (items.options.states) {
-                $scope.restoreState(); 
+                $scope.restoreState();
             }
         }
     });
@@ -215,7 +215,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
     beginAnimation();
 
     // Init end 
-    
+
     chrome.runtime.onMessage.addListener(
         function(request, sender, response) {
             if (request.message === "loadCanvas") {
@@ -409,7 +409,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
                 chrome.storage.local.set(newOptions);
             }
         });
-        
+
     };
     $scope.restoreState = function(state) {
         var name = state ? state : "default";
@@ -417,6 +417,22 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
         chrome.storage.local.get(["options"], function(items) {
             if (items.options && items.options.states) {
                 $scope.gridApi.saveState.restore($scope, items.options.states[name]);
+            }
+        });
+    };
+    $scope.toggleDarkmode = function() {
+        var newOptions = {
+            options: {}
+        };
+        chrome.storage.local.get(["options"], function(items) {
+            if (items.options && items.options.darkmode) {
+                newOptions = items.options;
+                newOptions.darkmode = !newOptions.darkmode;
+                chrome.storage.local.set(newOptions);
+            } else {
+                newOptions = items.options;
+                newOptions.darkmode = true;
+                chrome.storage.local.set(newOptions);
             }
         });
     };
