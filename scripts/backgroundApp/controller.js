@@ -11,7 +11,7 @@ angular.module('backgroundApp.controllers', [])
         function(request, sender, sendResponse) {
             if (request.message === "init") {
                 init();
-                if ($scope.inProgress === true) {
+                /*if ($scope.inProgress === true) {
                     sendResponse({
                         message: 'cache',
                         appItems: $scope.appItems,
@@ -45,11 +45,11 @@ angular.module('backgroundApp.controllers', [])
                             message: "appItemsDone"
                         });
                         return requestService.getAllUserTags();
-                    }).then(function(tags) {
+                    }).then(function(detailedInfo) {
                             //console.log("Done - All User Tags: ", tags);
                             var tmp_tags = [];
 
-                            $.each(tags, function(index, value) {
+                            $.each(detailedInfo.tags, function(index, value) {
                                 for (var j = value.length - 1; j >= 0; j--) {
                                     tmp_tags.push(value[j]);
                                 }
@@ -69,12 +69,12 @@ angular.module('backgroundApp.controllers', [])
 
                             for (var i = $scope.appItems.length - 1; i >= 0; i--) {
                                 if ($scope.appItems[i].type === 'app') {
-                                    $scope.appItems[i].userTags = tags[$scope.appItems[i].appid];
+                                    $scope.appItems[i].userTags = detailedInfo[$scope.appItems[i].appid].tags;
 
                                 } else if ($scope.appItems[i].type === 'package') {
-                                    $scope.appItems[i].userTags = tags[$scope.appItems[i].packageid];
+                                    $scope.appItems[i].userTags = detailedInfo[$scope.appItems[i].packageid].tags;
                                 } else if ($scope.appItems[i].type === 'bundle') {
-                                    $scope.appItems[i].userTags = tags[$scope.appItems[i].bundleid];
+                                    $scope.appItems[i].userTags = detailedInfo[$scope.appItems[i].bundleid].tags;
                                 }
 
                             }
@@ -90,7 +90,7 @@ angular.module('backgroundApp.controllers', [])
                             //console.log(userTagChunk);
                         }
                     );
-                }
+                }*/
 
             }
 
@@ -109,10 +109,12 @@ angular.module('backgroundApp.controllers', [])
                     chrome.browserAction.onClicked.removeListener(onBrowserActionClicked);
                 }
             } else {
+                // new user / init options / cleared local storage
                 var store = {
                     options: {}
                 };
                 store["options"]["view"] = "default";
+                store["options"]["darkmode"] = false;
                 chrome.storage.local.set(store);
             }
         });
@@ -131,16 +133,6 @@ angular.module('backgroundApp.controllers', [])
                 width: 430
             },
             function(windowInfo) {
-                //     if (!windowInfo.alwaysOnTop) {
-                //     chrome.windows.remove(windowInfo.id);
-                //     chrome.windows.create({
-                //         url: 'popup.html',
-                //         type: 'popup',
-                //         state: 'normal',
-                //         height: 500,
-                //         width: 420
-                //     });
-                // }
                 window.close();
             });
 
@@ -150,36 +142,104 @@ angular.module('backgroundApp.controllers', [])
         init();
     });
 
-    chrome.alarms.create("spb", {
-        when: Date.now() + 10000,
+    //!TODO only if alarm doesn't exist yet
+    chrome.alarms.create("spbSteamSales", {
+        when: Date.now() + 1000,
         delayInMinutes: null,
-        periodInMinutes: 1
+        periodInMinutes: 5
     });
 
     chrome.alarms.onAlarm.addListener(function(alarm) {
-        if (alarm.name === "spb") {
+        var newSales = [];
+        var newSalesIds = [];
+
+        //!TODO Check integrity aka check if items still on sale or not
+
+        if (alarm.name === "spbSteamSales") {
             var d = new Date();
             console.log("SPB alert: ", d.toUTCString());
-            var opt = {
-                type: "basic",
-                title: "Psssssst...",
-                message: "",
-                iconUrl: "img/Icon128x128small.png",
-                /*items: [{
-                    title: "Item1",
-                    message: "This is item1"
-                }, {
-                    title: "Item1",
-                    message: "This is item1"
-                }]*/
-                buttons: [{
-                    title: "View"
-                }]
-            };
 
-           /* chrome.notifications.create("spb_newSales", opt, function() {
-                //console.log(notificationId);
-            });*/
+            //get all sales
+            //check if sales are new 
+            //remove apps from storage which are no longer on sale
+            //return new sales?
+            requestService.getAllAppsOnSale()
+                .then(function(result) {
+                    var type, id;
+                    var XHRs = [];
+                    for (var i = result.length - 1; i >= 0; i--) {
+                        type = result[i].type;
+                        id = result[i].id;
+
+                        //cleanup
+
+
+                        //is in storage and correctly represented
+                        if ($rootScope.storageReference[type][id] && $rootScope.storageReference[type][id].price) {
+                            //already in storage
+                            //check if discount changed
+                            //!TODO why is this buggy
+                            if ($rootScope.storageReference[type][id].price.discount !== result[i].price.discount) {
+                                console.log("Discount changed!", $rootScope.storageReference[type][id], result[i]);
+                                //should leave details like tags intact
+                                $.extend($rootScope.storageReference[type][id], result[i]);
+                            }
+                        } else {
+                            console.log("Found new sale!");
+                            newSales.push(result[i]);
+                            console.log(result[i], "type: ", type, "id: ", id);
+                            $rootScope.storageReference[type][id] = result[i];
+
+                            //!TODO Lookup tags def. not known
+                            //closure to make sure type and id get passed to promises
+                            (function(type, id) {
+                                XHRs.push(requestService.getAppItemDetails(result[i])
+                                    .then(function(details) {
+                                        //console.log("getAppItemDetails done: ", details, type, id);
+                                        $rootScope.storageReference[type][id].details = details;
+                                    })
+                                );
+                            })(type, id);
+
+
+                        }
+                    }
+
+                    $q.all(XHRs).then(function() {
+                        console.log("ALL DONE?!", $rootScope.storageReference);
+                        chrome.storage.local.set($rootScope.storageReference);
+                        chrome.runtime.sendMessage({
+                            message: "appItemsDone"
+                        });
+                    });
+                }, function(reason) {
+                    console.log("Error: ", reason);
+                }, function(update) {
+
+                });
+
+            /* var opt = {
+                 type: "basic",
+                 title: "Psssssst...",
+                 message: "",
+                 iconUrl: "img/Icon128x128small.png",
+                 items: [{
+                     title: "Item1",
+                     message: "This is item1"
+                 }, {
+                     title: "Item1",
+                     message: "This is item1"
+                 }]
+                 buttons: [{
+                     title: "View"
+                 }]
+             };*/
+
+
+
+            /* chrome.notifications.create("spb_newSales", opt, function() {
+                 //console.log(notificationId);
+             });*/
         }
     });
 
@@ -208,6 +268,17 @@ angular.module('backgroundApp.controllers', [])
         }
         return a;
     }
+
+    //!TODO
+    /*$scope.$watch(function() {
+        return $rootScope.storageReference;
+    }, function(newValue, oldValue) {
+        console.log("Storage Reference changed! Save it? new / old: ", newValue, oldValue);
+        if (newValue !== undefined) {
+            
+        }
+        //scope apply or sth? notify popup script of changes necessary?
+    });*/
 
     init();
 });

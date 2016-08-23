@@ -1,7 +1,7 @@
 'use strict';
 angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid', 'ui.grid.selection', 'ui.grid.resizeColumns', 'ui.grid.saveState', 'ui.grid.moveColumns', 'ui.grid.pinning'])
 
-.controller('PopupController', function($scope, $rootScope, $window, $q, uiGridConstants) {
+.controller('PopupController', function($scope, $rootScope, $window, $timeout, $q, uiGridConstants) {
     Object.defineProperty($scope, "queryFilter", {
         get: function() {
             var out = {};
@@ -32,6 +32,14 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
         enableGridMenu: true,
         onRegisterApi: function(gridApi) {
             $scope.gridApi = gridApi;
+
+            $timeout(function() {
+                $scope.defaultState = $scope.gridApi.saveState.save();
+            }, 50);
+
+            $timeout(function() {
+                $scope.restoreState();
+            }, 500);
         },
         columnDefs: [{
             field: 'name',
@@ -44,7 +52,8 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
             },
             minWidth: 130
         }, {
-            field: 'userTags',
+            field: 'details.tags',
+            displayName: 'User tags',
             enableSorting: false,
             cellTemplate: "templates/tagsTemplate.html",
             filter: {
@@ -85,7 +94,16 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
             visible: false,
             filter: {
                 type: uiGridConstants.filter.SELECT,
-                selectOptions: [{}]
+                selectOptions: [{
+                    value: "app",
+                    label: "App"
+                }, {
+                    value: "package",
+                    label: "Package"
+                }, {
+                    value: "bundle",
+                    label: "Bundle"
+                }]
             }
         }, {
             field: 'urc',
@@ -186,7 +204,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
         if (response !== undefined) {
             $scope.appItems.all = response.appItems;
             $scope.appItems.filtered = response.appItems;
-            $scope.gridOptions.data = response.appItems;
+            //$scope.gridOptions.data = response.appItems;
             $scope.tags.unique = response.uniqueTags;
             /*var tmpTags = [];
             for (var i = response.uniqueTags.length - 1; i >= 0; i--) {
@@ -202,15 +220,43 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
         }
     });
 
-    chrome.storage.local.get(["options"], function(items) {
-        if (items.options) {
-            console.log("Got options: ", items.options);
-            $scope.options = items.options;
-            if (items.options.states) {
-                $scope.restoreState();
+    function getItemsFromStorage() {
+        chrome.storage.local.get(null, function(items) {
+            var allItemsArray = [];
+
+            console.log("Storage: ", items);
+            if (items.options) {
+                $scope.options = items.options;
+                if (items.options.states) {
+                    //fuck it restores old data 
+                    // make button to reset to default
+                    //$scope.restoreState();
+                }
             }
-        }
-    });
+            if (items.app) {
+                $.each(items.app, function(key, el) {
+                    if (!$.isArray(el)) {
+                        allItemsArray.push(el);
+                    }
+                });
+                $.each(items.package, function(key, el) {
+                    if (!$.isArray(el)) {
+                        allItemsArray.push(el);
+                    }
+                });
+                $.each(items.bundle, function(key, el) {
+                    if (!$.isArray(el)) {
+                        allItemsArray.push(el);
+                    }
+                });
+                allItemsArray.sort(function(a, b) {
+                    return a.relevance - b.relevance;
+                });
+                $scope.gridOptions.data = allItemsArray;
+                $scope.$apply();
+            }
+        });
+    }
 
     beginAnimation();
 
@@ -237,7 +283,8 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
                 $scope.appItems.all = $scope.appItems.all.concat(request.appItems);
                 $scope.$apply();
             } else if (request.message === "appItemsDone") {
-                $scope.disabled.search = false;
+                /*$scope.disabled.search = false;*/
+                getItemsFromStorage();
             } else if (request.message === "tags") {
                 $scope.tags.unique = request.tags;
                 /*var tmpTags = [];
@@ -256,7 +303,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
             }
             //might cause errors!
             $scope.appItems.filtered = $scope.appItems.all;
-            $scope.gridOptions.data = $scope.appItems.all;
+            //$scope.gridOptions.data = $scope.appItems.all;
         }
     );
 
@@ -418,6 +465,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
             if (items.options && items.options.states) {
                 $scope.gridApi.saveState.restore($scope, items.options.states[name]);
             }
+            getItemsFromStorage();
         });
     };
     $scope.toggleDarkmode = function() {

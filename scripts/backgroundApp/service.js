@@ -119,7 +119,7 @@ angular.module('backgroundApp.services', [])
                 for (var j = 0, valuesLength = filters[i].values.length; j < valuesLength; j++) {
                     if (filters[i].values[j].name === valueName) {
                         return filters[i].values[j].value;
-                    } 
+                    }
                 }
             }
         }
@@ -128,7 +128,7 @@ angular.module('backgroundApp.services', [])
 
 })
 
-.service('requestService', function($http, $q, util) {
+.service('requestService', function($http, $q, $rootScope, util) {
 
     var allAppsOnSale = [];
     var storage_reference = {};
@@ -150,8 +150,18 @@ angular.module('backgroundApp.services', [])
         return currentApp;
     };
 
-
+    //make this function to only use storage, http requests in alarm method
     this.getAllApps = function() {
+        var defer = $q.defer(),
+            status = 0;
+
+        //get storage reference
+
+
+        return defer.promise;
+    };
+
+    this.getAllAppsOnSale = function() {
         var XHRs = [],
             parent = {},
             currentPage = 1,
@@ -164,27 +174,6 @@ angular.module('backgroundApp.services', [])
             defer = $q.defer(),
             status = 0;
 
-        //get storage reference
-        chrome.storage.local.get(null, function(items) {
-            if (items && items.app) {
-                //console.log("Got storage reference")
-                storage_reference = items;
-            } else {
-                storage_reference = {
-                    'bundle': {
-                        '0': ['great', 'awesome']
-                    },
-                    'app': {
-                        '0': ['great', 'awesome']
-                    },
-                    'package': {
-                        '0': ['great', 'awesome']
-                    }
-                };
-            }
-
-        });
-
         // first call to access information like maxPage
         $http.get('http://store.steampowered.com/search/?specials=1')
             .success(function(data) {
@@ -196,6 +185,7 @@ angular.module('backgroundApp.services', [])
 
                 allAppsOnSale = allAppsOnSale.concat(parseDOMElementList(tmpList, currentPage));
                 defer.notify([parseDOMElementList(tmpList), status]);
+
                 currentPage++;
                 tmpList = [];
                 tmpItems = [];
@@ -220,6 +210,7 @@ angular.module('backgroundApp.services', [])
 
                 $q.all(XHRs).then(function() {
                     //console.log("resolve all apps on sale");
+
                     defer.resolve(allAppsOnSale);
                 });
             });
@@ -269,14 +260,15 @@ angular.module('backgroundApp.services', [])
         //app = this.getCurrentApp(appId, packageId);
         /*console.log("appId: ", appId);
         console.log("packageId: ", packageId);*/
-        var id = getIdFromType(appitem, appitem.type);
+        var id = appitem.id;
         var url = getUrlFromType(appitem, appitem.type);
 
-        var res = {};
+        //var res = {};
 
-        if (storage_reference[appitem["type"]][id]) {
+        /*if ($rootScope.storageReference[appitem["type"]][id] && 
+            $rootScope.storageReference[appitem["type"]][id]["tags"]) {
             //console.log("Found in storage");
-            res[id] = storage_reference[appitem.type][id];
+            res[id] = $rootScope.storageReference[appitem.type][id]["tags"];
             defer.resolve(res);
         } else {
             $http.get(url)
@@ -288,30 +280,46 @@ angular.module('backgroundApp.services', [])
 
                     // defer.resolve({
                     //     'id': id,
-                    //     'type': appitem.type,
+                    //     'type': apg.item.type,
                     //     'categories': categories,
                     //     'userTags': userTags,
                     //     'description': description
                     // });
-
-                    storage_reference[appitem.type][id] = userTags;
+                    $rootScope.storageReference[appitem.type][id].details = {};
+                    $rootScope.storageReference[appitem.type][id].details.tags = userTags;
+                    $rootScope.storageReference[appitem.type][id].details.categories = categories;
+                    $rootScope.storageReference[appitem.type][id].details.description = description;
                     res[id] = userTags;
                     defer.resolve(res);
                 });
-        }
+        }*/
 
+
+        $http.get(url)
+            .success(function(data) {
+                $data = $(data);
+                categories = getCategories($data);
+                userTags = getUserTags($data);
+                description = getDescription($data);
+
+                // defer.resolve({
+                //     'id': id,
+                //     'type': appitem.type,
+                //     'categories': categories,
+                //     'userTags': userTags,
+                //     'description': description
+                // });
+                var details = {
+                    tags: userTags,
+                    categories: categories,
+                    description: description
+                };
+                /*res[id] = userTags;
+                defer.resolve(res);*/
+                defer.resolve(details);
+            });
 
         return defer.promise;
-
-        function getIdFromType(appitem, type) {
-            if (type === 'app') {
-                return appitem.appid;
-            } else if (type === 'package') {
-                return appitem.packageid;
-            } else if (type === 'bundle') {
-                return appitem.bundleid;
-            }
-        }
 
         function getUrlFromType(appitem, type) {
             if (type === 'app') {
@@ -393,25 +401,19 @@ angular.module('backgroundApp.services', [])
         }
 
         function thenCallback(data) {
-            //ctr++;
-            //tmp_results.push(data);
+            //get the key, which is the id, to access the object
             all_results[Object.keys(data)[0]] = data[Object.keys(data)[0]];
-            // if (ctr % 25 === 0) {
-            //     defer.notify(tmp_results);
-            //     tmp_results = [];
-            // }
         }
 
         $q.all(XHRs).then(function() {
             //console.log("resolve all tags");
             //console.log("Saving tags in local storage: ", storage_reference);
-            chrome.storage.local.set(storage_reference);
+            //chrome.storage.local.set($rootScope.storageReference);
             defer.resolve(all_results);
         });
 
         return defer.promise;
     };
-
 
     //private functions
 
@@ -492,12 +494,14 @@ angular.module('backgroundApp.services', [])
 
     var parseDOMElementList = function(list, page) {
         var appitems = [],
-            appitem = {};
+            appitem = {},
+            relevanceCounter = 1;
 
         $.each(list, function(key, el) {
             var $el = $(el),
                 urcText = getUserReviewScoreText($el),
-                urcPattern = /\d+\s?%/g;
+                urcPattern = /\d+\s?%/g,
+                id = "";
 
             appitem.appid = getAppId($el);
             appitem.packageid = getPackageId($el);
@@ -505,6 +509,7 @@ angular.module('backgroundApp.services', [])
             appitem.bundledata = getBundleData($el);
             appitem.name = getName($el).replace(/&amp;/g, '&');
             appitem.released = getReleaseDate($el);
+            appitem.relevance = (page - 1) * list.length + relevanceCounter;
 
             appitem.price = {};
             appitem.price.original = getOriginalPrice($el);
@@ -524,9 +529,11 @@ angular.module('backgroundApp.services', [])
                 appitem.urc.percent = urcPattern.exec(urcText)[0];
                 appitem.urc.text = urcText.replace(/<br>/ig, ': ');
             }
+            appitem.id = getIdFromType(appitem, appitem.type);
 
             appitems.push(appitem);
             appitem = {};
+            relevanceCounter += 1;
         });
 
         return appitems;
@@ -628,6 +635,16 @@ angular.module('backgroundApp.services', [])
             }
         }
 
+        function getIdFromType(appitem, type) {
+            if (type === 'app') {
+                return appitem.appid;
+            } else if (type === 'package') {
+                return appitem.packageid;
+            } else if (type === 'bundle') {
+                return appitem.bundleid;
+            }
+        }
+
         function getUserReviewScoreText(element) {
             return element.find('.search_reviewscore span').data('storeTooltip');
         }
@@ -636,7 +653,7 @@ angular.module('backgroundApp.services', [])
             if (str === undefined) {
                 return 0;
             }
-            
+
             var urcPercent = findUrcPercent(str),
                 urcCount = findUrcCount(str.replace(/\d+\s?%/g, ''));
 
