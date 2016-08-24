@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html ng-app="SteamPiggyBankOptions">
+    <head>
+        <link rel="stylesheet" href="css/options.css">
+        <link rel="stylesheet" href="css/ionicons.css">
+
+        <script src="scripts/lib/ga.js"></script>
+        <script src="scripts/lib/jquery-2.1.1.min.js"></script>
+        <script src="scripts/lib/angular.min.js"></script>
+        <script type="text/javascript" src="scripts/lib/ui-utils-0.2.3/ui-utils.min.js"></script>
+
+        
+        <script src="scripts/app/app.js"></script>
+        <script src="scripts/app/service.js"></script>
+        <script src="scripts/app/controller.js"></script>
+
+        <title>Steam Piggy Bank Options</title>
+
+    </head>
+    <body ng-controller="OptionsController">
+        
+        <h1>General</h1>
+
+        <hr>
+
+        <fieldset>
+            <legend>Personalia:</legend>
+            Name: <input type="text"><br>
+            Email: <input type="text"><br>
+            Date of birth: <input type="text">
+        </fieldset>
+
+        <h1>Notifications</h1>
+
+        <hr>
+
+        <fieldset>
+            <legend>Personalia:</legend>
+            Name: <input type="text"><br>
+            Email: <input type="text"><br>
+            Date of birth: <input type="text">
+        </fieldset>
+
+        Hier geht noch nichts :P
+
+        <button id='toggleFiltering' ng-click="toggleFiltering()" class="btn btn-success">Toggle Filtering</button>
+        <button id="save" type="button" class="btn btn-success" ng-click="saveState()">Save</button>
+        <button id="restore" type="button" class="btn btn-success" ng-click="restoreState()">Restore</button>
+        <button id="toggleDarkmode" type="button" class="btn btn-success" ng-click="toggleDarkmode()">Toggle Darkmode</button>
+        
+    </body>
+</html>

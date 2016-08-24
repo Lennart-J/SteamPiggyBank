@@ -1,5 +1,5 @@
 'use strict';
-angular.module('backgroundApp.services', [])
+angular.module('background.services', [])
 
 .service('util', function() {
     var currencyLocaleMap = {

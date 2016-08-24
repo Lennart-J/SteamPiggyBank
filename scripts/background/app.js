@@ -1,5 +1,5 @@
 'use strict';
-var app = angular.module('backgroundApp', ['backgroundApp.controllers', 'backgroundApp.services']);
+var app = angular.module('background', ['background.controllers', 'background.services']);
 
 app.run(function($rootScope) {
     chrome.storage.local.get(null, function(items) {
@@ -9,7 +9,7 @@ app.run(function($rootScope) {
 
             //cleanup
             $.each($rootScope.storageReference, function(type, elements) {
-                if (type !== "options") {
+                if ($.inArray(type, ["app", "bundle", "package"]) !== -1) {
                     $.each(elements, function(id, details) {
                         if ($.isArray(details)) {
                             console.log("delete entry");

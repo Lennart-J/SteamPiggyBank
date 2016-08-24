@@ -78,54 +78,6 @@
             ui-grid-pinning>
         </div>
 
-        <!-- <div id="result-header">
-            <div class="col result-price" ng-click="changeOrder('finalpricesize');">
-                <p>Price</p>
-                <span class='arrow' ng-class='{"down" : orderExp === "finalpricesize" && orderReverse === false, "up" : orderExp === "finalpricesize" && orderReverse === true}'></span>
-            </div>
-            <div class="col result-discount" ng-click="changeOrder('discount', true);">
-                <p>Discount</p>
-                <span class='arrow' ng-class='{"down" : orderExp === "discount" && orderReverse === true, "up" : orderExp === "discount" && orderReverse === false}'></span>
-            </div>
-            <div class="col result-urc" title ="User Review Score" ng-click="changeOrder('urcScore');">
-                <p>URC</p>
-                <span class='arrow' ng-class='{"down" : orderExp === "urcScore" && orderReverse === false, "up" : orderExp === "urcScore" && orderReverse === true}'></span>
-            </div>
-            <div class="col result-usertags">
-                <p>Tags</p>
-                <span class='arrow'></span>
-                <div class="popup" tabindex="-1">
-                    <div class="popup-body">
-                        <p>No Tags yet</p>
-                    </div>
-                    <div class="popup-footer">
-                        <div class="dismiss">Clear</div>
-                    </div>
-                </div>
-            </div>
-            <div class="col result-name" ng-click="changeOrder('name');">
-                <p>Title</p>
-                <span class='arrow' ng-class='{"down" : orderExp === "name" && orderReverse === false, "up" : orderExp === "name" && orderReverse === true}'></span>
-            </div>
-        </div>
-
-        <div id="result-content">
-            <a href="" ng-repeat="app in appItems.filtered | filter:query | orderBy : orderExp : orderReverse | unique : 'name' | limitTo:displayLimit" class="result-row" ng-class-even="'even'" ng-class-odd="'odd'" ng-href="{{app.url}}" ng-attr-title="{{app.name}}" ng-click="onAppClick(app, $event)">
-                <div class="col result-price">
-                    <p><del>{{app.originalprice}}</del></p>
-                    <p>{{app.finalprice}}</p>
-                </div>
-                <div class="col result-discount"><span ng-if="app.discount > 0">-{{app.discount}}%</span></div>
-                <div class="col result-urc" ng-attr-title="{{app.urcText}}">{{app.urcPercent}}</div>
-                <div class="col result-usertags">{{app.userTags[0]}}</div>
-                <div class="col result-capsule">
-                    <img ng-src="{{app.imageUrl}}">
-                </div>
-                <div class="col result-name">
-                </div>
-            </a>
-        </div> -->
-
         <!-- <script src="scripts/test.js"></script> -->
     </body>
 </html>

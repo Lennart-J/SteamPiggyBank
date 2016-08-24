@@ -1,5 +1,5 @@
 'use strict';
-angular.module('backgroundApp.controllers', [])
+angular.module('background.controllers', [])
 
 .controller('BackgroundController', function($scope, $rootScope, requestService, $q) {
     $scope.appItems = [];
@@ -153,6 +153,19 @@ angular.module('backgroundApp.controllers', [])
         var newSales = [];
         var newSalesIds = [];
 
+        var notificationOptions = {
+            type: "list",
+            title: "New Sales arrived!",
+            message: "",
+            iconUrl: "img/Icon128x128small.png",
+            items: [],
+            buttons: [{
+                title: "View"
+            }, {
+                title: "Change notification settings"
+            }]
+        };
+
         //!TODO Check integrity aka check if items still on sale or not
 
         if (alarm.name === "spbSteamSales") {
@@ -182,7 +195,13 @@ angular.module('backgroundApp.controllers', [])
                             if ($rootScope.storageReference[type][id].price.discount !== result[i].price.discount) {
                                 console.log("Discount changed!", $rootScope.storageReference[type][id], result[i]);
                                 //should leave details like tags intact
-                                $.extend($rootScope.storageReference[type][id], result[i]);
+                                if (result[i].price.discount !== 0) {
+                                    newSales.push(result[i]);
+                                    var t = $rootScope.storageReference[type][id].price.discount;
+                                    $.extend($rootScope.storageReference[type][id], result[i]);
+                                    console.log(t, $rootScope.storageReference[type][id].price.discount);
+                                }
+
                             }
                         } else {
                             console.log("Found new sale!");
@@ -205,6 +224,20 @@ angular.module('backgroundApp.controllers', [])
                         }
                     }
 
+                    if (newSales.length !== 0) {
+                        var msg = "";
+                        for (var j = newSales.length - 1; j >= 0; j--) {
+                            msg = " Discount: " + newSales[j].price.discount;
+                            notificationOptions.items.push({
+                                title: newSales[j].name,
+                                message: msg
+                            });
+                        }
+                        chrome.notifications.create("spb_newSales", notificationOptions, function() {
+                            //console.log(notificationId);
+                        });
+                    }
+
                     $q.all(XHRs).then(function() {
                         console.log("ALL DONE?!", $rootScope.storageReference);
                         chrome.storage.local.set($rootScope.storageReference);
@@ -218,45 +251,34 @@ angular.module('backgroundApp.controllers', [])
 
                 });
 
-            /* var opt = {
-                 type: "basic",
-                 title: "Psssssst...",
-                 message: "",
-                 iconUrl: "img/Icon128x128small.png",
-                 items: [{
-                     title: "Item1",
-                     message: "This is item1"
-                 }, {
-                     title: "Item1",
-                     message: "This is item1"
-                 }]
-                 buttons: [{
-                     title: "View"
-                 }]
-             };*/
 
 
-
-            /* chrome.notifications.create("spb_newSales", opt, function() {
-                 //console.log(notificationId);
-             });*/
         }
     });
 
     chrome.notifications.onButtonClicked.addListener(function(notificationId, buttonIndex) {
         if (notificationId === "spb_newSales") {
-            var views = chrome.extension.getViews();
-            var views2 = chrome.windows.getAll();
-            console.log("Views: ", views);
-            console.log("Views2: ", views2);
-            if (views) {
-                console.log("panel open");
-                //onBrowserActionClicked();
-            }
-            if (views.length === 0) {
-                console.log("popup open");
+
+            if (buttonIndex === 0) {
+                var views = chrome.extension.getViews();
+                var views2 = chrome.windows.getAll();
+                console.log("Views: ", views);
+                console.log("Views2: ", views2);
+                if (views) {
+                    console.log("panel open");
+                    //onBrowserActionClicked();
+                }
+                if (views.length === 0) {
+                    console.log("popup open");
+                }
+            } else if (buttonIndex === 1) {
+                chrome.runtime.openOptionsPage(function() {
+                    console.log("Opened option page");
+                });
             }
         }
+
+
     });
 
     function uniques(arr) {
