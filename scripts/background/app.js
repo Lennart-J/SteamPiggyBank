@@ -6,7 +6,11 @@ app.run(function($rootScope) {
         if (items && items.app) {
             //console.log("Got storage reference")
             $rootScope.storageReference = items;
-
+            $rootScope.tmpStorage = {
+                'bundle': {},
+                'app': {},
+                'package': {}
+            };
             //cleanup
             $.each($rootScope.storageReference, function(type, elements) {
                 if ($.inArray(type, ["app", "bundle", "package"]) !== -1) {
@@ -18,6 +22,8 @@ app.run(function($rootScope) {
                     });
                 }
             });
+
+            
 
         } else {
             $rootScope.storageReference = {

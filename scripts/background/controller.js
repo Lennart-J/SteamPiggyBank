@@ -146,7 +146,7 @@ angular.module('background.controllers', [])
     chrome.alarms.create("spbSteamSales", {
         when: Date.now() + 1000,
         delayInMinutes: null,
-        periodInMinutes: 5
+        periodInMinutes: 10
     });
 
     chrome.alarms.onAlarm.addListener(function(alarm) {
@@ -180,13 +180,26 @@ angular.module('background.controllers', [])
                 .then(function(result) {
                     var type, id;
                     var XHRs = [];
+
+                    $rootScope.lastTmpStorage = $.extend(true, {}, $rootScope.tmpStorage);
+                    $rootScope.tmpStorage = {
+                        'bundle': {},
+                        'app': {},
+                        'package': {}
+                    };
+                    for (var j = result.length - 1; j >= 0; j--) {
+                        console.log("Result length: ", result.length);
+                        type = result[j].type;
+                        id = result[j].id;
+
+                        //use this to lookup if items in storage are no longer in sale
+                        $rootScope.tmpStorage[type][parseInt(id)] = {};
+                        $rootScope.tmpStorage[type][parseInt(id)] = result[j];
+                    }
+
                     for (var i = result.length - 1; i >= 0; i--) {
                         type = result[i].type;
                         id = result[i].id;
-
-                        //cleanup
-
-
                         //is in storage and correctly represented
                         if ($rootScope.storageReference[type][id] && $rootScope.storageReference[type][id].price) {
                             //already in storage
@@ -194,21 +207,42 @@ angular.module('background.controllers', [])
                             //!TODO why is this buggy
                             if ($rootScope.storageReference[type][id].price.discount !== result[i].price.discount) {
                                 console.log("Discount changed!", $rootScope.storageReference[type][id], result[i]);
+
                                 //should leave details like tags intact
                                 if (result[i].price.discount !== 0) {
+                                    console.log("Discount changed and greather than 0");
+                                    result[i].when = Date.now();
                                     newSales.push(result[i]);
                                     var t = $rootScope.storageReference[type][id].price.discount;
-                                    $.extend($rootScope.storageReference[type][id], result[i]);
                                     console.log(t, $rootScope.storageReference[type][id].price.discount);
+                                    $.extend($rootScope.storageReference[type][id], result[i]);
+                                    $rootScope.storageReference[type][id]._tolerance = 0;
+                                    //console.log(t, $rootScope.storageReference[type][id].price.discount);
                                 }
 
                             }
+
+                            if ($rootScope.storageReference[type][id].details === undefined ||
+                                $rootScope.storageReference[type][id].details.tags === undefined) {
+                                (function(type, id) {
+                                    XHRs.push(requestService.getAppItemDetails(result[i])
+                                        .then(function(details) {
+                                            //console.log("getAppItemDetails done: ", details, type, id);
+                                            $rootScope.storageReference[type][id].details = details;
+                                        })
+                                    );
+                                })(type, id);
+                            }
                         } else {
                             console.log("Found new sale!");
-                            newSales.push(result[i]);
+                            if (result[i].price.discount !== 0) {
+                                result[i].when = Date.now();
+                                newSales.push(result[i]);
+
+                            }
                             console.log(result[i], "type: ", type, "id: ", id);
                             $rootScope.storageReference[type][id] = result[i];
-
+                            $rootScope.storageReference[type][id]._tolerance = 0;
                             //!TODO Lookup tags def. not known
                             //closure to make sure type and id get passed to promises
                             (function(type, id) {
@@ -240,21 +274,92 @@ angular.module('background.controllers', [])
 
                     $q.all(XHRs).then(function() {
                         console.log("ALL DONE?!", $rootScope.storageReference);
-                        chrome.storage.local.set($rootScope.storageReference);
+                        //cleanup
+                        console.log($rootScope.storageReference,
+                            Object.size($rootScope.storageReference.app),
+                            Object.size($rootScope.storageReference.package),
+                            Object.size($rootScope.storageReference.bundle));
+                        console.log($rootScope.tmpStorage,
+                            Object.size($rootScope.tmpStorage.app),
+                            Object.size($rootScope.tmpStorage.package),
+                            Object.size($rootScope.tmpStorage.bundle));
+                        /*chrome.storage.local.set($rootScope.storageReference);*/
                         chrome.runtime.sendMessage({
                             message: "appItemsDone"
                         });
+
+                        console.log("Saving in storage...");
+                        chrome.storage.local.set($rootScope.storageReference, function() {
+                            console.log("...Done!");
+                        });
                     });
+
+
                 }, function(reason) {
                     console.log("Error: ", reason);
                 }, function(update) {
+                    /*console.log("Update: ", update, update.length);
+                    for (var j = update.length - 1; j >= 0; j--) {
 
+                        var type = update[j].type;
+                        var id = update[j].id;
+
+                        //use this to lookup if items in storage are no longer in sale
+                        if ($rootScope.tmpStorage[type][parseInt(id)] !== undefined) {
+                            console.log("already in tmpStorage, wtf?", update[j]);
+                            console.log("this is whats in storage: ", $rootScope.tmpStorage[type][parseInt(id)]);
+                        } else {
+                            $rootScope.tmpStorage[type][parseInt(id)] = {};
+                            $rootScope.tmpStorage[type][parseInt(id)] = update[j];
+                        }
+
+                    }
+                    console.log($rootScope.tmpStorage, Object.size($rootScope.tmpStorage.app), Object.size($rootScope.tmpStorage.package), Object.size($rootScope.tmpStorage.bundle));*/
+                })
+                .then(function() {
+                    console.log("Finding items that are no longer on sale....");
+                    $.each($rootScope.storageReference, function(type, elements) {
+                        if ($.inArray(type, ["app", "bundle", "package"]) !== -1) {
+                            $.each(elements, function(id, details) {
+                                if ($rootScope.tmpStorage[type][id] === undefined && $rootScope.storageReference[type][id].price &&
+                                    $rootScope.storageReference[type][id].price.discount > 0) {
+                                    console.log("Didn't find item, lower tolereance ", $rootScope.storageReference[type][id]);
+                                    if ($rootScope.storageReference[type][id]._tolerance !== undefined) {
+                                        $rootScope.storageReference[type][id]._tolerance -= 1;
+                                        if ($rootScope.storageReference[type][id]._tolerance < -5) {
+                                            console.log("Tolerance below threshhold, no longer on sale: ", $rootScope.storageReference[type][id]);
+                                            $rootScope.storageReference[type][id].price.discount = 0;
+                                            $rootScope.storageReference[type][id]._tolerance = 0;
+                                        }
+                                    } else {
+                                        $rootScope.storageReference[type][id]._tolerance = -1;
+                                    }
+
+                                }
+                            });
+                        }
+                    });
+                    console.log("Saving in storage...");
+                    chrome.storage.local.set($rootScope.storageReference, function() {
+                        console.log("...Done!");
+                    });
                 });
 
 
 
         }
     });
+
+    Object.size = function(obj) {
+        var size = 0,
+            key;
+        for (key in obj) {
+            if (obj.hasOwnProperty(key)) {
+                size++;
+            }
+        }
+        return size;
+    };
 
     chrome.notifications.onButtonClicked.addListener(function(notificationId, buttonIndex) {
         if (notificationId === "spb_newSales") {

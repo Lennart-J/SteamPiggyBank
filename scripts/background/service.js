@@ -128,7 +128,7 @@ angular.module('background.services', [])
 
 })
 
-.service('requestService', function($http, $q, $rootScope, util) {
+.service('requestService', function($http, $q, $rootScope, $timeout, util) {
 
     var allAppsOnSale = [];
     var storage_reference = {};
@@ -174,6 +174,7 @@ angular.module('background.services', [])
             defer = $q.defer(),
             status = 0;
 
+        allAppsOnSale = [];
         // first call to access information like maxPage
         $http.get('http://store.steampowered.com/search/?specials=1')
             .success(function(data) {
@@ -184,36 +185,56 @@ angular.module('background.services', [])
                 //allUserTags = findAllUserTags($data);
 
                 allAppsOnSale = allAppsOnSale.concat(parseDOMElementList(tmpList, currentPage));
-                defer.notify([parseDOMElementList(tmpList), status]);
+                //defer.notify([parseDOMElementList(tmpList, currentPage), status]);
 
                 currentPage++;
                 tmpList = [];
                 tmpItems = [];
 
-                for (; currentPage <= maxPage; currentPage++) {
-                    XHRs.push(
-                        $http.get('http://store.steampowered.com/search/?specials=1&page=' + currentPage)
-                        .success(successCallback)
-                    );
-                }
+                //Make all requests j times because steam is buggy like that, ensures all sales are retrieved
+                //!TODO observe behaviour in huge sales..
+                for (var j = 2; j >= 0; j--) {
+                    for (; currentPage <= maxPage; currentPage++) {
+                        (function(page) {
+                            XHRs.push(
+                                $http.get('http://store.steampowered.com/search/?specials=1&page=' + page)
+                                .success(
+                                    function(data) {
+                                        status += 1 / maxPage;
+                                        $data = $(data.replace(/<img src=/ig, '<img title='));
+                                        parent = $data.find('#search_result_container');
+                                        tmpList = findSaleItems(parent);
+                                        //defer.notify([parseDOMElementList(tmpList, page), status]);
+                                        allAppsOnSale = allAppsOnSale.concat(parseDOMElementList(tmpList, page));
 
-                function successCallback(data) {
-                    status += 1 / maxPage;
-                    $data = $(data.replace(/<img src=/ig, '<img title='));
-                    parent = $data.find('#search_result_container');
-                    tmpList = findSaleItems(parent);
-                    defer.notify([parseDOMElementList(tmpList), status]);
-                    allAppsOnSale = allAppsOnSale.concat(parseDOMElementList(tmpList, currentPage));
+                                        tmpList = [];
+                                    })
+                            );
+                        })(currentPage);
 
-                    tmpList = [];
+                    }
+                    currentPage = 1;
                 }
 
                 $q.all(XHRs).then(function() {
                     //console.log("resolve all apps on sale");
+                    var newArray = [];
+                    var lookupObject = {};
 
-                    defer.resolve(allAppsOnSale);
+                    for (var k = allAppsOnSale.length - 1; k >= 0; k--) {
+                        lookupObject[allAppsOnSale[k]["id"]] = allAppsOnSale[k];
+                    }
+
+                    for (var o in lookupObject) {
+                        if (lookupObject.hasOwnProperty(o)) {
+                            newArray.push(lookupObject[o]);
+                        }
+                    }
+                    defer.resolve(newArray);
                 });
             });
+
+
 
         // defer.resolve(allItemsOnSale);
 
@@ -510,6 +531,7 @@ angular.module('background.services', [])
             appitem.name = getName($el).replace(/&amp;/g, '&');
             appitem.released = getReleaseDate($el);
             appitem.relevance = (page - 1) * list.length + relevanceCounter;
+            appitem.page = page;
 
             appitem.price = {};
             appitem.price.original = getOriginalPrice($el);
