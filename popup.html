@@ -71,7 +71,7 @@
         <button id="save" type="button" class="btn btn-success" ng-click="saveState()">Save</button>
         <button id="restore" type="button" class="btn btn-success" ng-click="restoreState()">Restore</button>
         <button id="toggleDarkmode" type="button" class="btn btn-success" ng-click="toggleDarkmode()">Toggle Darkmode</button>
-        <div ui-grid="gridOptions" class="mainGrid" 
+        <div ui-grid="gridOptions" class="grid" ng-class='{"dark" : options.darkmode === true}'
             ui-grid-resize-columns 
             ui-grid-save-state 
             ui-grid-move-columns
