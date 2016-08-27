@@ -95,14 +95,86 @@ html {
     
 }
 
-.mainGrid {
-    //background: $background-content;
+.grid {
+    border:none !important;
+    font-family: $font-family;
     min-width: 420px;
     /* max-width: 420px; */
     min-height: 500px;
     height: 100%;
     overflow-y:scrollbars;
     /* max-height: 500px; */
+    &.dark {
+        input[type="text"].ui-grid-filter-input {
+            color: $textcolor-content;
+            border: 1px solid black;
+            background: $background-row-odd !important;
+            
+            &::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+                color:$textcolor-oldprice;
+            }
+        
+        }
+        
+        & {
+            color: $textcolor-content;
+            background: $background-row-odd;
+            @include scrollbars(0.7em, mix($background-column, white, 75%), $background-column);
+        }
+        .ui-grid-row {
+            &:nth-child(odd) .ui-grid-cell { 
+                background-color: $background-row-odd !important;
+                border-color: $background-row-odd !important;
+            }
+            &:nth-child(even) .ui-grid-cell {
+                background-color: $background-row-even !important;
+                border-color: $background-row-even !important;
+            }
+        }
+        .ui-grid-header {
+            border: black;
+            .ui-grid-header-canvas {
+                background: $background-column !important;
+            }
+           .ui-grid-header-cell {
+                background-color: $background-column !important;
+                border-color: $background-row-odd !important;
+                &:last-child .ui-grid-column-resizer.right{
+                    border:none !important;
+                }
+            } 
+        }
+        .ui-grid-menu-mid {
+            border: 1px solid black !important;
+            .ui-grid-menu-inner{
+                border: black;
+                .ui-grid-menu-items {
+                    button {
+                        color: $textcolor-content;
+                       background-color: $background-column !important;
+                        border-color: $background-row-odd !important; 
+                    }
+                }
+            }
+        }
+         .ui-grid-menu-button {
+            border: 1px solid black !important;
+            background: $background-column !important;
+         }
+        
+    }
+
+    .ui-grid-row {
+        .red {
+            background-color: rgba(255, 0, 0, 0.3) !important;
+        }
+        .yellow {
+            background-color: rgba(255, 255, 0, 0.3) !important;
+        }
+        .green {
+            background-color: rgba(0, 255, 0, 0.3) !important;
+        }
+    }
 }
 
 #header {
@@ -397,22 +469,8 @@ li.active a, li.active a:hover {
 .result-usertags {
     overflow-y: scroll !important;
     &::-webkit-scrollbar {
-          width:  0.5em;
-          height: 0.7em;
-          border-radius:2px;
-      }
-
-      &::-webkit-scrollbar-thumb {
-          background: #DDD;
-          border-radius: 10px;
-        -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.5);
-      }
-
-      &::-webkit-scrollbar-track {
-        -webkit-box-shadow: inset 0 0 6px rgba(0,0,0,0.3);
-        background: #FFF;
-        border-radius: 10px;
-      }
+          width:  0.5em !important;
+          }
     ul {
         overflow-y: hidden;
         overflow-x: hidden;

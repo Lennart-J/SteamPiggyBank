@@ -823,13 +823,69 @@ html {
   font-family: tahoma, helvetica, arial, trebuchet ms, sans-serif;
   font-size: 13px; }
 
-.mainGrid {
+.grid {
+  border: none !important;
+  font-family: tahoma, helvetica, arial, trebuchet ms, sans-serif;
   min-width: 420px;
   /* max-width: 420px; */
   min-height: 500px;
   height: 100%;
   overflow-y: scrollbars;
   /* max-height: 500px; */ }
+  .grid.dark input[type="text"].ui-grid-filter-input {
+    color: #b0aeac;
+    border: 1px solid black;
+    background: #1a1a1a !important; }
+    .grid.dark input[type="text"].ui-grid-filter-input::-webkit-input-placeholder {
+      /* WebKit, Blink, Edge */
+      color: #888888; }
+  .grid.dark {
+    color: #b0aeac;
+    background: #1a1a1a; }
+    .grid.dark ::-webkit-scrollbar {
+      width: 0.7em;
+      height: 0.7em;
+      border-radius: 2px; }
+    .grid.dark ::-webkit-scrollbar-thumb {
+      background: #5c5c5c;
+      border-radius: 10px;
+      -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5); }
+    .grid.dark ::-webkit-scrollbar-track {
+      -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
+      background: #262626;
+      border-radius: 10px; }
+  .grid.dark .ui-grid-row:nth-child(odd) .ui-grid-cell {
+    background-color: #1a1a1a !important;
+    border-color: #1a1a1a !important; }
+  .grid.dark .ui-grid-row:nth-child(even) .ui-grid-cell {
+    background-color: #1f1f1f !important;
+    border-color: #1f1f1f !important; }
+  .grid.dark .ui-grid-header {
+    border: black; }
+    .grid.dark .ui-grid-header .ui-grid-header-canvas {
+      background: #262626 !important; }
+    .grid.dark .ui-grid-header .ui-grid-header-cell {
+      background-color: #262626 !important;
+      border-color: #1a1a1a !important; }
+      .grid.dark .ui-grid-header .ui-grid-header-cell:last-child .ui-grid-column-resizer.right {
+        border: none !important; }
+  .grid.dark .ui-grid-menu-mid {
+    border: 1px solid black !important; }
+    .grid.dark .ui-grid-menu-mid .ui-grid-menu-inner {
+      border: black; }
+      .grid.dark .ui-grid-menu-mid .ui-grid-menu-inner .ui-grid-menu-items button {
+        color: #b0aeac;
+        background-color: #262626 !important;
+        border-color: #1a1a1a !important; }
+  .grid.dark .ui-grid-menu-button {
+    border: 1px solid black !important;
+    background: #262626 !important; }
+  .grid .ui-grid-row .red {
+    background-color: rgba(255, 0, 0, 0.3) !important; }
+  .grid .ui-grid-row .yellow {
+    background-color: rgba(255, 255, 0, 0.3) !important; }
+  .grid .ui-grid-row .green {
+    background-color: rgba(0, 255, 0, 0.3) !important; }
 
 #header {
   background-color: #262626;
@@ -1073,17 +1129,7 @@ li.active a, li.active a:hover {
 .result-usertags {
   overflow-y: scroll !important; }
   .result-usertags::-webkit-scrollbar {
-    width: 0.5em;
-    height: 0.7em;
-    border-radius: 2px; }
-  .result-usertags::-webkit-scrollbar-thumb {
-    background: #DDD;
-    border-radius: 10px;
-    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.5); }
-  .result-usertags::-webkit-scrollbar-track {
-    -webkit-box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.3);
-    background: #FFF;
-    border-radius: 10px; }
+    width: 0.5em !important; }
   .result-usertags ul {
     overflow-y: hidden;
     overflow-x: hidden; }
