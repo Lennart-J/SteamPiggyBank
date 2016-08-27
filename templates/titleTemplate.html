@@ -1,5 +1,5 @@
 <div class="grid-tooltip" title="{{grid.getCellValue(row, col)}}">
   <div class="ui-grid-cell-contents">
-    <img ng-src="{{ row.entity.imageUrl }}" lazy-src>
+    <img ng-src="{{ row.entity.imageUrl }}" lazy-src ng-click="grid.appScope.onAppClick(row, $event)">
   </div>
 </div>
