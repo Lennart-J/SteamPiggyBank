@@ -4,6 +4,10 @@
         <link rel="stylesheet" href="css/popup.css">
         <link rel="stylesheet" href="css/ionicons.css">
 
+        <!-- Add IntroJs styles -->
+        <link href="scripts/lib/bower_components/intro.js/minified/introjs.min.css" rel="stylesheet">
+        <!-- <script type="text/javascript" src="scripts/lib/intro.js-2.3.0/intro.min.js"></script> -->
+
         <script src="scripts/lib/ga.js"></script>
         <script src="scripts/lib/jquery-2.1.1.min.js"></script>
         <script src="scripts/lib/angular.min.js"></script>
@@ -13,6 +17,16 @@
         <script src="scripts/lib/bower_components/angular-ui-grid/ui-grid.min.js"></script>
 
         <script type="text/javascript" src="scripts/lib/select.min.js"></script>
+
+        <!-- load momentJS (required for angular-moment) -->
+        <script src="scripts/lib/moment.min.js"></script>
+
+        <!-- introjs -->
+        <script type="text/javascript" src="scripts/lib/bower_components/intro.js/minified/intro.min.js"></script>
+        <script type="text/javascript" src="scripts/lib/bower_components/angular-intro.js/src/angular-intro.js"></script>
+
+        <!-- load angular-moment -->
+        <script src="scripts/lib/angular-moment.min.js"></script>
         
         <script src="scripts/app/app.js"></script>
         <script src="scripts/app/service.js"></script>
@@ -33,6 +47,7 @@
       </style>
     </head>
     <body ng-controller="PopupController">
+        
         <div id="header">
             <!-- <div id="wishlist-icon">
                 <i class="icon ion-android-clipboard"></i>
@@ -41,18 +56,29 @@
             <div id="user-icon">
                 <i class="icon ion-android-person"></i>
             </div> -->
-            <span id="change-view-icon">
-                <i class="icon" ng-class='{"ion-chevron-down" : options.view === "default", "ion-chevron-up" : options.view === "panel"}' ng-click="changeView()" title="Go to chrome://flags/#enable-panels and enable Panels!"></i>
-            </span>
+            <div class="icon-row">
+                
+                <span id="darkmode-icon" ng-click="toggleDarkmode()" title="Toggle Darkmode">
+                    <i ng-class='options.darkmode === true ? "icon ion-ios-sunny" : "icon ion-ios-moon"'></i>
+                </span>
+                <span id="change-view-icon">
+                    <i class="icon" ng-class='{"ion-chevron-down" : options.view === "default", "ion-chevron-up" : options.view === "panel"}' ng-click="changeView()" title="Go to chrome://flags/#enable-panels and enable Panels!"></i>
+                </span>
+        
+                
+            </div>
             <h2>Steam Piggy Bank</h2>
             <div class="overlay"></div>
-            <div id="pigCircle" class="circle"></div>
-            <div class="circle-overlay"></div>
+            <div id="pigCircle" class="circle">
+                <div class="circle-overlay"></div>
+                <img id="stay" src="img/loadingPigStay.png">
+                <img id="mid" src="img/loadingPigMid.png">
+                <img id="jump" src="img/loadingPigJump.png">
+                <img id="mid2" src="img/loadingPigMid.png">
+            </div>
+            
             <canvas id="canvas" width="40" height="40">Your browser does not support the canvas element.</canvas>
-            <img id="stay" src="img/loadingPigStay.png">
-            <img id="mid" src="img/loadingPigMid.png">
-            <img id="jump" src="img/loadingPigJump.png">
-            <img id="mid2" src="img/loadingPigMid.png">
+            
         </div>
 
         <header>
@@ -67,17 +93,21 @@
             </ui-select> -->
         </header>
 
-        <button id='toggleFiltering' ng-click="toggleFiltering()" class="btn btn-success">Toggle Filtering</button>
-        <button id="save" type="button" class="btn btn-success" ng-click="saveState()">Save</button>
-        <button id="restore" type="button" class="btn btn-success" ng-click="restoreState()">Restore</button>
-        <button id="toggleDarkmode" type="button" class="btn btn-success" ng-click="toggleDarkmode()">Toggle Darkmode</button>
-        <div ui-grid="gridOptions" class="grid" ng-class='{"dark" : options.darkmode === true}'
-            ui-grid-resize-columns 
-            ui-grid-save-state 
-            ui-grid-move-columns
-            ui-grid-pinning>
+        <!-- <button id='toggleFiltering' ng-click="toggleFiltering()" class="btn btn-success">Toggle Filtering</button> -->
+        <div id="grid-parent">
+            <div ui-grid="gridOptions" class="grid" ng-class='{"dark" : options.darkmode === true}'
+                ui-grid-resize-columns 
+                ui-grid-save-state 
+                ui-grid-move-columns
+                ui-grid-pinning>
+            </div>
         </div>
-
+        
+        <div ng-intro-options="IntroOptions" ng-intro-method="StartIntro"
+             ng-intro-oncomplete="CompletedEvent" ng-intro-onexit="ExitEvent"
+             ng-intro-onchange="ChangeEvent" ng-intro-onbeforechange="BeforeChangeEvent"
+             ng-intro-onafterchange="AfterChangeEvent"
+             ng-intro-autostart="ShouldAutoStart"></div>
         <!-- <script src="scripts/test.js"></script> -->
     </body>
 </html>

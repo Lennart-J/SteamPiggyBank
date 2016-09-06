@@ -1,5 +1,7 @@
 'use strict';
-angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid', 'ui.grid.selection', 'ui.grid.resizeColumns', 'ui.grid.saveState', 'ui.grid.moveColumns', 'ui.grid.pinning'])
+angular.module('SteamPiggyBank.controllers', [
+    'ui.unique', 'ui.select', 'ui.grid', 'ui.grid.selection', 'ui.grid.resizeColumns', 'ui.grid.saveState', 'ui.grid.moveColumns', 'ui.grid.pinning'
+])
 
 .controller('PopupController', function($scope, $rootScope, $window, $timeout, $q, uiGridConstants) {
     Object.defineProperty($scope, "queryFilter", {
@@ -30,21 +32,40 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
         rowHeight: 45,
         enableFiltering: true,
         enableGridMenu: true,
+        gridMenuCustomItems: [{
+            title: 'Save configuration',
+            icon: 'ui-grid-icon-filter',
+            action: function($event) {
+                $scope.saveState(); // $scope.blargh() would work too, this is just an example
+            },
+            context: $scope
+        }, {
+            title: 'Restore configuration',
+            icon: 'ui-grid-icon-filter',
+            action: function($event) {
+                $scope.restoreState(); // $scope.blargh() would work too, this is just an example
+            },
+            context: $scope,
+            order: -1
+        }],
         onRegisterApi: function(gridApi) {
             $scope.gridApi = gridApi;
 
             $timeout(function() {
                 $scope.defaultState = $scope.gridApi.saveState.save();
-            }, 50);
-
-            $timeout(function() {
+                $scope.sortByLatestState = $.extend({}, $scope.defaultState);
+                $scope.sortByLatestState.columns[3].sort = {
+                    direction: "desc",
+                    priority: 0
+                };
                 $scope.restoreState();
-            }, 500);
+            }, 50);
         },
         columnDefs: [{
             field: 'name',
             type: 'string',
             displayName: 'Title',
+
             cellTemplate: "templates/titleTemplate.html",
             cellClass: "result-capsule",
             filter: {
@@ -86,6 +107,12 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
         }, {
             field: 'released',
             displayName: 'Release Date',
+            type: 'date',
+            visible: false
+        }, {
+            field: 'when',
+            displayName: 'When',
+            cellTemplate: 'templates/whenTemplate.html',
             type: 'date',
             visible: false
         }, {
@@ -206,6 +233,9 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
     $scope.displayLimit = 15;
     $scope.displayLimitChanged = false;
 
+    $scope.animateStatus = true;
+    $scope.sortByLatest = false;
+
     //load animations variables
     var canvasLoaded = 0,
         interval,
@@ -214,26 +244,25 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
     // Init
 
     chrome.runtime.sendMessage({
-        message: "init",
-        animate_status: animate
+        message: "init"
     }, function(response) {
-        if (response !== undefined) {
+        /*if (response !== undefined) {
             $scope.appItems.all = response.appItems;
             $scope.appItems.filtered = response.appItems;
             //$scope.gridOptions.data = response.appItems;
             $scope.tags.unique = response.uniqueTags;
-            /*var tmpTags = [];
+            var tmpTags = [];
             for (var i = response.uniqueTags.length - 1; i >= 0; i--) {
                 tmpTags[i] = {};
                 tmpTags[i].value = i;
                 tmpTags[i].label = response.uniqueTags[i];
             }
             console.log("tmpTags: ", tmpTags);
-            $scope.gridOptions.columnDefs[1].filter.selectOptions = tmpTags;*/
+            $scope.gridOptions.columnDefs[1].filter.selectOptions = tmpTags;
             $scope.disabled.search = false;
             $scope.disabled.select = false;
             $scope.$apply();
-        }
+        }*/
     });
 
     function getItemsFromStorage() {
@@ -285,10 +314,12 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
                 loadCanvas(request.arg);
 
                 if (request.arg === 100) {
-                    $scope.disabled.search = false;
+                    console.log("stop animation!");
                     endAnimation();
                     setTimeout(function() {
                         loadCanvas(0);
+
+                        animate = true;
                     }, 2000);
                     $scope.$apply();
                 } else if (animate === true) {
@@ -302,7 +333,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
                 /*$scope.disabled.search = false;*/
                 getItemsFromStorage();
             } else if (request.message === "tags") {
-                $scope.tags.unique = request.tags;
+                //$scope.tags.unique = request.tags;
                 /*var tmpTags = [];
                 for (var i = request.tags.length - 1; i >= 0; i--) {
                     tmpTags[i] = {};
@@ -311,11 +342,17 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
                 }
                 console.log("tmpTags: ", tmpTags);
                 $scope.gridOptions.columnDefs[1].filter.selectOptions = tmpTags;*/
-                $scope.disabled.select = false;
+                //$scope.disabled.select = false;
                 $scope.$apply();
             } else if (request.message === "tagsUpdate") {
                 $scope.appItems.all = request.appItems;
                 $scope.$apply();
+            } else if (request.message === "clickedBrowserAction") {
+                if (request.action === "latestSales") {
+                    $timeout(function() {
+                        $scope.gridApi.saveState.restore($scope, $scope.sortByLatestState);
+                    }, 500);
+                }
             }
             //might cause errors!
             $scope.appItems.filtered = $scope.appItems.all;
@@ -323,7 +360,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
         }
     );
 
-    $scope.changeOrder = function(order) {
+    /*$scope.changeOrder = function(order) {
         //console.log("Old order: " + $scope.orderExp + " Old reverse: " + $scope.orderReverse);
         $scope.track("event", "change_order", "click");
         if ($scope.orderExp === order) {
@@ -337,7 +374,7 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
             $scope.orderReverse = order === 'discount' ? true : false;
             $scope.orderExp = order;
         }
-    };
+    };*/
 
     $scope.onAppClick = function(row, event) {
         $scope.track("event", "Apps", "click");
@@ -348,35 +385,39 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
     };
 
     $scope.track = function(type, element, action) {
-        if (type === 'event') {
-            //ga('send', 'event', element, action);
-        } else if (type === 'pageview') {
-            //ga('send', 'pageview', element);
-        }
-
+        chrome.storage.local.get(["options"], function(items) {
+            if (items.options && items.options.trackingEnabled) {
+                console.log("Tracking enabled");
+                if (type === 'event') {
+                    ga('send', 'event', element, action);
+                } else if (type === 'pageview') {
+                    ga('send', 'pageview', element);
+                }
+            }
+        });
     };
     $scope.track('pageview', '/popup.html');
+    /*
+        $(window).bind("scroll", function() {
+            if ($(window).scrollTop() + $(window).height() > $(document).height() - 50 && $scope.displayLimitChanged === false) {
+                $scope.displayLimit += 10;
+                $scope.$apply();
+                $scope.displayLimitChanged = true;
+            } else if ($(window).scrollTop() <= 50) {
+                $scope.displayLimit = 15;
+                $scope.$apply();
+                $scope.displayLimitChanged = true;
+            }
+            $scope.displayLimitChanged = false;
+        });*/
 
-    $(window).bind("scroll", function() {
-        if ($(window).scrollTop() + $(window).height() > $(document).height() - 50 && $scope.displayLimitChanged === false) {
-            $scope.displayLimit += 10;
-            $scope.$apply();
-            $scope.displayLimitChanged = true;
-        } else if ($(window).scrollTop() <= 50) {
-            $scope.displayLimit = 15;
-            $scope.$apply();
-            $scope.displayLimitChanged = true;
-        }
-        $scope.displayLimitChanged = false;
-    });
-
-    $scope.isLoading = function(request) {
+    /*$scope.isLoading = function(request) {
         if (request === "appitems") {
             return $scope.disabled.search;
         } else if (request === "tags") {
             return $scope.disabled.select;
         }
-    };
+    };*/
 
     $scope.authorize = function() {
         //openid flow, scheint zu gehen
@@ -410,18 +451,23 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
                     setTimeout(window.close(), 1000);
                 } else if (items.options.view === "default") {
                     newOptions["options"]["view"] = "panel";
-                    chrome.storage.local.set(newOptions);
                     $scope.options["view"] = "panel";
-                    chrome.windows.create({
-                            url: 'popup.html',
-                            type: 'panel',
-                            state: 'docked',
-                            height: 500,
-                            width: 430
-                        },
-                        function(windowInfo) {
-                            window.close();
-                        });
+                    chrome.storage.local.set(newOptions, function() {
+                        var popupURL = chrome.extension.getURL("popup.html");
+                        console.log(popupURL);
+                        chrome.windows.create({
+                                url: popupURL,
+                                type: 'panel',
+                                state: 'docked',
+                                height: 500,
+                                width: 430
+                            },
+                            function(windowInfo) {
+                                window.close();
+                            });
+                    });
+
+
                 }
 
             }
@@ -572,5 +618,92 @@ angular.module('SteamPiggyBank.controllers', ['ui.unique', 'ui.select', 'ui.grid
         return searchObject;
     }
 
+    //introjs
+    $scope.CompletedEvent = function(scope) {
+        $scope.track("event", "IntroCompleted", "click");
+        chrome.sotrage.local.get(["options"], function(items) {
+            if (items.options) {
+                items.options.takeIntroTour = false;
+                chrome.storage.local.set(items);
+            }
+        });
+
+    };
+
+    $scope.ExitEvent = function(scope) {
+        $scope.track("event", "IntroExit", "click");
+        chrome.storage.local.get(["options"], function(items) {
+            if (items.options) {
+                items.options.takeIntroTour = false;
+                chrome.storage.local.set(items);
+            }
+        });
+    };
+
+    $scope.ChangeEvent = function(targetElement, scope) {
+        /*console.log("Change Event called");
+        console.log(targetElement); //The target element
+        console.log(this); //The IntroJS object*/
+    };
+
+    $scope.BeforeChangeEvent = function(targetElement, scope) {
+        /*console.log("Before Change Event called");
+        console.log(targetElement);*/
+    };
+
+    $scope.AfterChangeEvent = function(targetElement, scope) {
+        /*console.log("After Change Event called");
+        console.log(targetElement);*/
+    };
+
+    $scope.ShouldAutoStart = false;
+    angular.element(document).ready(function() {
+        $scope.IntroOptions = {
+            steps: [{
+                intro: "<h2>Hello there!</h2>" +
+                    "<div>This tour will show you the most <b>useful features</b> to help you configure the extension just as <b>you</b> like it!</div>" +
+                    "<div>You can always skip it and take the tour later by visiting the extensions option page and ticking the right box!</div>"
+            }, {
+                element: document.querySelectorAll('#pigCircle')[0],
+                intro: "<strong>You</strong> can also <em>include</em> HTML",
+                position: 'left'
+            }, {
+                element: document.querySelectorAll('.icon-row')[0],
+                intro: 'More features, more fun.',
+                position: 'bottom'
+            }, {
+                element: document.querySelectorAll('.ui-grid-header-cell-wrapper')[0],
+                intro: "Another step.",
+                position: 'bottom'
+            }, {
+                element: document.querySelectorAll('.ui-grid-menu-button')[0],
+                intro: "Another step.",
+                position: 'left'
+            }, {
+                element: document.querySelectorAll('.ui-grid-header-cell-wrapper')[0],
+                intro: "Another step.",
+                position: 'bottom'
+            }, {
+                element: document.querySelectorAll('.ui-grid-header-cell-wrapper')[0],
+                intro: "Another step.",
+                position: 'bottom'
+            }],
+            showStepNumbers: false,
+            exitOnOverlayClick: false,
+            exitOnEsc: true,
+            /*nextLabel: '<strong>NEXT!</strong>',
+            prevLabel: '<span style="color:green">Previous</span>',*/
+            skipLabel: 'Exit',
+            doneLabel: 'Done!'
+        };
+        $timeout(function() {
+        chrome.storage.local.get(["options"], function(items) {
+            if (items.options && items.options.takeIntroTour) {
+                $scope.StartIntro();
+            }
+        });
+    }, 50);
+    });
+    
 
 });

@@ -28,7 +28,7 @@ app.run(function($rootScope) {
         } else {
             $rootScope.storageReference = {
                 'bundle': {
-                    '0': {
+                    /*'0': {
                         appid: 0,
                         packageid: 0,
                         bundleid: 0,
@@ -55,13 +55,13 @@ app.run(function($rootScope) {
                             description: "blah",
                             categories: ["Controller", "Singleplayer"]
                         }
-                    }
+                    }*/
                 },
                 'app': {
-                    '0': ['great', 'awesome']
+                    //'0': ['great', 'awesome']
                 },
                 'package': {
-                    '0': ['great', 'awesome']
+                    //'0': ['great', 'awesome']
                 }
             };
         }

@@ -185,7 +185,7 @@ angular.module('background.services', [])
                 //allUserTags = findAllUserTags($data);
 
                 allAppsOnSale = allAppsOnSale.concat(parseDOMElementList(tmpList, currentPage));
-                //defer.notify([parseDOMElementList(tmpList, currentPage), status]);
+                defer.notify(status);
 
                 currentPage++;
                 tmpList = [];
@@ -200,11 +200,11 @@ angular.module('background.services', [])
                                 $http.get('http://store.steampowered.com/search/?specials=1&page=' + page)
                                 .success(
                                     function(data) {
-                                        status += 1 / maxPage;
+                                        status += 1 / (maxPage*3);
                                         $data = $(data.replace(/<img src=/ig, '<img title='));
                                         parent = $data.find('#search_result_container');
                                         tmpList = findSaleItems(parent);
-                                        //defer.notify([parseDOMElementList(tmpList, page), status]);
+                                        defer.notify(status);
                                         allAppsOnSale = allAppsOnSale.concat(parseDOMElementList(tmpList, page));
 
                                         tmpList = [];
@@ -230,6 +230,7 @@ angular.module('background.services', [])
                             newArray.push(lookupObject[o]);
                         }
                     }
+                    defer.notify(1);
                     defer.resolve(newArray);
                 });
             });

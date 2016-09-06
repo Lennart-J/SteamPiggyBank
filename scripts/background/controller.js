@@ -1,7 +1,7 @@
 'use strict';
 angular.module('background.controllers', [])
 
-.controller('BackgroundController', function($scope, $rootScope, requestService, $q) {
+.controller('BackgroundController', function($scope, $rootScope, requestService, $q, $timeout) {
     $scope.appItems = [];
     $scope.uniqueTags = [];
     $scope.inProgress = false;
@@ -11,7 +11,8 @@ angular.module('background.controllers', [])
         function(request, sender, sendResponse) {
             if (request.message === "init") {
                 init();
-                /*if ($scope.inProgress === true) {
+            }
+            /*if ($scope.inProgress === true) {
                     sendResponse({
                         message: 'cache',
                         appItems: $scope.appItems,
@@ -90,9 +91,9 @@ angular.module('background.controllers', [])
                             //console.log(userTagChunk);
                         }
                     );
-                }*/
+                }
 
-            }
+            }*/
 
         });
 
@@ -103,51 +104,112 @@ angular.module('background.controllers', [])
                     chrome.browserAction.setPopup({
                         popup: ''
                     });
-                    chrome.browserAction.onClicked.removeListener(onBrowserActionClicked);
-                    chrome.browserAction.onClicked.addListener(onBrowserActionClicked);
+                    console.log("should open panel");
+                    if (!chrome.browserAction.onClicked.hasListener(onBrowserActionClicked)) {
+                        chrome.browserAction.onClicked.addListener(onBrowserActionClicked);
+                    }
                 } else {
                     chrome.browserAction.onClicked.removeListener(onBrowserActionClicked);
                 }
             } else {
                 // new user / init options / cleared local storage
-                var store = {
-                    options: {}
-                };
-                store["options"]["view"] = "default";
-                store["options"]["darkmode"] = false;
-                chrome.storage.local.set(store);
+                setOptionsForNewUser();
             }
         });
+
+        checkAlarm();
     };
 
-    function onBrowserActionClicked() {
+    if (!chrome.browserAction.onClicked.hasListener(onBrowserActionClicked)) {
+        chrome.browserAction.onClicked.addListener(onBrowserActionClicked);
+        /*$timeout(function() {
+            if (!isPopupOpen()) {
+                onBrowserActionClicked();
+            }
 
-        chrome.runtime.sendMessage({
-            message: "clickedBrowserAction"
-        });
+        }, 100);*/
+
+    }
+
+    //message: message to send to content script
+    function onBrowserActionClicked(message) {
+
+        if (isPopupOpen()) {
+            return;
+        }
+        var popupURL = chrome.extension.getURL("popup.html");
         chrome.windows.create({
-                url: 'popup.html',
+                url: popupURL,
                 type: 'panel',
                 state: 'docked',
                 height: 500,
                 width: 430
             },
             function(windowInfo) {
-                window.close();
+                console.log("trying to send message:", message);
+                $timeout(function() {
+                    chrome.runtime.sendMessage({
+                        message: "clickedBrowserAction",
+                        action: message
+                    });
+                    if (message !== undefined) {
+                        window.close();
+                    }
+                }, 500);
+                if (message === undefined) {
+                    window.close();
+                }
             });
 
     }
+    /*if (chrome.runtime.onStartup) {
+        chrome.runtime.onStartup.addListener(function() {
+            init();
+        });
+    }*/
 
-    chrome.runtime.onStartup.addListener(function() {
-        init();
-    });
+    function checkAlarm() {
+        getUserOption({
+            name: "updateInterval",
+            callback: function(result) {
+                chrome.alarms.get("spbSteamSales", function(alarm) {
+                    if (alarm === undefined || (alarm && alarm.periodInMinutes !== result)) {
+                        var period = result ? result : 5;
+                        if (alarm) {
+                            //console.log("Alarm period changed: old/new", alarm.periodInMinutes, result);
+                        } else {
+                            //console.log("Alarm undefined!");
+                        }      
+                        chrome.alarms.clear("spbSteamSales", function() {
+                            chrome.alarms.create("spbSteamSales", {
+                                when: Date.now(),
+                                delayInMinutes: null,
+                                periodInMinutes: period
+                            });
+                        });
+                    }
+                });
+            }
+        });
+        chrome.alarms.get("spbSteamSales", function(alarm) {
+            //console.log("Alarm defined?", alarm);
+            if (alarm === undefined) {
+                getUserOption({
+                    name: "updateInterval",
+                    callback: function(result) {
+                        chrome.alarms.create("spbSteamSales", {
+                            when: Date.now() + 1000,
+                            delayInMinutes: null,
+                            periodInMinutes: result
+                        });
+                    }
+                });
 
-    //!TODO only if alarm doesn't exist yet
-    chrome.alarms.create("spbSteamSales", {
-        when: Date.now() + 1000,
-        delayInMinutes: null,
-        periodInMinutes: 10
-    });
+            }
+        });
+    }
+
+
 
     chrome.alarms.onAlarm.addListener(function(alarm) {
         var newSales = [];
@@ -166,12 +228,10 @@ angular.module('background.controllers', [])
             }]
         };
 
-        //!TODO Check integrity aka check if items still on sale or not
-
         if (alarm.name === "spbSteamSales") {
             var d = new Date();
             console.log("SPB alert: ", d.toUTCString());
-
+            checkAlarm();
             //get all sales
             //check if sales are new 
             //remove apps from storage which are no longer on sale
@@ -259,19 +319,37 @@ angular.module('background.controllers', [])
                     }
 
                     if (newSales.length !== 0) {
-                        var msg = "";
-                        for (var j = newSales.length - 1; j >= 0; j--) {
-                            msg = " Discount: " + newSales[j].price.discount;
-                            notificationOptions.items.push({
-                                title: newSales[j].name,
-                                message: msg
-                            });
-                        }
-                        chrome.notifications.create("spb_newSales", notificationOptions, function() {
-                            //console.log(notificationId);
+                        getUserOption({
+                            group: "notifications",
+                            name: "enabled",
+                            callback: function(result) {
+                                if (result === true) {
+                                    var msg = "",
+                                        name = "";
+                                    for (var l = newSales.length - 1; l >= 0; l--) {
+                                        msg = newSales[l].price.discount + "% from " + newSales[l].price.original + " to " + newSales[l].price.final.replace(/\s/g, '');
+                                        if (newSales[l].name.length > 18) {
+                                            name = newSales[l].name.substring(0, 15) + "...";
+                                        } else {
+                                            name = newSales[l].name;
+                                        }
+                                        notificationOptions.items.push({
+                                            title: name,
+                                            message: msg
+                                        });
+                                    }
+
+                                    chrome.notifications.create("spb_newSales", notificationOptions, function() {
+                                        //console.log(notificationId);
+                                        newSales = [];
+
+                                    });
+                                }
+                            }
                         });
                     }
 
+                    
                     $q.all(XHRs).then(function() {
                         console.log("ALL DONE?!", $rootScope.storageReference);
                         //cleanup
@@ -289,7 +367,11 @@ angular.module('background.controllers', [])
                         });
 
                         console.log("Saving in storage...");
-                        chrome.storage.local.set($rootScope.storageReference, function() {
+                        chrome.storage.local.set({
+                            'app': $rootScope.storageReference['app'],
+                            'bundle': $rootScope.storageReference['bundle'],
+                            'package': $rootScope.storageReference['package']
+                        }, function() {
                             console.log("...Done!");
                         });
                     });
@@ -298,23 +380,14 @@ angular.module('background.controllers', [])
                 }, function(reason) {
                     console.log("Error: ", reason);
                 }, function(update) {
-                    /*console.log("Update: ", update, update.length);
-                    for (var j = update.length - 1; j >= 0; j--) {
+                    //console.log("Update: ", update);
+                    var tmp_loadCanvasArg = Math.round(update * 100);
 
-                        var type = update[j].type;
-                        var id = update[j].id;
+                    chrome.runtime.sendMessage({
+                        message: "loadCanvas",
+                        arg: tmp_loadCanvasArg
+                    });
 
-                        //use this to lookup if items in storage are no longer in sale
-                        if ($rootScope.tmpStorage[type][parseInt(id)] !== undefined) {
-                            console.log("already in tmpStorage, wtf?", update[j]);
-                            console.log("this is whats in storage: ", $rootScope.tmpStorage[type][parseInt(id)]);
-                        } else {
-                            $rootScope.tmpStorage[type][parseInt(id)] = {};
-                            $rootScope.tmpStorage[type][parseInt(id)] = update[j];
-                        }
-
-                    }
-                    console.log($rootScope.tmpStorage, Object.size($rootScope.tmpStorage.app), Object.size($rootScope.tmpStorage.package), Object.size($rootScope.tmpStorage.bundle));*/
                 })
                 .then(function() {
                     console.log("Finding items that are no longer on sale....");
@@ -326,7 +399,7 @@ angular.module('background.controllers', [])
                                     console.log("Didn't find item, lower tolereance ", $rootScope.storageReference[type][id]);
                                     if ($rootScope.storageReference[type][id]._tolerance !== undefined) {
                                         $rootScope.storageReference[type][id]._tolerance -= 1;
-                                        if ($rootScope.storageReference[type][id]._tolerance < -5) {
+                                        if ($rootScope.storageReference[type][id]._tolerance < -4) {
                                             console.log("Tolerance below threshhold, no longer on sale: ", $rootScope.storageReference[type][id]);
                                             $rootScope.storageReference[type][id].price.discount = 0;
                                             $rootScope.storageReference[type][id]._tolerance = 0;
@@ -340,7 +413,11 @@ angular.module('background.controllers', [])
                         }
                     });
                     console.log("Saving in storage...");
-                    chrome.storage.local.set($rootScope.storageReference, function() {
+                    chrome.storage.local.set({
+                        'app': $rootScope.storageReference['app'],
+                        'bundle': $rootScope.storageReference['bundle'],
+                        'package': $rootScope.storageReference['package']
+                    }, function() {
                         console.log("...Done!");
                     });
                 });
@@ -365,26 +442,52 @@ angular.module('background.controllers', [])
         if (notificationId === "spb_newSales") {
 
             if (buttonIndex === 0) {
-                var views = chrome.extension.getViews();
-                var views2 = chrome.windows.getAll();
-                console.log("Views: ", views);
-                console.log("Views2: ", views2);
-                if (views) {
-                    console.log("panel open");
-                    //onBrowserActionClicked();
-                }
-                if (views.length === 0) {
-                    console.log("popup open");
+                if (!isPopupOpen()) {
+                    onBrowserActionClicked("latestSales");
+                    chrome.notifications.clear("spb_newSales", function() {
+
+                    });
                 }
             } else if (buttonIndex === 1) {
                 chrome.runtime.openOptionsPage(function() {
                     console.log("Opened option page");
+                    chrome.notifications.clear("spb_newSales", function() {
+
+                    });
                 });
             }
         }
-
-
     });
+
+    if (chrome.runtime.onInstalled) {
+        chrome.runtime.onInstalled.addListener(function(details) {
+
+            //Update from version 1.x.x.x
+            if (details.reason === "install" ||
+                (details.reason === "update" && details.previousVersion.startsWith("1"))) {
+                //setOptionsForNewUser();
+            }
+        });
+    }
+
+    function setOptionsForNewUser() {
+        console.log("Setting initial options for new user");
+        var store = {
+            options: {
+                view: "default",
+                updateInterval: 5,
+                notifications: {
+                    enabled: true,
+                    wishlistOnly: false,
+                    rules: []
+                },
+                trackingEnabled: true,
+                takeIntroTour: true
+            }
+        };
+
+        chrome.storage.local.set(store);
+    }
 
     function uniques(arr) {
         var a = [];
@@ -396,16 +499,36 @@ angular.module('background.controllers', [])
         return a;
     }
 
-    //!TODO
-    /*$scope.$watch(function() {
-        return $rootScope.storageReference;
-    }, function(newValue, oldValue) {
-        console.log("Storage Reference changed! Save it? new / old: ", newValue, oldValue);
-        if (newValue !== undefined) {
-            
+    function isPopupOpen() {
+        var views = chrome.extension.getViews();
+        var bool = false;
+        console.log("Views: ", views);
+        //console.log("Views2: ", views2);
+        for (var i = views.length - 1; i >= 0; i--) {
+            if (views[i].spb) {
+                bool = true;
+            }
         }
-        //scope apply or sth? notify popup script of changes necessary?
-    });*/
+        return bool;
+    }
+
+    function getUserOption(args) {
+        chrome.storage.local.get(["options"], function(items) {
+            if (args.group === undefined) {
+                if (items.options && items.options[args.name] !== undefined) {
+                    args.callback(items.options[args.name]);
+                } else {
+                    args.callback(undefined);
+                }
+            } else {
+                if (items.options && items.options[args.group][args.name] !== undefined) {
+                    args.callback(items.options[args.group][args.name]);
+                } else {
+                    args.callback(undefined);
+                }
+            }
+        });
+    }
 
     init();
 });

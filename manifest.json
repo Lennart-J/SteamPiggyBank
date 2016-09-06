@@ -8,7 +8,7 @@
         "default_popup": "popup.html",
         "default_title": "Steam Piggy Bank"
     },
-    "content_security_policy": "script-src 'self' 'unsafe-eval' https://www.google-analytics.com/analytics.js; object-src 'self'",
+    "content_security_policy": "script-src 'self' 'unsafe-eval' https://ssl.google-analytics.com/ga.js; object-src 'self'",
     "description": "Get a quick overview of Steam's current sales",
     "icons": {
         "128": "img/Icon128x128.png",

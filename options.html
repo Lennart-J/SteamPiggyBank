@@ -1,7 +1,6 @@
 <!DOCTYPE html>
-<html ng-app="SteamPiggyBankOptions">
+<html ng-app="options">
     <head>
-        <link rel="stylesheet" href="css/options.css">
         <link rel="stylesheet" href="css/ionicons.css">
 
         <script src="scripts/lib/ga.js"></script>
@@ -10,43 +9,147 @@
         <script type="text/javascript" src="scripts/lib/ui-utils-0.2.3/ui-utils.min.js"></script>
 
         
-        <script src="scripts/app/app.js"></script>
-        <script src="scripts/app/service.js"></script>
-        <script src="scripts/app/controller.js"></script>
+        <script src="scripts/options/app.js"></script>
+        <script src="scripts/options/service.js"></script>
+        <script src="scripts/options/controller.js"></script>
+
+        <style type="text/css">
+            html { 
+                overflow: hidden; 
+            }
+            
+            .left {
+                width: 30%;
+                float: left;
+                text-align: right;
+            }
+            .right {
+                width: 65%;
+                margin-left: 10px;
+                float:left;
+            }
+            .info {
+                position: absolute;
+                right: 30px;
+            }
+
+            .info-text {
+                display: none;
+                padding: 0px 10px;
+            }
+
+            i {
+                font-size: 16px;
+                font-weight: bold;
+                color: rgb(90, 90, 90);
+            }
+            
+            .option-group:not(:first-child) {
+                margin-top:15px;
+            }
+
+            .row:not(:first-child) {
+                margin-top: 10px;
+            }
+
+            .row:last-child {
+                margin-bottom: 15px;
+            }
+
+            .row {
+                overflow:hidden; zoom:1;
+            }
+         
+
+            hr {
+                width: 95%;
+            }
+
+            #footer {
+                float:right;
+            }
+        </style>
 
         <title>Steam Piggy Bank Options</title>
 
     </head>
     <body ng-controller="OptionsController">
         
-        <h1>General</h1>
+        <div class="option-group">
+            <h1>General</h1>
 
-        <hr>
+            <hr>
 
-        <fieldset>
-            <legend>Personalia:</legend>
-            Name: <input type="text"><br>
-            Email: <input type="text"><br>
-            Date of birth: <input type="text">
-        </fieldset>
+            <div class="row">
+                <div class="left">
+                    <label for="updateInterval">Update interval:</label>
+                </div>
+                <div class="right">
+                    <input type="number" id="updateInterval" name="updateInterval" min="3" max="120" step="1" ng-model="storage.options.updateInterval"> minutes
+                </div>
+                <div class="info" ng-click="showMoreInfo($event)">
+                    <i class="icon ion-information-circled"></i>
+                </div>
+                <div style="clear: both;"></div>
+                <p class="info-text">The interval in which the extension looks for new steam sales. Indirectly controls how often notifications will be displayed if enabled. New value takes effect after the next update cycle.</p>
+            </div>
 
-        <h1>Notifications</h1>
+            <div class="row">
+                <div class="left">
+                    <label for="takeIntroTour">Show intro tour:</label>
+                </div>
+                <div class="right">
+                    <input type="checkbox" id="takeIntroTour" name="takeIntroTour" ng-model="storage.options.takeIntroTour">
+                </div>
+                <div class="info" ng-click="showMoreInfo($event)">
+                    <i class="icon ion-information-circled"></i>
+                </div>
+                <div style="clear: both;"></div>
+                <p class="info-text">Guides you through the possible configurations and actions in the extension once you open it. In case you accidentally skipped it you can enable it here once again.</p>
+            </div>
 
-        <hr>
+            <div class="row">
+                <div class="left">
+                    <label for="trackingEnabled">Collect usage data:</label>
+                </div>
+                <div class="right">
+                    <input type="checkbox" id="trackingEnabled" name="trackingEnabled" ng-model="storage.options.trackingEnabled">
+                </div>
+                <div class="info" ng-click="showMoreInfo($event)">
+                    <i class="icon ion-information-circled"></i>
+                </div>
+                <div style="clear: both;"></div>
+                <p class="info-text">This helps me, the developer, to see which parts of the extensions are used the most. It's completely anonymised!</p>
+            </div>
 
-        <fieldset>
-            <legend>Personalia:</legend>
-            Name: <input type="text"><br>
-            Email: <input type="text"><br>
-            Date of birth: <input type="text">
-        </fieldset>
+            
+         </div>
 
-        Hier geht noch nichts :P
+        <div class="option-group">
+            <h1>Notifications</h1>
+            <hr>
 
-        <button id='toggleFiltering' ng-click="toggleFiltering()" class="btn btn-success">Toggle Filtering</button>
-        <button id="save" type="button" class="btn btn-success" ng-click="saveState()">Save</button>
-        <button id="restore" type="button" class="btn btn-success" ng-click="restoreState()">Restore</button>
-        <button id="toggleDarkmode" type="button" class="btn btn-success" ng-click="toggleDarkmode()">Toggle Darkmode</button>
+            <div class="row">
+                <div class="left">
+                    <label for="notificationsEnabled">Enable notifications:</label>
+                </div>
+                <div class="right">
+                    <input type="checkbox" id="notificationsEnabled" name="notificationsEnabled" ng-model="storage.options.notifications.enabled">
+                </div>
+                <div class="info" ng-click="showMoreInfo($event)">
+                    <i class="icon ion-information-circled"></i>
+                </div>
+                <div style="clear: both;"></div>
+                 <p class="info-text">Whether notifications of new sales should be displayed.</p>
+            </div>
+        </div>
+
+        <div id="footer">
+            <button ng-click="restoreOptions()" title="Discard your changes and display currently active options">Revert</button>
+            <button ng-click="saveOptions()" title="Save and apply the selected options">Save</button>
+            <div style="clear: both;"></div>
+        </div>
+        <br>
         
     </body>
 </html>
