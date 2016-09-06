@@ -5,6 +5,7 @@ angular.module('background.controllers', [])
     $scope.appItems = [];
     $scope.uniqueTags = [];
     $scope.inProgress = false;
+    $scope.popupId = undefined;
 
     chrome.runtime.onMessage.addListener(
 
@@ -135,6 +136,7 @@ angular.module('background.controllers', [])
     function onBrowserActionClicked(message) {
 
         if (isPopupOpen()) {
+            chrome.windows.update($scope.popupId, { "state": "maximized" }); 
             return;
         }
         var popupURL = chrome.extension.getURL("popup.html");
@@ -147,6 +149,7 @@ angular.module('background.controllers', [])
             },
             function(windowInfo) {
                 console.log("trying to send message:", message);
+                $scope.popupId = windowInfo.id;
                 $timeout(function() {
                     chrome.runtime.sendMessage({
                         message: "clickedBrowserAction",
