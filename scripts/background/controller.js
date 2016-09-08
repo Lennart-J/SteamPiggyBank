@@ -197,7 +197,7 @@ angular.module('background.controllers', [])
                 });
             }
         });
-        chrome.alarms.get("spbSteamSales", function(alarm) {
+        /*chrome.alarms.get("spbSteamSales", function(alarm) {
             //console.log("Alarm defined?", alarm);
             if (alarm === undefined) {
                 getUserOption({
@@ -212,7 +212,7 @@ angular.module('background.controllers', [])
                 });
 
             }
-        });
+        });*/
     }
 
 
