@@ -102,14 +102,12 @@ angular.module('background.controllers', [])
         });
 
     var init = function() {
-        console.log("init!");
         chrome.storage.local.get(["options"], function(items) {
             if (items.options && items.options.notifications !== undefined) {
                 if (items.options.view === "panel") {
                     chrome.browserAction.setPopup({
                         popup: ''
                     });
-                    console.log("should open panel");
                     if (!chrome.browserAction.onClicked.hasListener(onBrowserActionClicked)) {
                         chrome.browserAction.onClicked.addListener(onBrowserActionClicked);
                     }
@@ -154,6 +152,9 @@ angular.module('background.controllers', [])
             function(windowInfo) {
                 console.log("trying to send message:", message);
                 $scope.popupId = windowInfo.id;
+
+                
+
                 $timeout(function() {
                     chrome.runtime.sendMessage({
                         message: "clickedBrowserAction",
@@ -186,7 +187,7 @@ angular.module('background.controllers', [])
                             //console.log("Alarm period changed: old/new", alarm.periodInMinutes, result);
                         } else {
                             //console.log("Alarm undefined!");
-                        }      
+                        }
                         chrome.alarms.clear("spbSteamSales", function() {
                             chrome.alarms.create("spbSteamSales", {
                                 when: Date.now(),
@@ -305,9 +306,8 @@ angular.module('background.controllers', [])
                             if (result[i].price.discount !== 0) {
                                 result[i].when = Date.now();
                                 newSales.push(result[i]);
-
                             }
-                            console.log(result[i], "type: ", type, "id: ", id);
+                            //console.log(result[i], "type: ", type, "id: ", id);
                             $rootScope.storageReference[type][id] = result[i];
                             $rootScope.storageReference[type][id]._tolerance = 0;
                             //!TODO Lookup tags def. not known
@@ -356,7 +356,7 @@ angular.module('background.controllers', [])
                         });
                     }
 
-                    
+
                     $q.all(XHRs).then(function() {
                         console.log("ALL DONE?!", $rootScope.storageReference);
                         //cleanup

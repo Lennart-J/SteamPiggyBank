@@ -1,6 +1,6 @@
 'use strict';
 angular.module('SteamPiggyBank.controllers', [
-    'ui.unique', 'ui.select', 'ui.grid', 'ui.grid.selection', 'ui.grid.resizeColumns', 'ui.grid.saveState', 'ui.grid.moveColumns', 'ui.grid.pinning'
+    'ui.unique', 'ui.select', 'ui.grid', 'ui.grid.selection', 'ui.grid.resizeColumns', 'ui.grid.saveState', 'ui.grid.moveColumns', 'ui.grid.pinning', 'ui.grid.autoResize'
 ])
 
 .controller('PopupController', function($scope, $rootScope, $window, $timeout, $q, uiGridConstants) {
@@ -349,6 +349,21 @@ angular.module('SteamPiggyBank.controllers', [
                 $scope.$apply();
             } else if (request.message === "clickedBrowserAction") {
                 if (request.action === "latestSales") {
+                    console.log("Got message to show latest Sales");
+                    //if opened from notification always change view to "panel" because you cant open popup programatically
+                    chrome.storage.local.get(["options"], function(items) {
+                        var opts;
+                        if (items.options) {
+                            console.log("Set to panel");
+                            opts = $.extend(true, {}, items.options);
+                            opts.view = "panel";
+                            chrome.storage.local.set(opts);
+                            console.log(opts);
+                            $scope.options = opts;
+                            $scope.$apply();
+                        }
+                    });
+
                     $timeout(function() {
                         $scope.gridApi.saveState.restore($scope, $scope.sortByLatestState);
                     }, 500);
@@ -387,7 +402,6 @@ angular.module('SteamPiggyBank.controllers', [
     $scope.track = function(type, element, action) {
         chrome.storage.local.get(["options"], function(items) {
             if (items.options && items.options.trackingEnabled) {
-                console.log("Tracking enabled");
                 if (type === 'event') {
                     ga('send', 'event', element, action);
                 } else if (type === 'pageview') {
@@ -663,82 +677,82 @@ angular.module('SteamPiggyBank.controllers', [
 
     $scope.ShouldAutoStart = false;
     angular.element(document).ready(function() {
-        $timeout(function(){
-            $scope.IntroOptions = {
-            steps: [{
-                intro: "<h2>Hello there!</h2>" +
-                    "<div>This tour will show you the most <b>useful features</b> to help you configure the extension just as <b>you</b> like it!</div>" +
-                    "<div>You can always skip it and take the tour later by visiting the extensions option page and ticking the right box!</div>"
-            }, {
-                element: document.querySelectorAll('#pigCircle')[0],
-                intro: "When you see the piggy jump, it's checking for new sales.",
-                position: 'left'
-            }, {
-                element: document.querySelectorAll('#pigCircle')[0],
-                intro: "All this hard work happens in the background. That means the you will always see the latest sales here even if you don't see the piggy jump!<br> You will get <b>notifications</b> when there are new sales!",
-                position: 'left'
-            }, {
-                element: document.querySelector('.icon-row'),
-                intro: 'The left button will load the extension into its own popup window. You can also enable panels in chrome://falgs#enable-panels to get a nicer view!',
-                position: 'bottom'
-            }, {
-                element: document.querySelector('.icon-row'),
-                intro: 'The right one toggles between light and dark mode.',
-                position: 'bottom'
-            }, {
-                element: document.querySelectorAll('.ui-grid-header-cell')[0],
-                intro: "If you click on a column, it will sort cycle through descending, ascending and not sorting.<br> You can hold <b><code>SHIFT</code></b> to sort by multiple columns!",
-                position: 'bottom'
-            }, {
-                element: document.querySelectorAll('.ui-grid-header-cell')[0],
-                intro: "You can also drag, resize and hide every column to only view the information you want.",
-                position: 'bottom'
-            },{
-                element: document.querySelectorAll('.ui-grid-header-cell')[1],
-                intro: "Every column has a filter box that fits the data it represents. ",
-                position: 'bottom'
-            },{
-                element: document.querySelectorAll('.ui-grid-header-cell')[1],
-                intro: "The user tags can be filtered by typing a comma separated list, for example \"rpg, action, early access\". It uses the language you set on the steam site.",
-                position: 'bottom'
-            }, {
-                element: document.querySelectorAll('.ui-grid-menu-button')[0],
-                intro: "Here you can see more options, like all available columns. Clicking them will toggle their visibility.",
-                position: 'left'
-            },{
-                element: document.querySelectorAll('.ui-grid-menu-button')[0],
-                intro: "You can also save and load the customizations you made. This saves column visibility, size, position and which filters you chose for them, so it can be quite powerful!",
-                position: 'left'
-            }, {
-                intro: "<h2>That's it for now!</h2>" +
-                    "<div>If you have any more questions or feedback, don't hesitate to contact me via the Chrome Web Store page!</div>"
-            }],
-            showStepNumbers: false,
-            exitOnOverlayClick: false,
-            exitOnEsc: true,
-            /*nextLabel: '<strong>NEXT!</strong>',
-            prevLabel: '<span style="color:green">Previous</span>',*/
-            skipLabel: 'Exit',
-            doneLabel: 'Done!'
-        };
         $timeout(function() {
-            chrome.storage.local.get(["options"], function(items) {
-                if (items.options && items.options.takeIntroTour) {
-                    $scope.StartIntro();
+            $scope.IntroOptions = {
+                steps: [{
+                    intro: "<h2>Hello there!</h2>" +
+                        "<div>This tour will show you the most <b>useful features</b> to help you configure the extension just as <b>you</b> like it!</div>" +
+                        "<div>You can always skip it and take the tour later by visiting the extensions option page and ticking the right box!</div>"
+                }, {
+                    element: document.querySelectorAll('#pigCircle')[0],
+                    intro: "When you see the piggy jump, it's checking for new sales.",
+                    position: 'left'
+                }, {
+                    element: document.querySelectorAll('#pigCircle')[0],
+                    intro: "All this hard work happens in the background. That means the you will always see the latest sales here even if you don't see the piggy jump!<br> You will get <b>notifications</b> when there are new sales!",
+                    position: 'left'
+                }, {
+                    element: document.querySelector('.icon-row'),
+                    intro: 'The left button will load the extension into its own popup window. You can also enable panels in chrome://falgs#enable-panels to get a nicer view!',
+                    position: 'bottom'
+                }, {
+                    element: document.querySelector('.icon-row'),
+                    intro: 'The right one toggles between light and dark mode.',
+                    position: 'bottom'
+                }, {
+                    element: document.querySelectorAll('.ui-grid-header-cell')[0],
+                    intro: "If you click on a column, it will sort cycle through descending, ascending and not sorting.<br> You can hold <b><code>SHIFT</code></b> to sort by multiple columns!",
+                    position: 'bottom'
+                }, {
+                    element: document.querySelectorAll('.ui-grid-header-cell')[0],
+                    intro: "You can also drag, resize and hide every column to only view the information you want.",
+                    position: 'bottom'
+                }, {
+                    element: document.querySelectorAll('.ui-grid-header-cell')[1],
+                    intro: "Every column has a filter box that fits the data it represents. ",
+                    position: 'bottom'
+                }, {
+                    element: document.querySelectorAll('.ui-grid-header-cell')[1],
+                    intro: "The user tags can be filtered by typing a comma separated list, for example \"rpg, action, early access\". It uses the language you set on the steam site.",
+                    position: 'bottom'
+                }, {
+                    element: document.querySelectorAll('.ui-grid-menu-button')[0],
+                    intro: "Here you can see more options, like all available columns. Clicking them will toggle their visibility.",
+                    position: 'left'
+                }, {
+                    element: document.querySelectorAll('.ui-grid-menu-button')[0],
+                    intro: "You can also save and load the customizations you made. This saves column visibility, size, position and which filters you chose for them, so it can be quite powerful!",
+                    position: 'left'
+                }, {
+                    intro: "<h2>That's it for now!</h2>" +
+                        "<div>If you have any more questions or feedback, don't hesitate to contact me via the Chrome Web Store page!</div>"
+                }],
+                showStepNumbers: false,
+                exitOnOverlayClick: false,
+                exitOnEsc: true,
+                /*nextLabel: '<strong>NEXT!</strong>',
+                prevLabel: '<span style="color:green">Previous</span>',*/
+                skipLabel: 'Exit',
+                doneLabel: 'Done!'
+            };
+            $timeout(function() {
+                chrome.storage.local.get(["options"], function(items) {
+                    if (items.options && items.options.takeIntroTour) {
+                        $scope.StartIntro();
 
-                    $('.introjs-tooltipbuttons a').each(function(index, element) {
-                        $(this).removeAttr("href");
-                    });
-                    $('.introjs-bullets').find('a').each(function(index, element) {
-                        $(this).css('cursor', 'pointer');
-                        $(this).removeAttr("href");
-                    });
+                        $('.introjs-tooltipbuttons a').each(function(index, element) {
+                            $(this).removeAttr("href");
+                        });
+                        $('.introjs-bullets').find('a').each(function(index, element) {
+                            $(this).css('cursor', 'pointer');
+                            $(this).removeAttr("href");
+                        });
 
-                }
-            });
-        }, 50);
+                    }
+                });
+            }, 50);
         }, 300);
-        
+
     });
 
 
