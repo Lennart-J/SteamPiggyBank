@@ -102,8 +102,9 @@ angular.module('background.controllers', [])
         });
 
     var init = function() {
+        console.log("init!");
         chrome.storage.local.get(["options"], function(items) {
-            if (items.options) {
+            if (items.options && items.options.notifications !== undefined) {
                 if (items.options.view === "panel") {
                     chrome.browserAction.setPopup({
                         popup: ''
