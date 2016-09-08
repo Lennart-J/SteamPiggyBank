@@ -13,6 +13,9 @@ angular.module('background.controllers', [])
             if (request.message === "init") {
                 init();
             }
+            if (request.message === "openOptionsPage") {
+                chrome.runtime.openOptionsPage(function() {});
+            }
             /*if ($scope.inProgress === true) {
                     sendResponse({
                         message: 'cache',
@@ -136,7 +139,7 @@ angular.module('background.controllers', [])
     function onBrowserActionClicked(message) {
 
         if (isPopupOpen()) {
-            chrome.windows.update($scope.popupId, { "state": "maximized" }); 
+            //chrome.windows.update($scope.popupId, { "state": "maximized" }); 
             return;
         }
         var popupURL = chrome.extension.getURL("popup.html");
@@ -478,6 +481,7 @@ angular.module('background.controllers', [])
         var store = {
             options: {
                 view: "default",
+                darkmode: true,
                 updateInterval: 5,
                 notifications: {
                     enabled: true,

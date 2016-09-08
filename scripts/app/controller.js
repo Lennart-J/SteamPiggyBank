@@ -34,14 +34,14 @@ angular.module('SteamPiggyBank.controllers', [
         enableGridMenu: true,
         gridMenuCustomItems: [{
             title: 'Save configuration',
-            icon: 'ui-grid-icon-filter',
+            //icon: 'ui-grid-icon-filter',
             action: function($event) {
                 $scope.saveState(); // $scope.blargh() would work too, this is just an example
             },
             context: $scope
         }, {
             title: 'Restore configuration',
-            icon: 'ui-grid-icon-filter',
+            //icon: 'ui-grid-icon-filter',
             action: function($event) {
                 $scope.restoreState(); // $scope.blargh() would work too, this is just an example
             },
@@ -621,7 +621,7 @@ angular.module('SteamPiggyBank.controllers', [
     //introjs
     $scope.CompletedEvent = function(scope) {
         $scope.track("event", "IntroCompleted", "click");
-        chrome.sotrage.local.get(["options"], function(items) {
+        chrome.storage.local.get(["options"], function(items) {
             if (items.options) {
                 items.options.takeIntroTour = false;
                 chrome.storage.local.set(items);
@@ -648,7 +648,12 @@ angular.module('SteamPiggyBank.controllers', [
 
     $scope.BeforeChangeEvent = function(targetElement, scope) {
         /*console.log("Before Change Event called");
-        console.log(targetElement);*/
+        console.log(targetElement);
+        if (this._currentStep === 10) {
+            console.log($('.ui-grid-menu-button')[0]);
+            $($('.ui-grid-menu-button')[0]).trigger("click");
+        }
+        console.log(this);*/
     };
 
     $scope.AfterChangeEvent = function(targetElement, scope) {
@@ -658,35 +663,55 @@ angular.module('SteamPiggyBank.controllers', [
 
     $scope.ShouldAutoStart = false;
     angular.element(document).ready(function() {
-        $scope.IntroOptions = {
+        $timeout(function(){
+            $scope.IntroOptions = {
             steps: [{
                 intro: "<h2>Hello there!</h2>" +
                     "<div>This tour will show you the most <b>useful features</b> to help you configure the extension just as <b>you</b> like it!</div>" +
                     "<div>You can always skip it and take the tour later by visiting the extensions option page and ticking the right box!</div>"
             }, {
                 element: document.querySelectorAll('#pigCircle')[0],
-                intro: "<strong>You</strong> can also <em>include</em> HTML",
+                intro: "When you see the piggy jump, it's checking for new sales.",
                 position: 'left'
             }, {
-                element: document.querySelectorAll('.icon-row')[0],
-                intro: 'More features, more fun.',
+                element: document.querySelectorAll('#pigCircle')[0],
+                intro: "All this hard work happens in the background. That means the you will always see the latest sales here even if you don't see the piggy jump!<br> You will get <b>notifications</b> when there are new sales!",
+                position: 'left'
+            }, {
+                element: document.querySelector('.icon-row'),
+                intro: 'The left button will load the extension into its own popup window. You can also enable panels in chrome://falgs#enable-panels to get a nicer view!',
                 position: 'bottom'
             }, {
-                element: document.querySelectorAll('.ui-grid-header-cell-wrapper')[0],
-                intro: "Another step.",
+                element: document.querySelector('.icon-row'),
+                intro: 'The right one toggles between light and dark mode.',
+                position: 'bottom'
+            }, {
+                element: document.querySelectorAll('.ui-grid-header-cell')[0],
+                intro: "If you click on a column, it will sort cycle through descending, ascending and not sorting.<br> You can hold <b><code>SHIFT</code></b> to sort by multiple columns!",
+                position: 'bottom'
+            }, {
+                element: document.querySelectorAll('.ui-grid-header-cell')[0],
+                intro: "You can also drag, resize and hide every column to only view the information you want.",
+                position: 'bottom'
+            },{
+                element: document.querySelectorAll('.ui-grid-header-cell')[1],
+                intro: "Every column has a filter box that fits the data it represents. ",
+                position: 'bottom'
+            },{
+                element: document.querySelectorAll('.ui-grid-header-cell')[1],
+                intro: "The user tags can be filtered by typing a comma separated list, for example \"rpg, action, early access\". It uses the language you set on the steam site.",
                 position: 'bottom'
             }, {
                 element: document.querySelectorAll('.ui-grid-menu-button')[0],
-                intro: "Another step.",
+                intro: "Here you can see more options, like all available columns. Clicking them will toggle their visibility.",
+                position: 'left'
+            },{
+                element: document.querySelectorAll('.ui-grid-menu-button')[0],
+                intro: "You can also save and load the customizations you made. This saves column visibility, size, position and which filters you chose for them, so it can be quite powerful!",
                 position: 'left'
             }, {
-                element: document.querySelectorAll('.ui-grid-header-cell-wrapper')[0],
-                intro: "Another step.",
-                position: 'bottom'
-            }, {
-                element: document.querySelectorAll('.ui-grid-header-cell-wrapper')[0],
-                intro: "Another step.",
-                position: 'bottom'
+                intro: "<h2>That's it for now!</h2>" +
+                    "<div>If you have any more questions or feedback, don't hesitate to contact me via the Chrome Web Store page!</div>"
             }],
             showStepNumbers: false,
             exitOnOverlayClick: false,
@@ -697,13 +722,24 @@ angular.module('SteamPiggyBank.controllers', [
             doneLabel: 'Done!'
         };
         $timeout(function() {
-        chrome.storage.local.get(["options"], function(items) {
-            if (items.options && items.options.takeIntroTour) {
-                $scope.StartIntro();
-            }
-        });
-    }, 50);
+            chrome.storage.local.get(["options"], function(items) {
+                if (items.options && items.options.takeIntroTour) {
+                    $scope.StartIntro();
+
+                    $('.introjs-tooltipbuttons a').each(function(index, element) {
+                        $(this).removeAttr("href");
+                    });
+                    $('.introjs-bullets').find('a').each(function(index, element) {
+                        $(this).css('cursor', 'pointer');
+                        $(this).removeAttr("href");
+                    });
+
+                }
+            });
+        }, 50);
+        }, 300);
+        
     });
-    
+
 
 });

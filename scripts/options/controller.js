@@ -27,8 +27,14 @@ angular.module('options.controllers', [])
             }
         });
         if (valid) {
+            //last thing to track if user just disabled tracking
+            if ($scope.storage.options.trackingEnabled === false) {
+                    $scope.track("event", "trackingDisabled");
+                }
             chrome.storage.local.set($scope.storage, function() {
                 console.log("Saved options: ", $scope.storage.options);
+
+                window.close();
             });
         }
     };
