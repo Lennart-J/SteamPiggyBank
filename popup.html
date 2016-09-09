@@ -93,6 +93,10 @@
             </ui-select> -->
         </header>
 
+        <ul class="tabs">
+            <li class="tablink" ng-repeat="(key,val) in options.states"><a href="#" ng-click="openTab(event, key)">{{key}}</a></li>
+            <li><a href="#" ng-click="createTab()">Add</a></li>
+        </ul>
         <!-- <button id='toggleFiltering' ng-click="toggleFiltering()" class="btn btn-success">Toggle Filtering</button> -->
         <div id="grid-parent">
             <div ui-grid="gridOptions" class="grid" ng-class='{"dark" : options.darkmode === true}'
@@ -104,11 +108,13 @@
             </div>
         </div>
         
-        <div ng-intro-options="IntroOptions" ng-intro-method="StartIntro"
-             ng-intro-oncomplete="CompletedEvent" ng-intro-onexit="ExitEvent"
-             ng-intro-onchange="ChangeEvent" ng-intro-onbeforechange="BeforeChangeEvent"
-             ng-intro-onafterchange="AfterChangeEvent"
-             ng-intro-autostart="ShouldAutoStart"></div>
+        <div ng-controller="IntroController">
+            <div ng-intro-options="IntroOptions" ng-intro-method="StartIntro"
+                 ng-intro-oncomplete="CompletedEvent" ng-intro-onexit="ExitEvent"
+                 ng-intro-onchange="ChangeEvent" ng-intro-onbeforechange="BeforeChangeEvent"
+                 ng-intro-onafterchange="AfterChangeEvent"
+                 ng-intro-autostart="ShouldAutoStart"></div>
+        </div>
         <!-- <script src="scripts/test.js"></script> -->
     </body>
 </html>
