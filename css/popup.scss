@@ -73,6 +73,10 @@ input:disabled::-webkit-input-placeholder { /* WebKit, Blink, Edge */
     padding: 4px 2px !important;
 }
 
+ui-grid-cell-contents img {
+    cursor: pointer;
+}
+
 .ui-grid-column-menu-button-last-col {
     margin-right: 12px !important;
 }
