@@ -8,7 +8,7 @@ Version: 3.4.5 Timestamp: Mon Nov  4 08:22:42 PST 2013
   display: inline-block;
   /* inline-block for ie7 */
   zoom: 1;
-  *display: inline;
+  display: inline;
   vertical-align: middle; }
 
 .select2-container,
@@ -829,7 +829,7 @@ html {
 
 #grid-parent {
   position: absolute;
-  top: 45px;
+  top: 60px;
   bottom: 0;
   left: 0;
   right: 0;
@@ -1267,3 +1267,32 @@ li.active a, li.active a:hover {
   position: relative;
   float: left;
   pointer-events: auto; }
+
+  ul.tabs {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+}
+
+.tablink {
+    float:left;
+}
+
+ul.tabs li a {
+    display: inline-block;
+    color: black;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+    transition: 0.3s;
+    font-size: 17px;
+}
+
+/* Change background color of links on hover */
+ul.tabs li a:hover {background-color: #ddd;}
+
+/* Create an active/current tablink class */
+ul.tabs li a:focus, .active {background-color: #ccc;}
