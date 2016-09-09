@@ -3,7 +3,7 @@ angular.module('SteamPiggyBank.controllers', [
     'ui.unique', 'ui.select', 'ui.grid', 'ui.grid.selection', 'ui.grid.resizeColumns', 'ui.grid.saveState', 'ui.grid.moveColumns', 'ui.grid.pinning', 'ui.grid.autoResize'
 ])
 
-.controller('PopupController', function($scope, $rootScope, $window, $timeout, $q, uiGridConstants) {
+.controller('PopupController', function($scope, $rootScope, $window, $timeout, $q, uiGridConstants, util) {
     Object.defineProperty($scope, "queryFilter", {
         get: function() {
             var out = {};
@@ -400,15 +400,16 @@ angular.module('SteamPiggyBank.controllers', [
     };
 
     $scope.track = function(type, element, action) {
-        chrome.storage.local.get(["options"], function(items) {
-            if (items.options && items.options.trackingEnabled) {
-                if (type === 'event') {
-                    ga('send', 'event', element, action);
-                } else if (type === 'pageview') {
-                    ga('send', 'pageview', element);
-                }
-            }
-        });
+        // chrome.storage.local.get(["options"], function(items) {
+        //     if (items.options && items.options.trackingEnabled) {
+        //         if (type === 'event') {
+        //             ga('send', 'event', element, action);
+        //         } else if (type === 'pageview') {
+        //             ga('send', 'pageview', element);
+        //         }
+        //     }
+        // });
+        util.track(type, element, action);
     };
     $scope.track('pageview', '/popup.html');
     /*
@@ -524,12 +525,14 @@ angular.module('SteamPiggyBank.controllers', [
                 options: {}
             };
             if (items.options) {
-                newOptions["options"] = items.options;
+                newOptions = $.extend(true, {}, items);
                 if (!items.options.states) {
                     newOptions["options"]["states"] = {};
                 }
                 newOptions["options"]["states"][name] = $scope.state;
+                $scope.options = newOptions;
                 chrome.storage.local.set(newOptions);
+                getItemsFromStorage();
             }
         });
 
@@ -549,7 +552,6 @@ angular.module('SteamPiggyBank.controllers', [
             options: {}
         };
         chrome.storage.local.get(["options"], function(items) {
-            console.log(items);
             if (items.options) {
                 newOptions.options = items.options;
                 newOptions.options.darkmode = items.options.darkmode === true ? false : true;
@@ -632,9 +634,15 @@ angular.module('SteamPiggyBank.controllers', [
         return searchObject;
     }
 
+    
+
+
+})
+
+.controller('IntroController', function($scope, $rootScope, $timeout, util) {
     //introjs
     $scope.CompletedEvent = function(scope) {
-        $scope.track("event", "IntroCompleted", "click");
+        util.track("event", "IntroCompleted", "click");
         chrome.storage.local.get(["options"], function(items) {
             if (items.options) {
                 items.options.takeIntroTour = false;
@@ -645,7 +653,7 @@ angular.module('SteamPiggyBank.controllers', [
     };
 
     $scope.ExitEvent = function(scope) {
-        $scope.track("event", "IntroExit", "click");
+        util.track("event", "IntroExit", "click");
         chrome.storage.local.get(["options"], function(items) {
             if (items.options) {
                 items.options.takeIntroTour = false;
@@ -754,6 +762,4 @@ angular.module('SteamPiggyBank.controllers', [
         }, 300);
 
     });
-
-
 });

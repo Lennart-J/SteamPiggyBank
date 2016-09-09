@@ -40,6 +40,18 @@ angular.module('SteamPiggyBank.services', [])
       }).replace(/\s/g,'');
     }
   };
+
+  this.track = function(type, element, action) {
+        chrome.storage.local.get(["options"], function(items) {
+            if (items.options && items.options.trackingEnabled) {
+                if (type === 'event') {
+                    ga('send', 'event', element, action);
+                } else if (type === 'pageview') {
+                    ga('send', 'pageview', element);
+                }
+            }
+        });
+    };
 })
 
 .service('filterService', function() {
