@@ -61,6 +61,8 @@ angular.module('options.controllers', [])
         });
     };
 
+    $scope.track('pageview', '/options.html');
+
     $scope.showMoreInfo = function(event) {
         $(event.currentTarget).parent().find('.info-text').toggle(100);
     };
