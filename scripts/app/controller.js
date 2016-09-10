@@ -634,8 +634,44 @@ angular.module('SteamPiggyBank.controllers', [
         return searchObject;
     }
 
-    
+    getItemsFromStorage();
 
+
+
+})
+
+.controller('TabsController', function($scope) {
+
+
+   /* 
+
+    //chrome-tabs
+    var $chromeTabsExampleShell = $('.chrome-tabs-shell');
+    chromeTabs.init({
+        $shell: $chromeTabsExampleShell,
+        minWidth: 45,
+        maxWidth: 100
+    });
+    chromeTabs.addNewTab($chromeTabsExampleShell, {
+        favicon: 'demo/images/eager-favicon.ico',
+        title: 'Test',
+        data: {
+            timeAdded: +new Date()
+        }
+    });
+    $chromeTabsExampleShell.bind('chromeTabRender', function() {
+        var $currentTab = $chromeTabsExampleShell.find('.chrome-tab-current');
+        if ($currentTab.length && window['console'] && console.log) {
+            console.log('Current tab index', $currentTab.index(), 'title', $.trim($currentTab.text()), 'data', $currentTab.data('tabData').data);
+        }
+    });
+    $('button').click(function() {
+        if ($chromeTabsExampleShell.hasClass('chrome-tabs-dark-theme')) {
+            $chromeTabsExampleShell.removeClass('chrome-tabs-dark-theme');
+        } else {
+            $chromeTabsExampleShell.addClass('chrome-tabs-dark-theme');
+        }
+    });*/
 
 })
 

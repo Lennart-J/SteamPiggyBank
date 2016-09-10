@@ -10,6 +10,7 @@
 
         <script src="scripts/lib/ga.js"></script>
         <script src="scripts/lib/jquery-2.1.1.min.js"></script>
+        <script type="text/javascript" src="scripts/lib/jquery-ui.min.js"></script>
         <script src="scripts/lib/angular.min.js"></script>
         <script type="text/javascript" src="scripts/lib/ui-utils-0.2.3/ui-utils.min.js"></script>
 
@@ -17,6 +18,8 @@
         <script src="scripts/lib/bower_components/angular-ui-grid/ui-grid.min.js"></script>
 
         <script type="text/javascript" src="scripts/lib/select.min.js"></script>
+
+        
 
         <!-- load momentJS (required for angular-moment) -->
         <script src="scripts/lib/moment.min.js"></script>
@@ -92,29 +95,66 @@
                 </ui-select-choices>
             </ui-select> -->
         </header>
+        <div class="loaded" opacity=1>
+            <!-- <div ng-controller="TabsController">
+                <div class="chrome-tabs-shell" ng-class='options.darkmode === true ? "chrome-tabs-dark-theme" : ""'>
+                <div class="overlay"></div>
+                    <div class="chrome-tabs">
+                        <div class="chrome-tab">
+                            <div class="chrome-tab-favicon"></div>
+                            <div class="chrome-tab-title">All</div>
+                            <div class="chrome-tab-close"></div>
+                            <div class="chrome-tab-curves">
+                                <div class="chrome-tab-curves-left-shadow"></div>
+                                <div class="chrome-tab-curves-left-highlight"></div>
+                                <div class="chrome-tab-curves-left"></div>
+                                <div class="chrome-tab-curves-right-shadow"></div>
+                                <div class="chrome-tab-curves-right-highlight"></div>
+                                <div class="chrome-tab-curves-right"></div>
+                            </div>
+                        </div>
+                        <div class="chrome-tab chrome-tab-current">
+                            <div class="chrome-tab-favicon"></div>
+                            <div class="chrome-tab-title">Wishlist</div>
+                            <div class="chrome-tab-close"></div>
+                            <div class="chrome-tab-curves">
+                                <div class="chrome-tab-curves-left-shadow"></div>
+                                <div class="chrome-tab-curves-left-highlight"></div>
+                                <div class="chrome-tab-curves-left"></div>
+                                <div class="chrome-tab-curves-right-shadow"></div>
+                                <div class="chrome-tab-curves-right-highlight"></div>
+                                <div class="chrome-tab-curves-right"></div>
+                            </div>
+                        </div>
+                        <!-- <div class="chrome-tab add-button">
+                            
+                        </div> 
+                    </div>
+                    <div class="chrome-shell-bottom-bar"></div>
+                </div>
 
-        <ul class="tabs">
-            <li class="tablink" ng-repeat="(key,val) in options.states"><a href="#" ng-click="openTab(event, key)">{{key}}</a></li>
-            <li><a href="#" ng-click="createTab()">Add</a></li>
-        </ul>
-        <!-- <button id='toggleFiltering' ng-click="toggleFiltering()" class="btn btn-success">Toggle Filtering</button> -->
-        <div id="grid-parent">
-            <div ui-grid="gridOptions" class="grid" ng-class='{"dark" : options.darkmode === true}'
-                ui-grid-resize-columns 
-                ui-grid-save-state 
-                ui-grid-move-columns
-                ui-grid-pinning
-                ui-grid-auto-resize>
+            </div>   -->
+
+            <div id="grid-parent">
+                <div ui-grid="gridOptions" class="grid" ng-class='{"dark" : options.darkmode === true}'
+                    ui-grid-resize-columns 
+                    ui-grid-save-state 
+                    ui-grid-move-columns
+                    ui-grid-pinning
+                    ui-grid-auto-resize>
+                </div>
+            </div>
+            
+            <div ng-controller="IntroController">
+                <div ng-intro-options="IntroOptions" ng-intro-method="StartIntro"
+                     ng-intro-oncomplete="CompletedEvent" ng-intro-onexit="ExitEvent"
+                     ng-intro-onchange="ChangeEvent" ng-intro-onbeforechange="BeforeChangeEvent"
+                     ng-intro-onafterchange="AfterChangeEvent"
+                     ng-intro-autostart="ShouldAutoStart"></div>
             </div>
         </div>
-        
-        <div ng-controller="IntroController">
-            <div ng-intro-options="IntroOptions" ng-intro-method="StartIntro"
-                 ng-intro-oncomplete="CompletedEvent" ng-intro-onexit="ExitEvent"
-                 ng-intro-onchange="ChangeEvent" ng-intro-onbeforechange="BeforeChangeEvent"
-                 ng-intro-onafterchange="AfterChangeEvent"
-                 ng-intro-autostart="ShouldAutoStart"></div>
-        </div>
+
         <!-- <script src="scripts/test.js"></script> -->
+        <script type="text/javascript" src="scripts/lib/chrome-tabs.js"></script>
     </body>
 </html>

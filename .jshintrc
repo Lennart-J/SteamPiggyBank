@@ -14,7 +14,8 @@
     "globals"       : {
         "chrome"    : true,
         "angular"   : true,
-        "ga"        : true
+        "ga"        : true,
+        "chromeTabs": true
     }
 
 }

@@ -80,5 +80,5 @@ def makeZip(zip_path):
 zip_path = os.path.dirname(__file__) + "/../SteamPiggyBank.zip"
 ACCESS_TOKEN = generateAccessToken()
 makeZip(zip_path)
-#uploadToCWS(zip_path)
-#publishOnCWS()
+uploadToCWS(zip_path)
+publishOnCWS()
