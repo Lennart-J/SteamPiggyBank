@@ -414,7 +414,10 @@ angular.module('background.controllers', [])
                                     } else {
                                         $rootScope.storageReference[type][id]._tolerance = -1;
                                     }
-
+                                }
+                                if ($rootScope.storageReference[type][id].price.finalsize === undefined) {
+                                    console.log("Trying to repair");
+                                    $rootScope.storageReference[type][id].price.finalsize = Number($rootScope.storageReference[type][id].price.final.replace(/[^0-9\.]+/g,""));
                                 }
                             });
                         }
