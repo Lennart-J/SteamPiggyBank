@@ -537,7 +537,7 @@ angular.module('background.services', [])
             appitem.price = {};
             appitem.price.original = getOriginalPrice($el);
             appitem.price.final = getFinalPrice($el);
-            appitem.price.finalsize = parseFloat(getFinalPrice($el).replace(",", "."));
+            appitem.price.finalsize = Number(getFinalPrice($el).replace(/[^0-9\.]+/g,""));
             appitem.price.discount = getDiscount($el, appitem.bundledata);
 
             appitem.urc = {};
