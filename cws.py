@@ -53,7 +53,7 @@ def makeZip(zip_path):
     ignore_dirs = ['./', '../', '.git']
     ignore_roots = [os.path.join(script_dir, x) for x in ignore_dirs]
     
-    zf = zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED)
+    zf = zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED, allowZip64 = True)
     for root, dirs, files in os.walk(script_dir + "/../"):
         tmp_root = copy.deepcopy(root)
         if tmp_root in ignore_roots:
