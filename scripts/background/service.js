@@ -133,6 +133,18 @@ angular.module('background.services', [])
     var allAppsOnSale = [];
     var storage_reference = {};
 
+    var categories = {
+        "Games": 998,
+        "Software": 994,
+        "Streaming Videos": 992,
+        "DLC": 21,
+        "Demos": 10,
+        "Mods": 997,
+        "Hardware": 993,
+        "Trailers": 999,
+        "Bundles": 996,
+    };
+
     this.getCurrentApp = function(appId, packageId) {
         var currentApp;
         for (var i = 0; i < allAppsOnSale.length; i++) {
@@ -162,7 +174,7 @@ angular.module('background.services', [])
     };
 
     this.getAllAppsOnSale = function() {
-        var XHRs = [],
+        var allXHRs = [],
             parent = {},
             currentPage = 1,
             maxPage = 0,
@@ -175,8 +187,118 @@ angular.module('background.services', [])
             status = 0;
 
         allAppsOnSale = [];
+
+        $.each(categories, function(key, el) {
+            
+            allXHRs.push((function(categoryId, categoryName) {
+                var innerDefer = $q.defer();
+                var XHRs = [];
+                var url = "http://store.steampowered.com/search/?category1=" + categoryId + "&specials=1";
+                return $http.get(url)
+                .success(function(data) {
+                    $data = $(data.replace(/<img src=/ig, '<img title='));
+                    parent = $data.find('#search_result_container');
+                    maxPage = findLastSalePage($data);
+                    tmpList = findSaleItems(parent);
+                    //allUserTags = findAllUserTags($data);
+
+                    allAppsOnSale = allAppsOnSale.concat(parseDOMElementList(tmpList, currentPage, categoryName));
+                    innerDefer.notify(status);
+
+                    currentPage++;
+                    tmpList = [];
+                    tmpItems = [];
+
+                    //Make all requests j times because steam is buggy like that, ensures all sales are retrieved
+                    //!TODO observe behaviour in huge sales..
+                    for (var j = 0; j >= 0; j--) {
+                        for (; currentPage <= maxPage; currentPage++) {
+                            (function(page) {
+                                //console.log("Page " + page + " " + categoryId);
+                                XHRs.push(
+                                    $http.get(url + "&page=" + page)
+                                    .success(
+                                        function(data) {
+                                            status += 1 / (maxPage*3);
+                                            $data = $(data.replace(/<img src=/ig, '<img title='));
+                                            parent = $data.find('#search_result_container');
+                                            tmpList = findSaleItems(parent);
+                                            innerDefer.notify(status);
+                                            allAppsOnSale = allAppsOnSale.concat(parseDOMElementList(tmpList, page, categoryName));
+
+                                            tmpList = [];
+                                        })
+                                );
+                            })(currentPage);
+
+                        }
+                        currentPage = 1;
+                    }
+
+                     $q.all(XHRs).then(function() {
+                    console.log("resolve apps on sale");
+                        var newArray = [];
+                        var lookupObject = {};
+
+                        for (var k = allAppsOnSale.length - 1; k >= 0; k--) {
+                            lookupObject[allAppsOnSale[k]["id"]] = allAppsOnSale[k];
+                        }
+
+                        for (var o in lookupObject) {
+                            if (lookupObject.hasOwnProperty(o)) {
+                                newArray.push(lookupObject[o]);
+                            }
+                        }
+                        innerDefer.notify(1);
+                        innerDefer.resolve(newArray);
+                    });
+
+                    return innerDefer.promise;
+                });
+
+
+
+            })(el, key));
+            
+        });
+
+        $q.all(allXHRs).then(function() {
+                    console.log("resolve all apps on sale");
+                        var newArray = [];
+                        var lookupObject = {};
+
+                        for (var k = allAppsOnSale.length - 1; k >= 0; k--) {
+                            lookupObject[allAppsOnSale[k]["id"]] = allAppsOnSale[k];
+                        }
+
+                        for (var o in lookupObject) {
+                            if (lookupObject.hasOwnProperty(o)) {
+                                newArray.push(lookupObject[o]);
+                            }
+                        }
+                        defer.notify(1);
+                        defer.resolve(newArray);
+                    });
+       /* $q.all(allXHRs).then(function() {
+                    //console.log("resolve all apps on sale");
+                    var newArray = [];
+                    var lookupObject = {};
+
+                    for (var k = allAppsOnSale.length - 1; k >= 0; k--) {
+                        lookupObject[allAppsOnSale[k]["id"]] = allAppsOnSale[k];
+                    }
+
+                    for (var o in lookupObject) {
+                        if (lookupObject.hasOwnProperty(o)) {
+                            newArray.push(lookupObject[o]);
+                        }
+                    }
+                    defer.notify(1);
+                    defer.resolve(newArray);
+                });*/
+
         // first call to access information like maxPage
-        $http.get('http://store.steampowered.com/search/?specials=1')
+        /*$http.get('http://store.steampowered.com/search/?specials=1')
             .success(function(data) {
                 $data = $(data.replace(/<img src=/ig, '<img title='));
                 parent = $data.find('#search_result_container');
@@ -214,9 +336,9 @@ angular.module('background.services', [])
 
                     }
                     currentPage = 1;
-                }
+                }*/
 
-                $q.all(XHRs).then(function() {
+                /*$q.all(XHRs).then(function() {
                     //console.log("resolve all apps on sale");
                     var newArray = [];
                     var lookupObject = {};
@@ -232,8 +354,8 @@ angular.module('background.services', [])
                     }
                     defer.notify(1);
                     defer.resolve(newArray);
-                });
-            });
+                });*/
+            //});
 
 
 
@@ -514,7 +636,7 @@ angular.module('background.services', [])
         return tagArray;
     };
 
-    var parseDOMElementList = function(list, page) {
+    var parseDOMElementList = function(list, page, category) {
         var appitems = [],
             appitem = {},
             relevanceCounter = 1;
@@ -547,6 +669,7 @@ angular.module('background.services', [])
             appitem.imageUrl = getAppImage($el);
             appitem.url = getUrl($el);
             appitem.type = getType(appitem.appid, appitem.packageid, appitem.bundleid);
+            appitem.category = category;
 
             if (urcText) {
                 appitem.urc.percent = urcPattern.exec(urcText)[0];

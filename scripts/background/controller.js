@@ -387,7 +387,7 @@ angular.module('background.controllers', [])
                 }, function(reason) {
                     console.log("Error: ", reason);
                 }, function(update) {
-                    //console.log("Update: ", update);
+                    console.log("Update: ", update);
                     var tmp_loadCanvasArg = Math.round(update * 100);
 
                     chrome.runtime.sendMessage({
